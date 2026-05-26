@@ -8,8 +8,8 @@ export const authConfig = {
     // 30 days
   },
   pages: {
-    signIn: "/app/auth/signin",
-    error: "/app/auth/error",
+    signIn: "/auth/signin",
+    error: "/auth/error",
   },
   providers: [
     Google({
