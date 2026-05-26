@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import prisma from "@/lib/db";
+import { prisma } from "@/lib/db";
 
 export async function GET() {
   try {
@@ -11,7 +11,10 @@ export async function GET() {
     });
     return NextResponse.json(properties);
   } catch {
-    return NextResponse.json({ error: "Failed to fetch properties" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch properties" },
+      { status: 500 },
+    );
   }
 }
 
@@ -27,6 +30,9 @@ export async function POST(req: Request) {
     });
     return NextResponse.json(property);
   } catch {
-    return NextResponse.json({ error: "Failed to create property" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create property" },
+      { status: 500 },
+    );
   }
 }

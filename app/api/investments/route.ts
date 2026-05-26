@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import prisma from "@/lib/db";
+import { prisma } from "@/lib/db";
 
 export async function GET() {
   const session = await auth();
@@ -15,7 +15,10 @@ export async function GET() {
     });
     return NextResponse.json(investments);
   } catch {
-    return NextResponse.json({ error: "Failed to fetch investments" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch investments" },
+      { status: 500 },
+    );
   }
 }
 
@@ -31,6 +34,9 @@ export async function POST(req: Request) {
     });
     return NextResponse.json(investment);
   } catch {
-    return NextResponse.json({ error: "Failed to create investment" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create investment" },
+      { status: 500 },
+    );
   }
 }

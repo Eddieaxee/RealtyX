@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import prisma from "@/lib/db";
+import { prisma } from "@/lib/db";
 
 export async function GET() {
   const session = await auth();
@@ -9,13 +9,24 @@ export async function GET() {
   }
   try {
     const users = await prisma.user.findMany({
-      select: { id: true, email: true, name: true, image: true, role: true, status: true, createdAt: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        image: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
       orderBy: { createdAt: "desc" },
       take: 50,
     });
     return NextResponse.json(users);
   } catch {
-    return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch users" },
+      { status: 500 },
+    );
   }
 }
 
@@ -27,9 +38,15 @@ export async function PATCH(req: Request) {
   try {
     const body = await req.json();
     const { userId, status, role } = body;
-    const user = await prisma.user.update({ where: { id: userId }, data: { status, role } });
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { status, role },
+    });
     return NextResponse.json(user);
   } catch {
-    return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update user" },
+      { status: 500 },
+    );
   }
 }

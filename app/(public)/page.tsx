@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { PublicNav } from "@/components/layout/public-nav";
+
 import { HeroSection } from "@/components/public/hero-section";
 import { FeaturesSection } from "@/components/public/features-section";
 import { PropertiesPreview } from "@/components/public/properties-preview";

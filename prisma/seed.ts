@@ -1,10 +1,5 @@
-import { Prisma } from "../lib/prisma";
+import { prisma } from "../lib/db";
 import bcrypt from "bcryptjs";
-import { }
-
-const prisma = new PrismaClient({
-  datasourceUrl: process.env.DATABASE_URL,
-});
 
 async function main() {
   const adminPassword = await bcrypt.hash("admin123", 12);
@@ -38,7 +33,8 @@ async function main() {
     data: [
       {
         title: "Luxury Manhattan Penthouse",
-        description: "Premium penthouse in the heart of Manhattan with stunning city views.",
+        description:
+          "Premium penthouse in the heart of Manhattan with stunning city views.",
         slug: "luxury-manhattan-penthouse",
         type: "RESIDENTIAL",
         status: "ACTIVE",
@@ -52,12 +48,15 @@ async function main() {
         minInvestment: 100,
         expectedReturn: 14.2,
         rentalYield: 8.5,
-        images: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80"],
+        images: [
+          "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80",
+        ],
         features: ["Pool", "Gym", "Concierge", "Parking"],
       },
       {
         title: "Miami Beachfront Villa",
-        description: "Stunning beachfront property with private access and ocean views.",
+        description:
+          "Stunning beachfront property with private access and ocean views.",
         slug: "miami-beachfront-villa",
         type: "RESIDENTIAL",
         status: "ACTIVE",
@@ -71,7 +70,9 @@ async function main() {
         minInvestment: 50,
         expectedReturn: 18.5,
         rentalYield: 12.3,
-        images: ["https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&q=80"],
+        images: [
+          "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&q=80",
+        ],
         features: ["Beach Access", "Pool", "Garden", "Security"],
       },
       {
@@ -90,7 +91,9 @@ async function main() {
         minInvestment: 75,
         expectedReturn: 11.8,
         rentalYield: 7.2,
-        images: ["https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80"],
+        images: [
+          "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
+        ],
         features: ["Parking", "Conference Rooms", "Cafeteria", "Gym"],
       },
     ],

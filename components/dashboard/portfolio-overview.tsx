@@ -1,14 +1,46 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Building2, Wallet, Percent, DollarSign } from "lucide-react";
-import { formatCurrency, formatPercent, formatNumber } from "@/lib/utils";
+import {
+  TrendingUp,
+  TrendingDown,
+  Building2,
+  Wallet,
+  Percent,
+  DollarSign,
+} from "lucide-react";
+import { formatCurrency, formatPercent } from "@/lib/utils";
 
 const stats = [
-  { label: "Portfolio Value", value: 142850, change: 24.5, icon: DollarSign, trend: "up" },
-  { label: "Total Invested", value: 115000, change: 12.3, icon: Building2, trend: "up" },
-  { label: "Total Returns", value: 27850, change: 8.7, icon: Wallet, trend: "up" },
-  { label: "Avg Yield", value: 8.2, change: -1.2, icon: Percent, trend: "down", isPercent: true },
+  {
+    label: "Portfolio Value",
+    value: 142850,
+    change: 24.5,
+    icon: DollarSign,
+    trend: "up",
+  },
+  {
+    label: "Total Invested",
+    value: 115000,
+    change: 12.3,
+    icon: Building2,
+    trend: "up",
+  },
+  {
+    label: "Total Returns",
+    value: 27850,
+    change: 8.7,
+    icon: Wallet,
+    trend: "up",
+  },
+  {
+    label: "Avg Yield",
+    value: 8.2,
+    change: -1.2,
+    icon: Percent,
+    trend: "down",
+    isPercent: true,
+  },
 ];
 
 export function PortfolioOverview() {
@@ -29,13 +61,24 @@ export function PortfolioOverview() {
             </div>
           </div>
           <div className="text-2xl font-bold">
-            {stat.isPercent ? formatPercent(stat.value) : formatCurrency(stat.value)}
+            {stat.isPercent
+              ? formatPercent(stat.value)
+              : formatCurrency(stat.value)}
           </div>
-          <div className={`flex items-center gap-1 mt-1 text-sm ${
-            stat.trend === "up" ? "text-green-500" : "text-red-500"
-          }`}>
-            {stat.trend === "up" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-            <span>{stat.change > 0 ? "+" : ""}{stat.change}%</span>
+          <div
+            className={`flex items-center gap-1 mt-1 text-sm ${
+              stat.trend === "up" ? "text-green-500" : "text-red-500"
+            }`}
+          >
+            {stat.trend === "up" ? (
+              <TrendingUp className="w-3 h-3" />
+            ) : (
+              <TrendingDown className="w-3 h-3" />
+            )}
+            <span>
+              {stat.change > 0 ? "+" : ""}
+              {stat.change}%
+            </span>
             <span className="text-muted-foreground ml-1">vs last month</span>
           </div>
         </motion.div>

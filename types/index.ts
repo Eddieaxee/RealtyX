@@ -1,5 +1,14 @@
-import { UserRole, UserStatus, KYCStatus, PropertyType, PropertyStatus, 
-  InvestmentStatus, TransactionType, TransactionStatus, WalletType } from "@prisma/client";
+import {
+  UserRole,
+  UserStatus,
+  KYCStatus,
+  PropertyType,
+  PropertyStatus,
+  InvestmentStatus,
+  TransactionType,
+  TransactionStatus,
+  WalletType,
+} from "../lib/generated/prisma/client";
 
 export interface User {
   id: string;

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { verifyMessage, recoverMessageAddress } from "viem";
-import prisma from "@/lib/db";
+import { prisma } from "@/lib/db";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -12,7 +12,10 @@ export async function POST(req: Request) {
   try {
     const { message, signature, address } = await req.json();
     if (!message || !signature || !address) {
-      return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing parameters" },
+        { status: 400 },
+      );
     }
 
     const isValid = await verifyMessage({
@@ -39,7 +42,12 @@ export async function POST(req: Request) {
       data: { isVerified: true, verifiedAt: new Date() },
     });
 
-    return NextResponse.json({ success: true, verified: true, address: recoveredAddress, walletCount: wallet.count });
+    return NextResponse.json({
+      success: true,
+      verified: true,
+      address: recoveredAddress,
+      walletCount: wallet.count,
+    });
   } catch {
     return NextResponse.json({ error: "Verification failed" }, { status: 500 });
   }

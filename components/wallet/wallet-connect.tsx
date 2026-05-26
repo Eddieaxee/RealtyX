@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { Wallet, Shield, Zap } from "lucide-react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Button } from "@/components/ui/button";
 
 export function WalletConnect() {
   return (
@@ -15,7 +14,9 @@ export function WalletConnect() {
     >
       <div>
         <h2 className="text-lg font-semibold mb-2">Connect Wallet</h2>
-        <p className="text-sm text-muted-foreground">Link your Web3 wallet to start investing.</p>
+        <p className="text-sm text-muted-foreground">
+          Link your Web3 wallet to start investing.
+        </p>
       </div>
 
       <div className="space-y-3">

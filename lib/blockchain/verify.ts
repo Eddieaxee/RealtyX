@@ -1,12 +1,12 @@
-import { ethers } from "ethers";
+import { verifyMessage, verifyTypedData } from "ethers";
 
 export async function verifyWalletSignature(
   message: string,
   signature: string,
-  expectedAddress: string
+  expectedAddress: string,
 ): Promise<boolean> {
   try {
-    const recoveredAddress = ethers.verifyMessage(message, signature);
+    const recoveredAddress = verifyMessage(message, signature);
     return recoveredAddress.toLowerCase() === expectedAddress.toLowerCase();
   } catch {
     return false;
@@ -14,14 +14,14 @@ export async function verifyWalletSignature(
 }
 
 export async function verifyTypedDataSignature(
-  domain: any,
-  types: any,
-  value: any,
+  domain: Record<string, unknown>,
+  types: Record<string, unknown>,
+  value: Record<string, unknown>,
   signature: string,
-  expectedAddress: string
+  expectedAddress: string,
 ): Promise<boolean> {
   try {
-    const recoveredAddress = ethers.verifyTypedData(domain, types, value, signature);
+    const recoveredAddress = verifyTypedData(domain, types, value, signature);
     return recoveredAddress.toLowerCase() === expectedAddress.toLowerCase();
   } catch {
     return false;
