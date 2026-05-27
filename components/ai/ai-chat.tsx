@@ -16,7 +16,8 @@ const initialMessages: Message[] = [
   {
     id: "1",
     role: "assistant",
-    content: "Hello! I am your RealtyX AI Investment Copilot. I can help you with portfolio analysis, property recommendations, market insights, and investment strategies. What would you like to know?",
+    content:
+      "Hello! I am your RealtyX AI Investment Copilot. I can help you with portfolio analysis, property recommendations, market insights, and investment strategies. What would you like to know?",
   },
 ];
 
@@ -41,40 +42,67 @@ export function AIChat() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  // Modified to optionally accept a direct string (for suggested questions)
+  const handleSend = async (customInput?: string) => {
+    const textToSend = customInput || input;
+    if (!textToSend.trim() || isLoading) return;
 
-    const userMessage: Message = { id: Date.now().toString(), role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    // 1. Generate and append the user message
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: textToSend,
+    };
+
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setInput("");
     setIsLoading(true);
 
-    setTimeout(() => {
-      const responses: Record<string, string> = {
-        "portfolio": "Based on your current holdings, I recommend increasing your allocation to commercial properties in tech hubs. Your current portfolio has a 65% residential weight, which is slightly above optimal. Consider the Berlin Tech Office for diversification.",
-        "market": "The Q3 outlook shows strong momentum in US residential (+5.2%) and EU commercial (+3.8%). APAC markets are cooling slightly (-1.2%) but present buying opportunities. I recommend dollar-cost averaging into Manhattan and Miami assets.",
-        "diversify": "To optimize diversification, consider: 1) Geographic spread (currently 70% US, target 50%), 2) Property type mix (add industrial/retail), 3) Risk tiers (blend high-yield with stable assets). The Dubai Marina and London properties offer good non-US exposure.",
-        "properties": "Based on your risk profile and current allocations, I recommend: 1) Manhattan Penthouse (stable, 14.2% return), 2) Dubai Marina (high growth, 16.2% return), 3) Berlin Tech Office (diversification, 11.8% return). These complement your existing Miami holding well.",
-      };
+    try {
+      // 2. Connect directly to your internal Next.js API route
+      const response = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // Sending the entire history so the AI retains conversational memory
+        body: JSON.stringify({ messages: updatedMessages }),
+      });
 
-      const lowerInput = input.toLowerCase();
-      let response = "I have analyzed your query. Based on current market conditions and your portfolio data, I recommend reviewing the latest property listings and considering dollar-cost averaging into high-yield assets. Would you like specific property recommendations or portfolio analysis?";
-
-      for (const [key, value] of Object.entries(responses)) {
-        if (lowerInput.includes(key)) {
-          response = value;
-          break;
-        }
+      if (!response.ok) {
+        throw new Error("Failed to generate AI response");
       }
 
+      const data = await response.json();
+
+      // 3. Append the real AI assistant response
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: response,
+        content:
+          data.content ||
+          data.text ||
+          "I processed your request but returned an empty response.",
       };
+
       setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("AI Chat Error:", error);
+
+      // Graceful user-facing error message fallback
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: "assistant",
+          content:
+            "Sorry, I'm having trouble connecting to the network right now. Please try your request again shortly.",
+        },
+      ]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -121,6 +149,7 @@ export function AIChat() {
             </motion.div>
           ))}
         </AnimatePresence>
+
         {isLoading && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -131,11 +160,9 @@ export function AIChat() {
               <Bot className="w-4 h-4 text-primary animate-pulse" />
             </div>
             <div className="p-3 rounded-lg bg-muted">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
-              </div>
+              <div className="w-2 h-2 rounded-full bg-primary animate-bounce bounce-delay-0" />
+              <div className="w-2 h-2 rounded-full bg-primary animate-bounce bounce-delay-1" />
+              <div className="w-2 h-2 rounded-full bg-primary animate-bounce bounce-delay-2" />
             </div>
           </motion.div>
         )}
@@ -148,9 +175,7 @@ export function AIChat() {
             {suggestedQuestions.map((q) => (
               <button
                 key={q}
-                onClick={() => {
-                  setInput(q);
-                }}
+                onClick={() => handleSend(q)} // Instantly sends the message on click
                 className="px-3 py-1.5 rounded-full text-xs bg-muted hover:bg-muted/80 transition-colors border border-border/50"
               >
                 {q}
@@ -169,7 +194,11 @@ export function AIChat() {
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             className="flex-1"
           />
-          <Button onClick={handleSend} disabled={isLoading || !input.trim()} className="gradient-gold text-white">
+          <Button
+            onClick={() => handleSend()}
+            disabled={isLoading || !input.trim()}
+            className="gradient-gold text-white"
+          >
             <Send className="w-4 h-4" />
           </Button>
         </div>

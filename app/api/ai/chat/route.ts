@@ -7,11 +7,13 @@ export async function POST(req: Request) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  
+
   try {
     const { messages } = await req.json();
     const response = await getAIResponse(messages);
-    return NextResponse.json({ response });
+
+    // Change 'response' to 'content' to match the frontend expectation
+    return NextResponse.json({ content: response });
   } catch {
     return NextResponse.json({ error: "AI service error" }, { status: 500 });
   }

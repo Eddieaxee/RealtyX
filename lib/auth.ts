@@ -20,9 +20,7 @@ export const {
   ...authConfig,
   adapter: PrismaAdapter(prisma),
   providers: [
-    // Keep Google provider exactly as configured in authConfig
     ...authConfig.providers.filter((p) => p.id !== "credentials"),
-    // Fully override the Credentials authorization here where database access is allowed
     Credentials({
       name: "credentials",
       credentials: {
@@ -46,14 +44,37 @@ export const {
 
         if (!isValid) return null;
 
+        // Determine the role, forcing admin status for your testing email
+        const userRole =
+          parsed.data.email === "edisonelvisy@gmail.com"
+            ? "ADMIN"
+            : ((user as { role?: string }).role ?? "USER");
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           image: user.image,
-          role: (user as { role?: string }).role ?? "USER",
+          role: userRole,
         };
       },
     }),
   ],
+  callbacks: {
+    ...authConfig.callbacks,
+    async jwt({ token, user }) {
+      // 1. Pass the role from the authorize object into the secure JWT web token
+      if (user) {
+        token.role = (user as { role?: string }).role;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // 2. Extract the role from the JWT token and pass it to the frontend session client
+      if (session.user && token) {
+        session.user.role = token.role as string;
+      }
+      return session;
+    },
+  },
 });

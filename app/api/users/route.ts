@@ -50,3 +50,40 @@ export async function PATCH(req: Request) {
     );
   }
 }
+
+// Added PUT method to handle self profile updates
+export async function PUT(req: Request) {
+  const session = await auth();
+
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+  }
+
+  try {
+    const body = await req.json();
+    const { name, phone, address } = body;
+
+    const updatedUser = await prisma.user.update({
+      where: { email: session.user.email },
+      data: {
+        name,
+        ...(phone && { phone }),
+        ...(address && { address }),
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        name: updatedUser.name,
+        email: updatedUser.email,
+      },
+    });
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to update profile settings" },
+      { status: 500 },
+    );
+  }
+}
