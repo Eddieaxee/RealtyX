@@ -3,7 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Building2, Mail, Lock, User, ArrowRight } from "lucide-react";
+import {
+  Building2,
+  Mail,
+  Lock,
+  User,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -19,68 +27,173 @@ export function SignUpForm() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.toLowerCase().trim(),
+          password,
+        }),
       });
+
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "Failed to create account");
+        setError(data.error || "Failed to establish secure investor account.");
       } else {
-        router.push("/auth/signin");
+        router.push("/auth/signin?registered=true");
       }
     } catch {
-      setError("Something went wrong");
+      setError("Network or infrastructure failure. Please retry shortly.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-background/95">
-      <div className="w-full max-w-md p-8">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 rounded-lg gradient-gold flex items-center justify-center">
-              <Building2 className="w-6 h-6 text-white" />
+    <div className="min-h-screen grid lg:grid-cols-12 bg-[#090A0C] text-white font-sans selection:bg-[#E2B93B]/30">
+      {/* Cinematic Showcase Left Panel */}
+      <div className="hidden lg:flex lg:col-span-5 relative flex-col justify-between p-12 overflow-hidden border-r border-white/5 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#161920] via-[#0D0E12] to-[#090A0C]">
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#E2B93B_1px,transparent_1px)] [background-size:16px_16px]" />
+
+        <Link href="/" className="relative z-10 flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E2B93B] to-[#B89221] flex items-center justify-center shadow-lg shadow-[#E2B93B]/10">
+            <Building2 className="w-5 h-5 text-[#090A0C]" />
+          </div>
+          <span className="text-xl font-bold tracking-tight uppercase">
+            Realty<span className="text-[#E2B93B]">X</span>
+          </span>
+        </Link>
+
+        <div className="relative z-10 space-y-6 my-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#E2B93B]/20 bg-[#E2B93B]/5 text-[#E2B93B] text-xs font-medium tracking-wide backdrop-blur-md">
+            <ShieldCheck className="w-3.5 h-3.5" /> SEC & CBN Compliance
+            Anchored
+          </div>
+          <h2 className="text-4xl font-extrabold tracking-tight leading-[1.15] text-balance">
+            Institutional-Grade Real Estate Asset Fractionalization.
+          </h2>
+          <p className="text-sm text-neutral-400 leading-relaxed max-w-md">
+            Unlock premium yield opportunities across Nigeria and elite global
+            corridors. Co-invest in prime commercial sectors and high-growth
+            developments with direct multi-currency settlement rails.
+          </p>
+
+          <div className="space-y-3 pt-4 border-t border-white/5 max-w-sm">
+            <div className="flex items-start gap-3 text-xs text-neutral-400">
+              <CheckCircle2 className="w-4 h-4 text-[#E2B93B] shrink-0 mt-0.5" />
+              <span>Dual-currency protection mechanics (USD/NGN)</span>
             </div>
-            <span className="text-2xl font-bold">Realty<span className="text-gradient-gold">X</span></span>
-          </Link>
-          <h1 className="text-2xl font-bold mb-2">Create an account</h1>
-          <p className="text-muted-foreground">Start your investment journey</p>
+            <div className="flex items-start gap-3 text-xs text-neutral-400">
+              <CheckCircle2 className="w-4 h-4 text-[#E2B93B] shrink-0 mt-0.5" />
+              <span>
+                Immutable legal deed registry mapped via secure tokens
+              </span>
+            </div>
+          </div>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm">{error}</div>}
+
+        <div className="relative z-10 text-xs text-neutral-500">
+          © 2026 RealtyX Tech. Secure institutional platform.
+        </div>
+      </div>
+
+      {/* Input Operations Interface Right Panel */}
+      <div className="col-span-12 lg:col-span-7 flex items-center justify-center p-6 sm:p-12 md:p-16 bg-[#0D0E12]">
+        <div className="w-full max-w-md space-y-8">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input type="text" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} className="pl-10" required />
-            </div>
+            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white via-neutral-200 to-neutral-400 bg-clip-text text-transparent">
+              Onboard as an Investor
+            </h1>
+            <p className="text-sm text-neutral-400">
+              Establish your sovereign portal interface parameters.
+            </p>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Email</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/20 text-red-400 text-xs font-medium backdrop-blur-sm animate-in fade-in slide-in-from-top-1 duration-200">
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-neutral-300 uppercase tracking-wider">
+                Full Legal Name
+              </label>
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                <Input
+                  type="text"
+                  placeholder="e.g., Chidi Okafor"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="pl-11 bg-[#13161C] border-neutral-800 text-white placeholder:text-neutral-600 focus:border-[#E2B93B] focus:ring-[#E2B93B]/10 h-11 rounded-xl transition-all"
+                  required
+                />
+              </div>
             </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10" required minLength={6} />
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-neutral-300 uppercase tracking-wider">
+                Corporate or Personal Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                <Input
+                  type="email"
+                  placeholder="name@domain.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-11 bg-[#13161C] border-neutral-800 text-white placeholder:text-neutral-600 focus:border-[#E2B93B] focus:ring-[#E2B93B]/10 h-11 rounded-xl transition-all"
+                  required
+                />
+              </div>
             </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-neutral-300 uppercase tracking-wider">
+                Secure Access Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-11 bg-[#13161C] border-neutral-800 text-white placeholder:text-neutral-600 focus:border-[#E2B93B] focus:ring-[#E2B93B]/10 h-11 rounded-xl transition-all"
+                  required
+                  minLength={6}
+                />
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full h-11 bg-gradient-to-r from-[#E2B93B] to-[#B89221] hover:from-[#f3c94a] hover:to-[#cb21] text-[#090A0C] font-semibold rounded-xl shadow-lg shadow-[#E2B93B]/5 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading}
+            >
+              {isLoading
+                ? "Provisioning Portal Account..."
+                : "Initialize Portal Account"}
+              <ArrowRight className="ml-2 w-4 h-4 stroke-[2.5]" />
+            </Button>
+          </form>
+
+          <div className="text-center text-xs text-neutral-500 pt-2">
+            By initializing an account, you affirm compliance tracking
+            protocols. Have a profile?{" "}
+            <Link
+              href="/auth/signin"
+              className="text-[#E2B93B] font-medium hover:underline tracking-wide"
+            >
+              Authorize Access
+            </Link>
           </div>
-          <Button type="submit" className="w-full gradient-gold text-white hover:opacity-90" disabled={isLoading}>
-            {isLoading ? "Creating account..." : "Create Account"}
-            <ArrowRight className="ml-2 w-4 h-4" />
-          </Button>
-        </form>
-        <div className="mt-6 text-center text-sm text-muted-foreground">
-          Already have an account? <Link href="/auth/signin" className="text-primary hover:underline">Sign in</Link>
         </div>
       </div>
     </div>

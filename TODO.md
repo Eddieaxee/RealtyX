@@ -1,0 +1,4 @@
+- [x] Fix CurrencyProvider to listen for nav currency changes (realtyx_currency_changed) and use realtyx_currency_preference key.
+- [x] Normalize /api/properties response in landing `PropertiesPreview` so images and content render.
+- [ ] Fix remaining UI/UX aesthetics + ensure all links/buttons point to active pages.
+- [ ] Resolve remaining TypeScript/ESLint/webhint issues across the repo (user reported ~20 problems).

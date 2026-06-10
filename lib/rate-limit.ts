@@ -12,14 +12,20 @@ export function rateLimit(request: NextRequest) {
     return null;
   }
   if (record.count >= RATE_LIMIT) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": "60" } });
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": "60" } },
+    );
   }
   record.count++;
   return null;
 }
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, record] of rateLimitMap.entries()) {
-    if (now > record.resetTime) rateLimitMap.delete(ip);
-  }
-}, 5 * 60 * 1000);
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [ip, record] of Array.from(rateLimitMap.entries())) {
+      if (now > record.resetTime) rateLimitMap.delete(ip);
+    }
+  },
+  5 * 60 * 1000,
+);

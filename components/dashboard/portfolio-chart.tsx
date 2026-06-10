@@ -1,7 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 const data = [
   { month: "Jan", value: 85000 },
@@ -32,16 +39,25 @@ export function PortfolioChart() {
                 <stop offset="95%" stopColor="#d4a017" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-            <XAxis dataKey="month" stroke="rgba(255,255,255,0.3)" fontSize={12} />
-            <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`} />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="rgba(255,255,255,0.05)"
+            />
+            <XAxis
+              dataKey="month"
+              stroke="rgba(255,255,255,0.3)"
+              fontSize={12}
+            />
             <Tooltip
               contentStyle={{
                 backgroundColor: "rgba(0,0,0,0.8)",
                 border: "1px solid rgba(255,255,255,0.1)",
                 borderRadius: "8px",
               }}
-              formatter={(value: number) => [`$${value.toLocaleString()}`, "Value"]}
+              formatter={(value: number) => [
+                `$${value.toLocaleString()}`,
+                "Value",
+              ]}
             />
             <Area
               type="monotone"

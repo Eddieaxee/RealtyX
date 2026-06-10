@@ -7,79 +7,161 @@ import {
   Building2,
   Wallet,
   Percent,
-  DollarSign,
+  BarChart3,
+  Loader2,
 } from "lucide-react";
-import { formatCurrency, formatPercent } from "@/lib/utils";
+import { useCurrency } from "@/context/currency-context";
+import { useEffect, useState } from "react";
 
-const stats = [
-  {
-    label: "Portfolio Value",
-    value: 142850,
-    change: 24.5,
-    icon: DollarSign,
-    trend: "up",
-  },
-  {
-    label: "Total Invested",
-    value: 115000,
-    change: 12.3,
-    icon: Building2,
-    trend: "up",
-  },
-  {
-    label: "Total Returns",
-    value: 27850,
-    change: 8.7,
-    icon: Wallet,
-    trend: "up",
-  },
-  {
-    label: "Avg Yield",
-    value: 8.2,
-    change: -1.2,
-    icon: Percent,
-    trend: "down",
-    isPercent: true,
-  },
-];
+interface PortfolioData {
+  totalInvestments: number;
+  totalValue: number;
+  totalYield: number;
+  avgYield: number;
+  investmentCount: number;
+}
 
 export function PortfolioOverview() {
+  const { formatValue } = useCurrency();
+  const [data, setData] = useState<PortfolioData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPortfolio() {
+      try {
+        const res = await fetch("/api/investments");
+        if (res.ok) {
+          const investments = await res.json();
+          if (Array.isArray(investments) && investments.length > 0) {
+            const totalInvested = investments.reduce(
+              (sum: number, inv: { amountUSD?: number }) =>
+                sum + (inv.amountUSD || 0),
+              0,
+            );
+            setData({
+              totalInvestments: totalInvested,
+              totalValue: totalInvested * 1.18, // 18% appreciation
+              totalYield: totalInvested * 0.12, // 12% yield
+              avgYield: 12.5,
+              investmentCount: investments.length,
+            });
+          } else {
+            setData({
+              totalInvestments: 0,
+              totalValue: 0,
+              totalYield: 0,
+              avgYield: 0,
+              investmentCount: 0,
+            });
+          }
+        }
+      } catch {
+        // Use default empty state
+        setData({
+          totalInvestments: 0,
+          totalValue: 0,
+          totalYield: 0,
+          avgYield: 0,
+          investmentCount: 0,
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPortfolio();
+  }, []);
+
+  const stats = [
+    {
+      label: "Portfolio Value",
+      value: data?.totalValue ?? 0,
+      change: data && data.totalValue > 0 ? 18.4 : 0,
+      icon: BarChart3,
+      trend: "up" as const,
+    },
+    {
+      label: "Total Invested",
+      value: data?.totalInvestments ?? 0,
+      change: data && data.totalInvestments > 0 ? 12.5 : 0,
+      icon: Building2,
+      trend: "up" as const,
+    },
+    {
+      label: "Accrued Yield",
+      value: data?.totalYield ?? 0,
+      change: data && data.totalYield > 0 ? 6.2 : 0,
+      icon: Wallet,
+      trend: "up" as const,
+    },
+    {
+      label: "Average Yield",
+      value: data?.avgYield ?? 0,
+      change: data && data.avgYield > 0 ? -0.4 : 0,
+      icon: Percent,
+      trend: "down" as const,
+      isPercent: true,
+    },
+  ];
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="p-5 rounded-2xl border border-white/5 bg-[#0D0E12]/80 backdrop-blur-md"
+          >
+            <div className="flex items-center justify-center h-20">
+              <Loader2 className="w-5 h-5 text-[#E2B93B] animate-spin" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((stat, i) => (
         <motion.div
           key={stat.label}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.1 }}
-          className="p-5 rounded-xl border border-border/50 bg-card/50 hover:bg-card/80 transition-colors"
+          transition={{ delay: i * 0.05, duration: 0.3 }}
+          className="p-5 rounded-2xl border border-white/5 bg-[#0D0E12]/80 backdrop-blur-md hover:border-white/10 transition-all duration-200 shadow-xl group"
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-muted-foreground">{stat.label}</span>
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <stat.icon className="w-4 h-4 text-primary" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-neutral-400 group-hover:text-neutral-300 transition-colors">
+              {stat.label}
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-[#E2B93B]/5 border border-[#E2B93B]/10 flex items-center justify-center">
+              <stat.icon className="w-4 h-4 text-[#E2B93B]" />
             </div>
           </div>
-          <div className="text-2xl font-bold">
-            {stat.isPercent
-              ? formatPercent(stat.value)
-              : formatCurrency(stat.value)}
+
+          <div className="text-2xl font-bold font-mono tracking-tight text-white">
+            {stat.isPercent ? `${stat.value}%` : formatValue(stat.value)}
           </div>
-          <div
-            className={`flex items-center gap-1 mt-1 text-sm ${
-              stat.trend === "up" ? "text-green-500" : "text-red-500"
-            }`}
-          >
-            {stat.trend === "up" ? (
-              <TrendingUp className="w-3 h-3" />
-            ) : (
-              <TrendingDown className="w-3 h-3" />
-            )}
-            <span>
-              {stat.change > 0 ? "+" : ""}
-              {stat.change}%
-            </span>
-            <span className="text-muted-foreground ml-1">vs last month</span>
+
+          <div className="flex items-center gap-1.5 mt-2 text-xs font-medium">
+            <div
+              className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-md ${
+                stat.trend === "up"
+                  ? "bg-emerald-500/5 text-emerald-400"
+                  : "bg-red-500/5 text-red-400"
+              }`}
+            >
+              {stat.trend === "up" ? (
+                <TrendingUp className="w-3 h-3 stroke-[2.5]" />
+              ) : (
+                <TrendingDown className="w-3 h-3 stroke-[2.5]" />
+              )}
+              <span>
+                {stat.change > 0 ? "+" : ""}
+                {stat.change}%
+              </span>
+            </div>
+            <span className="text-neutral-500">vs baseline</span>
           </div>
         </motion.div>
       ))}

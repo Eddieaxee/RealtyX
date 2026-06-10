@@ -5,7 +5,7 @@ import Credentials from "next-auth/providers/credentials";
 export const authConfig = {
   session: {
     strategy: "jwt",
-    // 30 days
+    maxAge: 30 * 24 * 60 * 60, // 30 Days explicitly typed
   },
   pages: {
     signIn: "/auth/signin",
@@ -16,7 +16,7 @@ export const authConfig = {
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     }),
-    // We provide an empty Credentials provider wrapper here so NextAuth knows it exists at the Edge level
+    // Empty Credentials fallback wrapper to ensure edge middleware maps runtime schemas correctly
     Credentials({
       name: "credentials",
       credentials: {},
@@ -29,16 +29,17 @@ export const authConfig = {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as { role?: string }).role;
+        token.role = (user as { role?: string }).role ?? "USER";
       }
       if (trigger === "update" && session) {
         token.name = session.name;
         token.image = session.image;
+        if (session.role) token.role = session.role;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token) {
+      if (token && session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
       }
@@ -46,8 +47,10 @@ export const authConfig = {
     },
     authorized({ request, auth }) {
       const { pathname } = request.nextUrl;
+      const isAuthenticated = !!auth;
+      const userRole = auth?.user?.role;
 
-      // Public routes
+      // 1. Structural Public Content Gateways
       if (
         pathname === "/" ||
         pathname.startsWith("/api/auth") ||
@@ -55,6 +58,8 @@ export const authConfig = {
         pathname.startsWith("/images") ||
         pathname.startsWith("/icons") ||
         pathname === "/favicon.ico" ||
+        pathname === "/manifest.json" ||
+        pathname === "/robots.txt" ||
         pathname.startsWith("/about") ||
         pathname.startsWith("/properties") ||
         pathname.startsWith("/education") ||
@@ -64,14 +69,12 @@ export const authConfig = {
         return true;
       }
 
-      // Admin routes
+      // 2. Structural Admin Route Validation Controls
       if (pathname.startsWith("/admin")) {
-        return (
-          auth?.user?.role === "ADMIN" || auth?.user?.role === "SUPER_ADMIN"
-        );
+        return isAuthenticated && (userRole === "ADMIN" || userRole === "SUPER_ADMIN");
       }
 
-      // Dashboard routes require auth
+      // 3. Fintech Investor Operational Space Gates
       if (
         pathname.startsWith("/dashboard") ||
         pathname.startsWith("/portfolio") ||
@@ -81,7 +84,7 @@ export const authConfig = {
         pathname.startsWith("/transactions") ||
         pathname.startsWith("/settings")
       ) {
-        return !!auth;
+        return isAuthenticated;
       }
 
       return true;

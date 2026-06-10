@@ -1,12 +1,11 @@
 generator client {
-  provider = "prisma-client"
-  engineType = "library"
-  output   = "../lib/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
+
 
 model Account {
   id                String  @id @default(cuid())
@@ -40,10 +39,13 @@ model Session {
 
 model User {
   id            String    @id @default(cuid())
+
   email         String    @unique
   emailVerified DateTime? @map("email_verified")
   name          String?
   image         String?
+  phone         String?
+  address       String?
   password      String?
   role          UserRole  @default(USER)
   status        UserStatus @default(ACTIVE)
@@ -58,9 +60,13 @@ model User {
   transactions  Transaction[]
   notifications Notification[]
   auditLogs     AuditLog[]
+  maintenanceRequests MaintenanceRequest[]
+  userNotificationSettings UserNotificationSettings?
+  secondaryOrders SecondaryMarketOrder[]
 
   @@map("users")
 }
+
 
 model VerificationToken {
   identifier String
@@ -72,30 +78,34 @@ model VerificationToken {
 }
 
 model KYCRecord {
-  id              String     @id @default(cuid())
-  userId          String     @unique @map("user_id")
-  status          KYCStatus  @default(PENDING)
-  firstName       String     @map("first_name")
-  lastName        String     @map("last_name")
-  dateOfBirth     DateTime?  @map("date_of_birth")
-  nationality     String?
-  idType          String?    @map("id_type")
-  idNumber        String?    @map("id_number")
-  idDocumentUrl   String?    @map("id_document_url")
-  proofOfAddressUrl String?  @map("proof_of_address_url")
-  selfieUrl       String?    @map("selfie_url")
-  address         String?
-  city            String?
-  country         String?
-  postalCode      String?    @map("postal_code")
-  phoneNumber     String?    @map("phone_number")
-  riskLevel       RiskLevel  @default(LOW) @map("risk_level")
-  submittedAt     DateTime?  @map("submitted_at")
-  reviewedAt      DateTime?  @map("reviewed_at")
-  reviewedBy      String?    @map("reviewed_by")
-  notes           String?
-  createdAt       DateTime   @default(now()) @map("created_at")
-  updatedAt       DateTime   @updatedAt @map("updated_at")
+  id                String     @id @default(cuid())
+  userId            String     @unique @map("user_id")
+  status            KYCStatus  @default(PENDING)
+  firstName         String     @map("first_name")
+  lastName          String     @map("last_name")
+  dateOfBirth       DateTime?  @map("date_of_birth")
+  nationality       String?    @default("Nigerian")
+  idType            LocalIDType @default(BVN) @map("id_type")
+  idNumber          String?    @map("id_number") // Hashed or encrypted in application logic
+  ninNumber         String?    @map("nin_number") // Optional secondary document entry
+  idDocumentUrl     String?    @map("id_document_url")
+  proofOfAddressUrl String?    @map("proof_of_address_url")
+  selfieUrl         String?    @map("selfie_url")
+  address           String?
+  city              String?
+  state             String?    @default("Lagos") // Local territory context maps
+  country           String?    @default("Nigeria")
+  postalCode        String?    @map("postal_code")
+  phoneNumber       String?    @map("phone_number")
+  riskLevel         RiskLevel  @default(LOW) @map("risk_level")
+  investorCategory  String?    @default("RETAIL") @map("investor_category") // RETAIL, HIGH_NET_WORTH, INSTITUTIONAL
+  investmentGoals   String[]   @map("investment_goals")
+  submittedAt       DateTime?  @map("submitted_at")
+  reviewedAt        DateTime?  @map("reviewed_at")
+  reviewedBy        String?    @map("reviewed_by")
+  notes             String?
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -123,37 +133,69 @@ model Wallet {
 }
 
 model Property {
-  id              String          @id @default(cuid())
-  title           String
-  description     String          @db.Text
-  slug            String          @unique
-  type            PropertyType
-  status          PropertyStatus  @default(DRAFT)
-  location        String
-  city            String
-  country         String
-  latitude        Decimal?        @db.Decimal(10, 8)
-  longitude       Decimal?        @db.Decimal(11, 8)
-  totalValue      Decimal         @map("total_value") @db.Decimal(18, 2)
-  tokenPrice      Decimal         @map("token_price") @db.Decimal(18, 6)
-  totalTokens     Int             @map("total_tokens")
-  availableTokens Int           @map("available_tokens")
-  minInvestment   Decimal         @map("min_investment") @db.Decimal(18, 2)
-  expectedReturn  Decimal?        @map("expected_return") @db.Decimal(5, 2)
-  rentalYield     Decimal?        @map("rental_yield") @db.Decimal(5, 2)
-  images          String[]
-  documents       String[]
-  features        String[]
-  tokenAddress    String?         @map("token_address")
-  contractAddress String?         @map("contract_address")
-  createdAt       DateTime        @default(now()) @map("created_at")
-  updatedAt       DateTime        @updatedAt @map("updated_at")
-  publishedAt     DateTime?       @map("published_at")
+  id                     String             @id @default(cuid())
+  title                  String
+  description            String             @db.Text
+  slug                   String             @unique
+  type                   PropertyType
+  status                 PropertyStatus     @default(DRAFT)
+  developmentStatus      DevelopmentStatus  @default(EXISTING_STRUCTURE) @map("development_status")
+  completionPercentage   Decimal            @default(100.00) @map("completion_percentage") @db.Decimal(5, 2)
+  location               String
+  city                   String
+  state                  String             @default("Lagos")
+  country                String             @default("Nigeria")
+  latitude               Decimal?           @db.Decimal(10, 8)
+  longitude              Decimal?           @db.Decimal(11, 8)
+  
+  // Dual-Currency Value Layer to prevent cross-rate conversion degradation
+  totalValueUSD          Decimal            @map("total_value_usd") @db.Decimal(18, 2)
+  totalValueNGN          Decimal            @map("total_value_ngn") @db.Decimal(18, 2)
+  tokenPriceUSD          Decimal            @map("token_price_usd") @db.Decimal(18, 6)
+  tokenPriceNGN          Decimal            @map("token_price_ngn") @db.Decimal(18, 2)
+  
+  totalTokens            Int                @map("total_tokens")
+  availableTokens        Int                @map("available_tokens")
+  minInvestmentUSD       Decimal            @map("min_investment_usd") @db.Decimal(18, 2)
+  
+  expectedReturn         Decimal?           @map("expected_return") @db.Decimal(5, 2)
+  rentalYield            Decimal?           @map("rental_yield") @db.Decimal(5, 2)
+  images                 String[]
+  documents              String[]
+  features               String[]
+  tokenAddress           String?            @map("token_address")
+  contractAddress        String?            @map("contract_address")
+  createdAt              DateTime           @default(now()) @map("created_at")
+  updatedAt              DateTime           @updatedAt @map("updated_at")
+  publishedAt            DateTime?          @map("published_at")
 
-  investments     Investment[]
-  payouts         Payout[]
+  investments            Investment[]
+  payouts                Payout[]
+  milestones             ConstructionMilestone[]
+  tenants                PropertyTenant[]
+  maintenanceRequests    MaintenanceRequest[]
+  secondaryOrders        SecondaryMarketOrder[]
+  management             PropertyManagement?
 
   @@map("properties")
+}
+
+model ConstructionMilestone {
+  id              String           @id @default(cuid())
+  propertyId      String           @map("property_id")
+  title           String
+  description     String           @db.Text
+  percentageValue Decimal          @map("percentage_value") @db.Decimal(5, 2) // Contribution to overall project
+  status          MilestoneStatus  @default(PENDING)
+  estimatedDate   DateTime         @map("estimated_date")
+  completedAt     DateTime?        @map("completed_at")
+  evidenceImages  String[]         @map("evidence_images")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  property        Property         @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("construction_milestones")
 }
 
 model Investment {
@@ -161,8 +203,9 @@ model Investment {
   userId          String            @map("user_id")
   propertyId      String            @map("property_id")
   tokens          Int
-  amount          Decimal           @db.Decimal(18, 2)
-  tokenPrice      Decimal           @map("token_price") @db.Decimal(18, 6)
+  amountUSD       Decimal           @map("amount_usd") @db.Decimal(18, 2)
+  amountNGN       Decimal           @map("amount_ngn") @db.Decimal(18, 2)
+  tokenPriceUSD   Decimal           @map("token_price_usd") @db.Decimal(18, 6)
   status          InvestmentStatus  @default(PENDING)
   txHash          String?           @map("tx_hash")
   walletAddress   String?           @map("wallet_address")
@@ -177,33 +220,74 @@ model Investment {
 }
 
 model Transaction {
+  id                String            @id @default(cuid())
+  userId            String            @map("user_id")
+  investmentId      String?           @map("investment_id")
+  walletId          String?           @map("wallet_id")
+  type              TransactionType
+  status            TransactionStatus @default(PENDING)
+  paymentGateway    PaymentGateway    @default(BLOCKCHAIN) @map("payment_gateway")
+  gatewayReference  String?           @unique @map("gateway_reference") // Custom tracker ID for Paystack/Flutterwave/BankTransfer references
+  amountUSD         Decimal           @map("amount_usd") @db.Decimal(18, 2)
+  amountNGN         Decimal           @map("amount_ngn") @db.Decimal(18, 2)
+  tokenAmount       Int?              @map("token_amount")
+  feeUSD            Decimal?          @map("fee_usd") @db.Decimal(18, 6)
+  txHash            String?           @map("tx_hash")
+  fromAddress       String?           @map("from_address")
+  toAddress         String?           @map("to_address")
+  bankName          String?           @map("bank_name") // For tracking virtual allocations (Opay, Moniepoint, etc.)
+  accountNumber     String?           @map("account_number")
+  metadata          Json?
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  investment        Investment?       @relation(fields: [investmentId], references: [id])
+  wallet            Wallet?           @relation(fields: [walletId], references: [id])
+
+  @@map("transactions")
+}
+
+model PropertyTenant {
+  id              String        @id @default(cuid())
+  propertyId      String        @map("property_id")
+  tenantName      String        @map("tenant_name")
+  leaseStart      DateTime      @map("lease_start")
+  leaseEnd        DateTime      @map("lease_end")
+  rentAmountNGN   Decimal       @map("rent_amount_ngn") @db.Decimal(18, 2)
+  occupancyStatus String        @default("ACTIVE") @map("occupancy_status")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  property        Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("property_tenants")
+}
+
+model MaintenanceRequest {
   id              String            @id @default(cuid())
+  propertyId      String            @map("property_id")
   userId          String            @map("user_id")
-  investmentId    String?           @map("investment_id")
-  walletId        String?           @map("wallet_id")
-  type            TransactionType
-  status          TransactionStatus @default(PENDING)
-  amount          Decimal           @db.Decimal(18, 2)
-  tokenAmount     Int?              @map("token_amount")
-  fee             Decimal?          @db.Decimal(18, 6)
-  txHash          String?           @map("tx_hash")
-  fromAddress     String?           @map("from_address")
-  toAddress       String?           @map("to_address")
-  metadata        Json?
+  title           String
+  description     String            @db.Text
+  priority        PriorityLevel     @default(MEDIUM)
+  status          MaintenanceStatus @default(REPORTED)
+  scheduledDate   DateTime?         @map("scheduled_date")
+  estimatedCost   Decimal?          @map("estimated_cost") @db.Decimal(18, 2)
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
 
+  property        Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  investment      Investment?       @relation(fields: [investmentId], references: [id])
-  wallet          Wallet?           @relation(fields: [walletId], references: [id])
 
-  @@map("transactions")
+  @@map("maintenance_requests")
 }
 
 model Payout {
   id              String        @id @default(cuid())
   propertyId      String        @map("property_id")
-  amount          Decimal       @db.Decimal(18, 2)
+  amountUSD       Decimal       @map("amount_usd") @db.Decimal(18, 2)
+  amountNGN       Decimal       @map("amount_ngn") @db.Decimal(18, 2)
   type            PayoutType
   periodStart     DateTime      @map("period_start")
   periodEnd       DateTime      @map("period_end")
@@ -222,7 +306,8 @@ model Distribution {
   id              String    @id @default(cuid())
   payoutId        String    @map("payout_id")
   userId          String    @map("user_id")
-  amount          Decimal   @db.Decimal(18, 2)
+  amountUSD       Decimal   @map("amount_usd") @db.Decimal(18, 2)
+  amountNGN       Decimal   @map("amount_ngn") @db.Decimal(18, 2)
   tokens          Int
   txHash          String?   @map("tx_hash")
   distributedAt   DateTime? @map("distributed_at")
@@ -231,6 +316,42 @@ model Distribution {
   payout          Payout    @relation(fields: [payoutId], references: [id], onDelete: Cascade)
 
   @@map("distributions")
+}
+
+model SecondaryMarketOrder {
+  id              String            @id @default(cuid())
+  userId          String            @map("user_id")
+  propertyId      String            @map("property_id")
+  type            OrderType
+  priceUSD        Decimal           @map("price_usd") @db.Decimal(18, 6)
+  priceNGN        Decimal           @map("price_ngn") @db.Decimal(18, 2)
+  quantity        Int
+  filledQuantity  Int               @default(0) @map("filled_quantity")
+  status          OrderStatus       @default(OPEN)
+  expiresAt       DateTime?         @map("expires_at")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property        Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("secondary_market_orders")
+}
+
+model PropertyManagement {
+  id              String            @id @default(cuid())
+  propertyId      String            @unique @map("property_id")
+  managerId       String            @map("manager_id")
+  occupancyRate   Decimal           @default(0) @map("occupancy_rate") @db.Decimal(5, 2)
+  totalUnits      Int               @default(0) @map("total_units")
+  occupiedUnits   Int               @default(0) @map("occupied_units")
+  monthlyRevenue  Decimal           @default(0) @map("monthly_revenue") @db.Decimal(18, 2)
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  property        Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("property_management")
 }
 
 model Notification {
@@ -247,6 +368,29 @@ model Notification {
 
   @@map("notifications")
 }
+
+model UserNotificationSettings {
+  id                String   @id @default(cuid())
+  userId            String   @unique @map("user_id")
+
+  emailDrawdown     Boolean  @default(true)  @map("email_drawdown")
+  smsSecondaryMatch Boolean  @default(false) @map("sms_secondary_match")
+  marketingUpdates  Boolean  @default(true)  @map("marketing_updates")
+  twoFactorEnforced Boolean  @default(true)  @map("two_factor_enforced")
+
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  // Relation is intentionally unidirectional to match current User model.
+  // If you add the opposite relation field on `User`, Prisma can enforce bidirectional relations.
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+
+
+  @@map("user_notification_settings")
+}
+
+
 
 model AuditLog {
   id          String    @id @default(cuid())
@@ -288,6 +432,14 @@ enum KYCStatus {
   EXPIRED
 }
 
+enum LocalIDType {
+  BVN
+  NIN
+  PASSPORT
+  VOTERS_CARD
+  DRIVERS_LICENSE
+}
+
 enum RiskLevel {
   LOW
   MEDIUM
@@ -319,6 +471,34 @@ enum PropertyStatus {
   SUSPENDED
 }
 
+enum DevelopmentStatus {
+  UNDER_CONSTRUCTION
+  EXISTING_STRUCTURE
+  PHASED_DEVELOPMENT
+}
+
+enum MilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  DELAYED
+}
+
+enum PriorityLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum MaintenanceStatus {
+  REPORTED
+  SCHEDULED
+  IN_PROGRESS
+  RESOLVED
+  CANCELLED
+}
+
 enum InvestmentStatus {
   PENDING
   CONFIRMED
@@ -344,6 +524,16 @@ enum TransactionStatus {
   CANCELLED
 }
 
+enum PaymentGateway {
+  BLOCKCHAIN
+  PAYSTACK
+  FLUTTERWAVE
+  BANK_TRANSFER
+  OPAY
+  PALMPAY
+  MONIEPOINT
+}
+
 enum PayoutType {
   RENTAL
   APPRECIATION
@@ -364,4 +554,17 @@ enum NotificationType {
   SYSTEM
   PRICE_ALERT
   SECURITY
+}
+
+enum OrderType {
+  BUY
+  SELL
+}
+
+enum OrderStatus {
+  OPEN
+  PARTIALLY_FILLED
+  FILLED
+  CANCELLED
+  EXPIRED
 }

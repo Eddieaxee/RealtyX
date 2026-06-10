@@ -2,57 +2,87 @@
 
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-
+import { PieChart as PieIcon } from "lucide-react";
+import "./asset-breakdown.css";
 const data = [
-  { name: "Residential", value: 65, color: "#d4a017" },
-  { name: "Commercial", value: 25, color: "#3b82f6" },
-  { name: "Industrial", value: 10, color: "#8b5cf6" },
+  {
+    name: "Premium Residential Houses",
+    value: 65,
+    color: "#E2B93B",
+    className: "premium",
+  },
+  {
+    name: "Commercial & Logistical Hubs",
+    value: 25,
+    color: "#4B5563",
+    className: "commercial",
+  },
+  {
+    name: "High-Yield Infrastructure Developments",
+    value: 10,
+    color: "#1F2937",
+    className: "infrastructure",
+  },
 ];
 
 export function AssetBreakdown() {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-      className="rounded-xl border border-border/50 bg-card/50 p-6"
+      transition={{ delay: 0.15, duration: 0.4 }}
+      className="rounded-2xl border border-white/5 bg-[#0D0E12]/80 backdrop-blur-md p-6 shadow-xl"
     >
-      <h2 className="text-lg font-semibold mb-6">Asset Breakdown</h2>
-      <div className="h-[200px]">
+      <div className="flex items-center gap-2 mb-6">
+        <PieIcon className="w-4 h-4 text-[#E2B93B]" />
+        <h2 className="text-base font-bold text-white tracking-tight">
+          Portfolio Allocation Profile
+        </h2>
+      </div>
+
+      <div className="h-[180px] relative">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={80}
-              paddingAngle={5}
+              innerRadius={55}
+              outerRadius={75}
+              paddingAngle={4}
               dataKey="value"
             >
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={entry.color}
+                  stroke="#090A0C"
+                  strokeWidth={2}
+                />
               ))}
             </Pie>
             <Tooltip
-              contentStyle={{
-                backgroundColor: "rgba(0,0,0,0.8)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "8px",
-              }}
-              formatter={(value: number) => [`${value}%`, "Allocation"]}
+              formatter={(value: number) => [`${value}%`, "Allocation Weight"]}
             />
           </PieChart>
         </ResponsiveContainer>
       </div>
-      <div className="space-y-2 mt-4">
+
+      <div className="space-y-2 mt-4 pt-4 border-t border-white/5">
         {data.map((item) => (
-          <div key={item.name} className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-              <span className="text-sm">{item.name}</span>
+          <div
+            key={item.name}
+            className="flex items-center justify-between gap-2 min-w-0"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <div
+                className={`w-2.5 h-2.5 rounded-md shrink-0 dot ${item.className}`}
+              />
+              <span className="text-neutral-400 truncate">{item.name}</span>
             </div>
-            <span className="text-sm font-medium">{item.value}%</span>
+            <span className="text-white font-mono font-bold ml-2 shrink-0">
+              {item.value}%
+            </span>
           </div>
         ))}
       </div>

@@ -9,32 +9,34 @@ export function WalletConnect() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-      className="rounded-xl border border-border/50 bg-card/50 p-6 space-y-6"
+      transition={{ delay: 0.1 }}
+      className="rounded-2xl border border-white/5 bg-[#0D0E12]/80 backdrop-blur-md p-6 space-y-6 shadow-xl"
     >
       <div>
-        <h2 className="text-lg font-semibold mb-2">Connect Wallet</h2>
-        <p className="text-sm text-muted-foreground">
-          Link your Web3 wallet to start investing.
+        <h2 className="text-base font-bold text-white tracking-tight">On-Chain Interface</h2>
+        <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
+          Establish cryptographic link parameters with Web3 signatures to authorize fractional acquisitions.
         </p>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50">
-          <Shield className="w-5 h-5 text-gold-500" />
-          <div className="text-sm">Bank-grade security</div>
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-[#13161C]/50 border border-white/5">
+          <Shield className="w-4 h-4 text-[#E2B93B] shrink-0" />
+          <div className="text-xs text-neutral-300 font-medium">Secured Encrypted Execution</div>
         </div>
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50">
-          <Zap className="w-5 h-5 text-gold-500" />
-          <div className="text-sm">Instant transactions</div>
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-[#13161C]/50 border border-white/5">
+          <Zap className="w-4 h-4 text-[#E2B93B] shrink-0" />
+          <div className="text-xs text-neutral-300 font-medium">Instant Contract Minting</div>
         </div>
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50">
-          <Wallet className="w-5 h-5 text-gold-500" />
-          <div className="text-sm">Multi-chain support</div>
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-[#13161C]/50 border border-white/5">
+          <Wallet className="w-4 h-4 text-[#E2B93B] shrink-0" />
+          <div className="text-xs text-neutral-300 font-medium">Ethereum & Base Support</div>
         </div>
       </div>
 
-      <ConnectButton showBalance={false} />
+      <div className="pt-2 w-full custom-rainbowkit-wrapper">
+        <ConnectButton showBalance={false} label="Establish Web3 Link" />
+      </div>
     </motion.div>
   );
 }

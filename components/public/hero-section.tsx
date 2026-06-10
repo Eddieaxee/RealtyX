@@ -5,8 +5,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, TrendingUp, Users } from "lucide-react";
 import { ParticleField } from "@/components/three/particle-field";
+import { useCurrency } from "@/context/currency-context";
 
 export function HeroSection() {
+  const { formatValue } = useCurrency();
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background gradient */}
@@ -28,7 +31,7 @@ export function HeroSection() {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               <span className="text-sm font-medium text-primary">
-                Now Live on Base & Ethereum
+                Now Live on Polygon & Ethereum
               </span>
             </div>
 
@@ -38,12 +41,13 @@ export function HeroSection() {
             </h1>
 
             <p className="text-xl text-muted-foreground mb-8 max-w-lg leading-relaxed">
-              Invest in premium tokenized properties from $100. AI-powered insights, 
-              institutional security, and seamless blockchain ownership.
+              Invest in premium tokenized properties across Nigeria from as low
+              as $100. AI-powered insights, institutional security, and seamless
+              blockchain ownership.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <Link href="/dashboard">
+              <Link href="/auth/signup">
                 <Button
                   size="lg"
                   className="gradient-gold text-white text-lg px-8 py-6 hover:opacity-90 group"
@@ -66,15 +70,15 @@ export function HeroSection() {
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-gold-400" />
-                <span className="text-sm font-medium">12.4% Avg Return</span>
+                <span className="text-sm font-medium">14-22% Avg Return</span>
               </div>
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-gold-400" />
-                <span className="text-sm font-medium">Institutional Security</span>
+                <span className="text-sm font-medium">SEC & CBN Compliant</span>
               </div>
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-gold-400" />
-                <span className="text-sm font-medium">50K+ Investors</span>
+                <span className="text-sm font-medium">5K+ Investors</span>
               </div>
             </div>
           </motion.div>
@@ -93,41 +97,60 @@ export function HeroSection() {
                     Portfolio Value
                   </span>
                   <span className="text-sm font-medium text-green-500">
-                    +24.5%
+                    +18.4%
                   </span>
                 </div>
-                <div className="text-4xl font-bold">$142,850.00</div>
+                <div className="text-4xl font-bold">{formatValue(142850)}</div>
 
                 <div className="grid grid-cols-3 gap-4">
                   {[
-                    { label: "Properties", value: "12" },
+                    { label: "Properties", value: "6" },
                     { label: "Tokens", value: "8.4K" },
-                    { label: "Yield", value: "8.2%" },
+                    { label: "Yield", value: "12.5%" },
                   ].map((stat) => (
-                    <div key={stat.label} className="text-center p-3 rounded-xl bg-white/5">
+                    <div
+                      key={stat.label}
+                      className="text-center p-3 rounded-xl bg-white/5"
+                    >
                       <div className="text-lg font-bold">{stat.value}</div>
-                      <div className="text-xs text-muted-foreground">{stat.label}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {stat.label}
+                      </div>
                     </div>
                   ))}
                 </div>
 
                 <div className="space-y-3">
                   {[
-                    { name: "Manhattan Condo", value: 45000, color: "bg-gold-500" },
-                    { name: "Miami Beachfront", value: 32000, color: "bg-blue-500" },
-                    { name: "Austin Tech Hub", value: 28000, color: "bg-purple-500" },
+                    {
+                      name: "Ikoyi Luxury Penthouse",
+                      value: 45000,
+                      color: "bg-gold-500",
+                    },
+                    {
+                      name: "VI Commercial Tower",
+                      value: 32000,
+                      color: "bg-blue-500",
+                    },
+                    {
+                      name: "Lekki Phase 1 Estate",
+                      value: 28000,
+                      color: "bg-purple-500",
+                    },
                   ].map((item) => (
                     <div key={item.name} className="space-y-1">
                       <div className="flex justify-between text-sm">
                         <span>{item.name}</span>
                         <span className="text-muted-foreground">
-                          ${(item.value / 1000).toFixed(0)}K
+                          {formatValue(item.value)}
                         </span>
                       </div>
                       <div className="h-2 rounded-full bg-white/10 overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
-                          animate={{ width: `${(item.value / 45000) * 100}%` }}
+                          animate={{
+                            width: `${(item.value / 45000) * 100}%`,
+                          }}
                           transition={{ duration: 1, delay: 0.8 }}
                           className={`h-full rounded-full ${item.color}`}
                         />
