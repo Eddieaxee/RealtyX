@@ -1,0 +1,18 @@
+/*
+  Component-level styles for PropertiesPreview.
+  Most styling is handled by Tailwind classes.
+*/
+
+/* gold gradient helper (safe even if class never used elsewhere) */
+.gradient-gold {
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+}
+
+/* progress fill defaults (used by progress-fill element) */
+.progress-fill {
+  background: linear-gradient(
+    90deg,
+    rgba(245, 158, 11, 0.9),
+    rgba(251, 191, 36, 0.95)
+  );
+}
