@@ -54,6 +54,7 @@ export const authConfig = {
       if (
         pathname === "/" ||
         pathname.startsWith("/api/auth") ||
+        pathname.startsWith("/api/contact") ||
         pathname.startsWith("/_next") ||
         pathname.startsWith("/images") ||
         pathname.startsWith("/icons") ||
@@ -64,6 +65,13 @@ export const authConfig = {
         pathname.startsWith("/properties") ||
         pathname.startsWith("/education") ||
         pathname.startsWith("/trust") ||
+        pathname.startsWith("/contact") ||
+        pathname.startsWith("/faq") ||
+        pathname.startsWith("/blog") ||
+        pathname.startsWith("/getting-started") ||
+        pathname.startsWith("/privacy") ||
+        pathname.startsWith("/terms") ||
+        pathname.startsWith("/compliance") ||
         pathname.startsWith("/auth")
       ) {
         return true;

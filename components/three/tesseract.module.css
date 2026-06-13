@@ -1,0 +1,13 @@
+/* Tesseract fallback animation styles */
+.outerRing {
+  animation-duration: 8s;
+}
+
+.outerRingReverse {
+  animation-duration: 8s;
+  animation-direction: reverse;
+}
+
+.innerRing {
+  animation-duration: 6s;
+}

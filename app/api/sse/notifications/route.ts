@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
@@ -21,8 +19,15 @@ export async function GET(req: Request) {
 
       let lastCreatedAt = new Date(0);
 
+      // Initial connection event
       send({ type: "connected", message: "SSE connection established" });
 
+      // Heartbeat every 15s to keep connection alive
+      const heartbeat = setInterval(() => {
+        controller.enqueue(encoder.encode(": keep-alive\n\n"));
+      }, 15000);
+
+      // Poll for new notifications every 30s
       const interval = setInterval(async () => {
         try {
           const notifications = await prisma.notification.findMany({
@@ -49,12 +54,14 @@ export async function GET(req: Request) {
             });
           }
         } catch {
-          // Keep SSE alive; retry next tick.
+          // swallow errors, retry next tick
         }
       }, 30000);
 
+      // Cleanup when client disconnects
       req.signal.addEventListener("abort", () => {
         clearInterval(interval);
+        clearInterval(heartbeat);
         controller.close();
       });
     },

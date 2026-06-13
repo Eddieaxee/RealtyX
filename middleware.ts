@@ -1,28 +1,23 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import NextAuth from "next-auth";
+import { authConfig } from "./lib/auth.config";
 
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+/**
+ * Auth.js v5 official middleware pattern.
+ * Uses the `authorized` callback from authConfig to handle route protection.
+ * This eliminates manual cookie checking and prevents the request waterfalling issue.
+ */
+export default NextAuth(authConfig).auth;
 
-  // Simple session check using NextAuth session token
-  const hasSession =
-    request.cookies.has("next-auth.session-token") ||
-    request.cookies.has("__Secure-next-auth.session-token");
-
-  // Protect dashboard routes for unauthenticated users
-  if (pathname.startsWith("/dashboard") && !hasSession) {
-    return NextResponse.redirect(new URL("/auth/signin", request.url));
-  }
-
-  // Protect admin routes
-  if (pathname.startsWith("/admin") && !hasSession) {
-    return NextResponse.redirect(new URL("/auth/signin", request.url));
-  }
-
-  return NextResponse.next();
-}
-
-// Exclusion block for safe package rendering
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|assets|public).*)"],
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - api/auth (NextAuth API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization)
+     * - favicon.ico (favicon)
+     * - public assets
+     */
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|assets|public).*)",
+  ],
 };

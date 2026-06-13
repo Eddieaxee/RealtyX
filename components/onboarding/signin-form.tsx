@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Building2, Mail, Lock, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Building2, Mail, Lock, ArrowRight, ShieldCheck, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -16,6 +16,7 @@ export function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (searchParams.get("registered") === "true") {
@@ -23,6 +24,9 @@ export function SignInForm() {
     }
     if (searchParams.get("error") === "SessionRequired") {
       setError("Active authorization token expired. Please re-authenticate.");
+    }
+    if (searchParams.get("error") === "CredentialsSignin") {
+      setError("Invalid credentials. Please verify your email and password.");
     }
   }, [searchParams]);
 
@@ -46,8 +50,9 @@ export function SignInForm() {
           setError("Invalid cryptographic parameters or unauthorized email identity signature.");
         }
       } else {
-        router.push("/dashboard");
-        router.refresh();
+        // Force a hard navigation to /dashboard to trigger a fresh server-side session read.
+        // This prevents the infinite auth loop caused by client-side re-renders.
+        window.location.assign("/dashboard");
       }
     } catch {
       setError("Core network communication failure. Please verify connection rails.");
@@ -149,19 +154,26 @@ export function SignInForm() {
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
                 <Input 
-                  type="password" 
+                  type={showPassword ? "text" : "password"} 
                   placeholder="••••••••" 
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)} 
-                  className="pl-11 bg-[#13161C] border-neutral-800 text-white placeholder:text-neutral-600 focus:border-[#E2B93B] focus:ring-[#E2B93B]/10 h-11 rounded-xl transition-all"
+                  className="pl-11 pr-11 bg-[#13161C] border-neutral-800 text-white placeholder:text-neutral-600 focus:border-[#E2B93B] focus:ring-[#E2B93B]/10 h-11 rounded-xl transition-all"
                   required 
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
             <Button 
               type="submit" 
-              className="w-full h-11 bg-gradient-to-r from-[#E2B93B] to-[#B89221] hover:from-[#f3c94a] hover:to-[#cb21] text-[#090A0C] font-semibold rounded-xl shadow-lg shadow-[#E2B93B]/5 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-11 bg-gradient-to-r from-[#E2B93B] to-[#B89221] hover:from-[#f3c94a] hover:to-[#cbab3a] text-[#090A0C] font-semibold rounded-xl shadow-lg shadow-[#E2B93B]/5 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
               {isLoading ? "Verifying Identity Tokens..." : "Sign In to Secure Session"}

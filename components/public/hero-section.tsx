@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, TrendingUp, Users } from "lucide-react";
-import { ParticleField } from "@/components/three/particle-field";
+import { Tesseract } from "@/components/three/tesseract";
 import { useCurrency } from "@/context/currency-context";
 
 export function HeroSection() {
@@ -14,11 +14,6 @@ export function HeroSection() {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
-
-      {/* Particle field */}
-      <div className="absolute inset-0 opacity-40">
-        <ParticleField />
-      </div>
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20">
@@ -87,11 +82,21 @@ export function HeroSection() {
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="relative hidden lg:block"
+            className="relative hidden lg:flex items-center justify-center"
           >
-            <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-r from-gold-500/20 to-primary/20 rounded-3xl blur-2xl" />
-              <div className="relative glass rounded-3xl p-8 space-y-6">
+            {/* 3D Tesseract - Interactive rotating hypercube */}
+            <div className="relative w-full h-[500px]">
+              <div className="absolute -inset-4 bg-gradient-to-r from-gold-500/10 to-primary/10 rounded-3xl blur-2xl" />
+              <div className="relative w-full h-full rounded-3xl overflow-hidden">
+                <Tesseract />
+              </div>
+              {/* Floating portfolio overlay */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.2 }}
+                className="absolute bottom-6 left-6 right-6 glass rounded-2xl p-5 space-y-3 backdrop-blur-xl bg-white/5 border border-white/10"
+              >
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">
                     Portfolio Value
@@ -100,65 +105,20 @@ export function HeroSection() {
                     +18.4%
                   </span>
                 </div>
-                <div className="text-4xl font-bold">{formatValue(142850)}</div>
-
-                <div className="grid grid-cols-3 gap-4">
+                <div className="text-3xl font-bold">{formatValue(142850)}</div>
+                <div className="grid grid-cols-3 gap-3">
                   {[
                     { label: "Properties", value: "6" },
                     { label: "Tokens", value: "8.4K" },
                     { label: "Yield", value: "12.5%" },
                   ].map((stat) => (
-                    <div
-                      key={stat.label}
-                      className="text-center p-3 rounded-xl bg-white/5"
-                    >
-                      <div className="text-lg font-bold">{stat.value}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {stat.label}
-                      </div>
+                    <div key={stat.label} className="text-center p-2 rounded-lg bg-white/5">
+                      <div className="text-sm font-bold">{stat.value}</div>
+                      <div className="text-[10px] text-muted-foreground">{stat.label}</div>
                     </div>
                   ))}
                 </div>
-
-                <div className="space-y-3">
-                  {[
-                    {
-                      name: "Ikoyi Luxury Penthouse",
-                      value: 45000,
-                      color: "bg-gold-500",
-                    },
-                    {
-                      name: "VI Commercial Tower",
-                      value: 32000,
-                      color: "bg-blue-500",
-                    },
-                    {
-                      name: "Lekki Phase 1 Estate",
-                      value: 28000,
-                      color: "bg-purple-500",
-                    },
-                  ].map((item) => (
-                    <div key={item.name} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span>{item.name}</span>
-                        <span className="text-muted-foreground">
-                          {formatValue(item.value)}
-                        </span>
-                      </div>
-                      <div className="h-2 rounded-full bg-white/10 overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{
-                            width: `${(item.value / 45000) * 100}%`,
-                          }}
-                          transition={{ duration: 1, delay: 0.8 }}
-                          className={`h-full rounded-full ${item.color}`}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>

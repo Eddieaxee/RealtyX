@@ -17,10 +17,11 @@ import { Footer } from "@/components/layout/footer";
  */
 export default function HomePage() {
   return (
-    <div className="relative min-h-screen bg-[#030712] text-slate-100 selection:bg-emerald-500/30 selection:text-emerald-400 overflow-x-hidden antialiased">
-      {/* Ambient background institutional gradient layers to eliminate flat "empty card" visual aesthetics */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-gradient-to-b from-emerald-500/5 via-transparent to-transparent pointer-events-none blur-3xl z-0" />
-      <div className="absolute top-[1200px] right-0 w-96 h-96 bg-blue-500/5 pointer-events-none blur-3xl z-0" />
+    <div className="relative min-h-screen bg-[#030712] text-slate-100 selection:bg-[#E2B93B]/30 selection:text-[#E2B93B] overflow-x-hidden antialiased noise-overlay">
+      {/* Ambient background institutional gradient layers */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-gradient-to-b from-[#E2B93B]/[0.04] via-transparent to-transparent pointer-events-none blur-3xl z-0" />
+      <div className="absolute top-[1200px] right-0 w-96 h-96 bg-blue-500/[0.03] pointer-events-none blur-3xl z-0" />
+      <div className="absolute top-[2400px] left-0 w-[500px] h-[500px] bg-purple-500/[0.02] pointer-events-none blur-3xl z-0" />
       
       {/* Sticky Global Navigation with real routes & currency preference contextual hooks */}
       <PublicNav />

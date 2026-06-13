@@ -88,7 +88,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth(); // Fetch session server-side
+  let session = null;
+  try {
+    session = await auth();
+  } catch {
+    // Gracefully handle auth errors during build or when DB is unavailable
+    session = null;
+  }
 
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
@@ -97,14 +103,12 @@ export default async function RootLayout({
       >
         <Providers>
           <CurrencyProvider>
-            {/* Inject the listener only if the user is authenticated */}
             <Toaster position="top-right" richColors theme="dark" />
             {session?.user?.id && (
               <KYCStatusListener userId={session.user.id} />
             )}
 
             {children}
-            <Toaster />
           </CurrencyProvider>
         </Providers>
         <Analytics />

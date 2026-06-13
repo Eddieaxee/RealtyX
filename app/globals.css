@@ -64,11 +64,11 @@
 }
 
 /* Generic border reset to approximate `border-border` utility */
-* {
+/* * {
   border-color: hsl(var(--border));
   border-width: 1px;
   border-style: solid;
-}
+} */
 
 body {
   background-color: hsl(var(--background));
@@ -169,4 +169,229 @@ body {
 .progress-fill {
   width: var(--progress-width, 0%);
   transition: width 0.5s ease;
+}
+
+/* Progress bar fill classes for properties grid */
+.progress-fill-0 { width: 0%; }
+.progress-fill-5 { width: 5%; }
+.progress-fill-10 { width: 10%; }
+.progress-fill-15 { width: 15%; }
+.progress-fill-20 { width: 20%; }
+.progress-fill-25 { width: 25%; }
+.progress-fill-30 { width: 30%; }
+.progress-fill-35 { width: 35%; }
+.progress-fill-40 { width: 40%; }
+.progress-fill-45 { width: 45%; }
+.progress-fill-50 { width: 50%; }
+.progress-fill-55 { width: 55%; }
+.progress-fill-60 { width: 60%; }
+.progress-fill-65 { width: 65%; }
+.progress-fill-70 { width: 70%; }
+.progress-fill-75 { width: 75%; }
+.progress-fill-80 { width: 80%; }
+.progress-fill-85 { width: 85%; }
+.progress-fill-90 { width: 90%; }
+.progress-fill-95 { width: 95%; }
+.progress-fill-100 { width: 100%; }
+
+/* Line clamp utility */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Animation utilities */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slide-in-from-top-1 {
+  from { transform: translateY(-0.25rem); }
+  to { transform: translateY(0); }
+}
+.animate-in {
+  animation: fade-in 0.2s ease-out, slide-in-from-top-1 0.2s ease-out;
+}
+
+/* ========================================
+   Premium Animation Keyframes
+   ======================================== */
+
+/* Smooth float animation for cards and elements */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Gentle pulse glow effect */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(226, 185, 59, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(226, 185, 59, 0.2);
+  }
+}
+
+/* Subtle gradient shift for backgrounds */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Scale-in entrance animation */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Rotate-subtle for decorative elements */
+@keyframes rotate-subtle {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Border gradient animation */
+@keyframes border-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ========================================
+   Utility Classes for Premium Effects
+   ======================================== */
+
+/* Floating animation utility */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Pulse glow utility */
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Gradient shift utility */
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* Scale-in utility */
+.animate-scale-in {
+  animation: scale-in 0.5s ease-out forwards;
+}
+
+/* Smooth glass hover effect */
+.glass-hover {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-hover:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Card tilt effect on hover (CSS-only, no JS needed) */
+.card-tilt {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.card-tilt:hover {
+  transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) translateY(-4px);
+}
+
+/* Premium button glow */
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+}
+.btn-glow::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(226, 185, 59, 0.15) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.btn-glow:hover::after {
+  opacity: 1;
+}
+
+/* Smooth text reveal */
+.text-reveal {
+  background: linear-gradient(to right, rgba(226, 185, 59, 1), rgba(243, 201, 74, 1));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+  animation: gradient-shift 4s linear infinite;
+}
+
+/* Noise texture overlay for premium feel */
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Smooth section transitions */
+section {
+  position: relative;
+}
+
+/* Premium focus states for accessibility */
+*:focus-visible {
+  outline: 2px solid rgba(226, 185, 59, 0.5);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

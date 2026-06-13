@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Building2, Linkedin, Mail } from "lucide-react";
+import { Building2, Linkedin, Mail, ArrowUpRight } from "lucide-react";
 
-// Realigned links mapping perfectly to your current layout system dashboard paths
 const footerLinks = {
   Platform: [
     { label: "Browse Properties", href: "/properties" },
@@ -15,25 +14,25 @@ const footerLinks = {
     { label: "About Us", href: "/about" },
     { label: "Education Hub", href: "/education" },
     { label: "Trust & Security", href: "/trust" },
-    { label: "Contact", href: "mailto:contact@realtyx.co" },
+    { label: "Contact", href: "/contact" },
   ],
   Resources: [
     { label: "Properties", href: "/properties" },
-    { label: "Getting Started", href: "/education" },
-    { label: "FAQ", href: "/about" },
-    { label: "Blog", href: "/education" },
+    { label: "Getting Started", href: "/getting-started" },
+    { label: "FAQ", href: "/faq" },
+    { label: "Blog", href: "/blog" },
   ],
   Legal: [
-    { label: "Privacy Policy", href: "/trust" },
-    { label: "Terms of Service", href: "/trust" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms of Service", href: "/terms" },
     { label: "Trust & Security", href: "/trust" },
-    { label: "Compliance", href: "/trust" },
+    { label: "Compliance", href: "/compliance" },
   ],
 };
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/50 bg-card/30">
+    <footer className="border-t border-border/50 bg-[#06080C]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
           <div className="col-span-2">
@@ -50,14 +49,13 @@ export function Footer() {
               intelligent, and accessible.
             </p>
 
-            {/* FIXED: Replaced raw '#' anchors to valid external target safety footprints */}
             <div className="flex items-center gap-4">
               <a
                 href="https://twitter.com/realtyx"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Twitter (opens in new tab)"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-muted-foreground hover:text-[#E2B93B] transition-colors"
               >
                 <svg
                   className="w-5 h-5"
@@ -73,7 +71,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 title="GitHub (opens in new tab)"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-muted-foreground hover:text-[#E2B93B] transition-colors"
               >
                 <svg
                   className="w-5 h-5"
@@ -89,14 +87,14 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 title="LinkedIn (opens in new tab)"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-muted-foreground hover:text-[#E2B93B] transition-colors"
               >
                 <Linkedin className="w-5 h-5" />
               </a>
               <a
                 href="mailto:contact@realtyx.co"
                 title="Email contact@realtyx.co"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-muted-foreground hover:text-[#E2B93B] transition-colors"
               >
                 <Mail className="w-5 h-5" />
               </a>
@@ -105,15 +103,16 @@ export function Footer() {
 
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h4 className="font-semibold mb-4">{category}</h4>
+              <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-[#E2B93B]/80">{category}</h4>
               <ul className="space-y-3">
                 {links.map((link) => (
-                  <li key={link.href}>
+                  <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="text-sm text-muted-foreground hover:text-[#E2B93B] transition-colors flex items-center gap-1 group"
                     >
                       {link.label}
+                      <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-0.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all" />
                     </Link>
                   </li>
                 ))}
@@ -122,7 +121,6 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Updated timestamp array metrics anchor */}
         <div className="mt-16 pt-8 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
             © 2026 RealtyX. All rights reserved.
@@ -130,9 +128,9 @@ export function Footer() {
           <div className="flex items-center gap-6">
             <span className="text-xs text-muted-foreground">Powered by</span>
             <div className="flex items-center gap-3">
-              <span className="text-xs font-medium">Ethereum</span>
-              <span className="text-xs font-medium">Base</span>
-              <span className="text-xs font-medium">Polygon</span>
+              <span className="text-xs font-medium px-2 py-0.5 rounded bg-white/5 text-muted-foreground">Ethereum</span>
+              <span className="text-xs font-medium px-2 py-0.5 rounded bg-white/5 text-muted-foreground">Base</span>
+              <span className="text-xs font-medium px-2 py-0.5 rounded bg-white/5 text-muted-foreground">Polygon</span>
             </div>
           </div>
         </div>

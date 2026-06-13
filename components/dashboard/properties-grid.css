@@ -1,0 +1,35 @@
+/* Shared styles for PropertiesGrid component (tailwind-heavy). */
+
+/* progress-fill classes are generated dynamically in TS as progress-fill-0..100.
+   Provide a safe fallback to ensure styling exists even if class names vary. */
+.progress-fill-0,
+.progress-fill-5,
+.progress-fill-10,
+.progress-fill-15,
+.progress-fill-20,
+.progress-fill-25,
+.progress-fill-30,
+.progress-fill-35,
+.progress-fill-40,
+.progress-fill-45,
+.progress-fill-50,
+.progress-fill-55,
+.progress-fill-60,
+.progress-fill-65,
+.progress-fill-70,
+.progress-fill-75,
+.progress-fill-80,
+.progress-fill-85,
+.progress-fill-90,
+.progress-fill-95,
+.progress-fill-100 {
+  /* Fallback gradient if Tailwind-generated classes are missing. */
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* If any legacy class names are referenced elsewhere */
+.gradient-gold {
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+}
