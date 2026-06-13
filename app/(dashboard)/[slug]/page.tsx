@@ -109,7 +109,7 @@ export default function DynamicPublicPages({ params }: PageProps) {
               <ArrowLeft className="mr-1.5 w-3.5 h-3.5" /> Back to Home
             </Button>
           </Link>
-          <Link href="/dashboard/portal" passHref legacyBehavior>
+<Link href="/portal" passHref legacyBehavior>
             <Button
               size="sm"
               className="bg-[#E2B93B] text-black hover:bg-[#B89221] font-mono font-bold text-xs rounded-xl h-9"

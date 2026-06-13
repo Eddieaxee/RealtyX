@@ -205,7 +205,7 @@ export function PropertiesGrid({
                   {formatValue(property.tokenPrice)}
                 </div>
               </div>
-              <Link href={`/dashboard/invest/${property.id}`}>
+<Link href={`/invest/${property.id}`}>
                 <Button
                   size="sm"
                   className="bg-gradient-to-r from-[#E2B93B] to-[#B89221] hover:from-[#B89221] hover:to-[#917116] text-black font-bold text-xs px-4 rounded-xl shadow-lg transition-all duration-200 group/btn"

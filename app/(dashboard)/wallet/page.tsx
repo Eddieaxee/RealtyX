@@ -115,7 +115,7 @@ export default function WalletPage() {
                     asChild
                     className="bg-gradient-to-r from-[#E2B93B] to-[#B89221] text-black font-bold rounded-xl h-10 px-5 shadow-lg shadow-[#E2B93B]/5"
                   >
-                    <Link href="/dashboard/kyc">Complete KYC</Link>
+<Link href="/kyc">Complete KYC</Link>
                   </Button>
 
                   <Button

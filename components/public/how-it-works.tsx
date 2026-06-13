@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { UserCheck, Wallet, Building2, TrendingUp } from "lucide-react";
+import styles from "./how-it-works.module.css";
 
 const steps = [
   {
@@ -57,16 +58,23 @@ function StepCard({ item, index }: { item: (typeof steps)[0]; index: number }) {
         delay: index * 0.15,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
-      style={{ perspective: "800px" }}
-      className="relative group"
+      className={`relative group ${styles.stepCard}`}
+      style={{
+        "--item-color": item.color,
+        "--item-color-15": `${item.color}15`,
+        "--item-color-08": `${item.color}08`,
+        "--item-color-20": `${item.color}20`,
+        "--item-color-30": `${item.color}30`,
+        "--item-color-00": `${item.color}00`,
+        "--item-color-10": `${item.color}10`,
+        "--item-color-cc": `${item.color}cc`,
+        "--item-color-25": `${item.color}25`,
+      } as React.CSSProperties}
     >
       <div className="relative p-6 sm:p-8 rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm text-center overflow-hidden transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.04]">
         {/* Hover glow */}
         <div
-          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-          style={{
-            background: `radial-gradient(circle at 50% 30%, ${item.color}15, transparent 70%)`,
-          }}
+          className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ${styles.hoverGlow}`}
         />
 
         {/* Step number - large background */}
@@ -77,27 +85,17 @@ function StepCard({ item, index }: { item: (typeof steps)[0]; index: number }) {
         <div className="relative z-10">
           {/* Icon */}
           <motion.div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 transition-all duration-500 group-hover:scale-110"
-            style={{
-              background: `linear-gradient(135deg, ${item.color}20, ${item.color}08)`,
-              border: `1px solid ${item.color}30`,
-              boxShadow: `0 0 0 0 ${item.color}00`,
-            }}
+            className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 transition-all duration-500 group-hover:scale-110 ${styles.iconWrapper}`}
             whileHover={{
-              boxShadow: `0 8px 32px ${item.color}25`,
+              boxShadow: `0 8px 32px var(--item-color-25)`,
             }}
           >
-            <item.icon className="w-7 h-7" style={{ color: item.color }} />
+            <item.icon className={`w-7 h-7 ${styles.iconColor}`} />
           </motion.div>
 
           {/* Step badge */}
           <div
-            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4"
-            style={{
-              background: `${item.color}10`,
-              color: `${item.color}cc`,
-              border: `1px solid ${item.color}20`,
-            }}
+            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 ${styles.stepBadge}`}
           >
             Step {item.step}
           </div>

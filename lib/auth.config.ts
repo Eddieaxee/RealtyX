@@ -90,7 +90,15 @@ export const authConfig = {
         pathname.startsWith("/wallet") ||
         pathname.startsWith("/ai-assistant") ||
         pathname.startsWith("/transactions") ||
-        pathname.startsWith("/settings")
+        pathname.startsWith("/settings") ||
+        pathname.startsWith("/earnings") ||
+        pathname.startsWith("/capital-calls") ||
+        pathname.startsWith("/secondary") ||
+        pathname.startsWith("/property-management") ||
+        pathname.startsWith("/kyc") ||
+        pathname.startsWith("/notifications") ||
+        pathname.startsWith("/portal") ||
+        pathname.startsWith("/docs")
       ) {
         return isAuthenticated;
       }

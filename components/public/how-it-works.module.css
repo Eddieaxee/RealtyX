@@ -1,0 +1,28 @@
+/* Step card perspective */
+.stepCard {
+  perspective: 800px;
+}
+
+/* Hover glow gradient - uses --item-color CSS variable */
+.hoverGlow {
+  background: radial-gradient(circle at 50% 30%, var(--item-color-15), transparent 70%);
+}
+
+/* Icon wrapper with dynamic gradient and border */
+.iconWrapper {
+  background: linear-gradient(135deg, var(--item-color-20), var(--item-color-08));
+  border: 1px solid var(--item-color-30);
+  box-shadow: 0 0 0 0 var(--item-color-00);
+}
+
+/* Icon color */
+.iconColor {
+  color: var(--item-color);
+}
+
+/* Step badge with dynamic colors */
+.stepBadge {
+  background: var(--item-color-10);
+  color: var(--item-color-cc);
+  border: 1px solid var(--item-color-20);
+}

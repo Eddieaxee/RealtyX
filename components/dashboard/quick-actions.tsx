@@ -5,9 +5,9 @@ import { Building2, Wallet, Bot, ArrowRight, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const actions = [
-  { href: "/dashboard/invest", label: "Acquire Fractional Units", icon: Building2, description: "Capital allocation terminal" },
-  { href: "/dashboard/wallet", label: "Liquidity Injection", icon: Wallet, description: "Deposit or clear yield balances" },
-  { href: "/dashboard/ai-assistant", label: "Predictive Analytics", icon: Bot, description: "Consult risk evaluation modeling" },
+  { href: "/invest", label: "Acquire Fractional Units", icon: Building2, description: "Capital allocation terminal" },
+  { href: "/wallet", label: "Liquidity Injection", icon: Wallet, description: "Deposit or clear yield balances" },
+  { href: "/ai-assistant", label: "Predictive Analytics", icon: Bot, description: "Consult risk evaluation modeling" },
 ];
 
 export function QuickActions() {

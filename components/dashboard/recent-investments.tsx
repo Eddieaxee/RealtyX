@@ -24,7 +24,7 @@ export function RecentInvestments() {
           <h2 className="text-lg font-bold text-white tracking-tight">Active Holdings Ledger</h2>
           <p className="text-xs text-neutral-400 mt-0.5">Live monitoring of premium fractionized placement assets.</p>
         </div>
-        <Link href="/dashboard/portfolio">
+<Link href="/portfolio">
           <Button variant="ghost" size="sm" className="group text-xs text-[#E2B93B] hover:text-[#B89221] hover:bg-white/5 rounded-xl transition-all">
             Inspect Ledger
             <ArrowRight className="ml-1.5 w-3.5 h-3.5 group-hover:translate-x-1 transition-transform stroke-[2.5]" />

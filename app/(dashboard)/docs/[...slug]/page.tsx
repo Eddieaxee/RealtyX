@@ -89,7 +89,7 @@ console.log(\`Node connected: \${connection.latency}ms\`);`}
         </div>
 
         <div className="pt-4 border-t border-white/5">
-          <Link href="/dashboard/portal" passHref legacyBehavior>
+          <Link href="/portal" passHref legacyBehavior>
             <Button className="bg-[#E2B93B] text-black hover:bg-[#B89221] font-mono font-bold text-xs uppercase tracking-wider h-10 rounded-xl px-6">
               Return to Console App
             </Button>

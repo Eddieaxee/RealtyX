@@ -48,6 +48,7 @@ export function AdminNav() {
           <div className="relative">
             <button
               onClick={() => setShowNotifs(!showNotifs)}
+              aria-label="View notifications"
               className="relative p-2 rounded-xl hover:bg-white/5 transition-colors"
             >
               <Bell className="w-4 h-4 text-neutral-400" />
@@ -59,15 +60,34 @@ export function AdminNav() {
                   Platform Alerts
                 </h4>
                 {[
-                  { text: "New KYC submission requires review", time: "2m ago", color: "text-amber-400" },
-                  { text: "Large investment: $50,000 detected", time: "15m ago", color: "text-emerald-400" },
-                  { text: "System backup completed successfully", time: "1h ago", color: "text-blue-400" },
+                  {
+                    text: "New KYC submission requires review",
+                    time: "2m ago",
+                    color: "text-amber-400",
+                  },
+                  {
+                    text: "Large investment: $50,000 detected",
+                    time: "15m ago",
+                    color: "text-emerald-400",
+                  },
+                  {
+                    text: "System backup completed successfully",
+                    time: "1h ago",
+                    color: "text-blue-400",
+                  },
                 ].map((n, i) => (
-                  <div key={i} className="flex items-start gap-3 p-2 rounded-lg hover:bg-white/5">
-                    <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${n.color}`} />
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 p-2 rounded-lg hover:bg-white/5"
+                  >
+                    <div
+                      className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${n.color}`}
+                    />
                     <div>
                       <p className="text-xs text-white">{n.text}</p>
-                      <p className="text-[10px] text-neutral-500 font-mono mt-0.5">{n.time}</p>
+                      <p className="text-[10px] text-neutral-500 font-mono mt-0.5">
+                        {n.time}
+                      </p>
                     </div>
                   </div>
                 ))}

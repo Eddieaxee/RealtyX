@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { Activity, TrendingUp } from "lucide-react";
+import styles from "./platform-activity.module.css";
 
 const data = [
   { day: "Mon", users: 120, investments: 45, volume: 280000 },
@@ -20,7 +21,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <div className="bg-[#13161C] border border-white/10 rounded-xl p-3 shadow-2xl">
         <p className="text-xs font-bold text-white mb-1">{label}</p>
         {payload.map((entry: any, index: number) => (
-          <p key={index} className="text-[10px] font-mono" style={{ color: entry.color }}>
+          <p key={index} className={`text-[10px] font-mono ${styles.tooltipValue}`} style={{ "--tooltip-color": entry.color } as React.CSSProperties}>
             {entry.name}: {entry.value.toLocaleString()}
           </p>
         ))}

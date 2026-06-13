@@ -64,7 +64,7 @@ export default async function DashboardPage() {
           </div>
           {userRecord?.status !== "PENDING" && (
             <Link
-              href="/dashboard/kyc"
+              href="/kyc"
               className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#E2B93B] hover:text-[#B89221] bg-[#E2B93B]/10 hover:bg-[#E2B93B]/20 px-3 py-2 rounded-lg transition-all self-start sm:self-center shrink-0"
             >
               Complete Verification <ChevronRight className="w-3.5 h-3.5" />

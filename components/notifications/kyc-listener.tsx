@@ -33,7 +33,7 @@ export function KYCStatusListener({ userId }: { userId: string }) {
           duration: 8000,
           action: {
             label: "View Dashboard",
-            onClick: () => (window.location.href = "/dashboard/kyc"),
+onClick: () => (window.location.href = "/kyc"),
           },
         });
       } catch {

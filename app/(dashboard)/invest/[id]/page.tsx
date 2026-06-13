@@ -108,7 +108,7 @@ export default function PropertyDetailPage() {
     return styles[`progress-w-${pct}`] ?? "";
   }, [completionPercentage]);
 
-  const backHref = "/dashboard/invest";
+  const backHref = "/invest";
 
   return (
     <div className="min-h-screen text-white bg-[#090A0C] py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">

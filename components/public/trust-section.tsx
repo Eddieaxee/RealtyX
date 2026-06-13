@@ -10,6 +10,7 @@ import {
   Server,
   Fingerprint,
 } from "lucide-react";
+import styles from "./trust-section.module.css";
 
 const trustItems = [
   {
@@ -75,6 +76,13 @@ function TrustCard({ item, index }: { item: (typeof trustItems)[0]; index: numbe
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
       className="group"
+      style={{
+        "--item-color": item.color,
+        "--item-color-10": `${item.color}10`,
+        "--item-color-15": `${item.color}15`,
+        "--item-color-08": `${item.color}08`,
+        "--item-color-25": `${item.color}25`,
+      } as React.CSSProperties}
     >
       <motion.div
         className="relative flex items-start gap-4 p-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm overflow-hidden transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.04]"
@@ -83,21 +91,14 @@ function TrustCard({ item, index }: { item: (typeof trustItems)[0]; index: numbe
       >
         {/* Hover glow */}
         <div
-          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-          style={{
-            background: `radial-gradient(circle at 20% 50%, ${item.color}10, transparent 60%)`,
-          }}
+          className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ${styles.hoverGlow}`}
         />
 
         <div className="relative z-10 shrink-0">
           <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:scale-110"
-            style={{
-              background: `linear-gradient(135deg, ${item.color}15, ${item.color}08)`,
-              border: `1px solid ${item.color}25`,
-            }}
+            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 ${styles.iconWrapper}`}
           >
-            <item.icon className="w-5 h-5" style={{ color: item.color }} />
+            <item.icon className={`w-5 h-5 ${styles.iconColor}`} />
           </div>
         </div>
 
