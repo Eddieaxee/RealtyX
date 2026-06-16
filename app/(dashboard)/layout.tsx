@@ -20,6 +20,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { LogoutButton } from "@/components/layout/logout-button";
 
 // Grouped sidebar navigation for the investor workspace
 const navSections = [
@@ -27,8 +28,7 @@ const navSections = [
     label: "Portfolio",
     items: [
       { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-      { name: "Properties", href: "/properties", icon: Building2 },
-      { name: "Invest", href: "/invest", icon: CreditCard },
+      { name: "Properties", href: "/invest", icon: Building2 },
       { name: "Portfolio", href: "/portfolio", icon: TrendingUp },
       { name: "Earnings", href: "/earnings", icon: DollarSign },
     ],
@@ -134,6 +134,9 @@ export default function DashboardLayout({
               pathname={pathname}
               onNavigate={() => setMobileOpen(false)}
             />
+            <div className="mt-4 pt-4 border-t border-white/5">
+              <LogoutButton />
+            </div>
           </aside>
         </div>
       )}
@@ -186,6 +189,7 @@ export default function DashboardLayout({
 
         {/* Bottom */}
         <div className="space-y-3 pt-4 border-t border-white/5">
+          <LogoutButton />
           <Link
             href="/"
             className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-neutral-400 hover:text-white hover:bg-white/[0.02] transition-all"

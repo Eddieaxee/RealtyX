@@ -7,6 +7,7 @@ import { PortfolioOverview } from "@/components/dashboard/portfolio-overview";
 import { RecentInvestments } from "@/components/dashboard/recent-investments";
 import { MarketInsights } from "@/components/dashboard/market-insights";
 import { QuickActions } from "@/components/dashboard/quick-actions";
+import { AIInsights } from "@/components/ai/ai-insights";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -75,6 +76,9 @@ export default async function DashboardPage() {
 
       {/* Core Analytic Data Presentation Area */}
       <PortfolioOverview />
+
+      {/* AI-Powered Diagnostic Insights */}
+      <AIInsights />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Core Relational Asset Data Block */}

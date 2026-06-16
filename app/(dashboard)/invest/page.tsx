@@ -4,76 +4,33 @@ import { useState, useMemo } from "react";
 import { InvestmentFilters } from "@/components/dashboard/investment-filters";
 import { PropertiesGrid } from "@/components/dashboard/properties-grid";
 import { ShieldCheck, Layers3 } from "lucide-react";
+import propertiesData from "@/data/properties.json";
 
-// Production mock dataset mapping the localized structure accurately
-const institutionalProperties = [
-  {
-    id: "eko-atlantic-alpha",
-    title: "Eko Atlantic High-Rise Alpha",
-    location: "Marina District, Victoria Island, Lagos",
-    region: "VI",
-    category: "COMMERCIAL",
-    lifecycle: "UNDER_CONSTRUCTION" as const,
-    currentMilestone: "Piling & Substructure",
-    image:
-      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80",
-    tokenPriceNGN: 50000,
-    expectedReturn: 16.4,
-    rentalYield: 9.2,
-    availableTokens: 14200,
-    totalTokens: 50000,
-    funded: 85,
-  },
-  {
-    id: "ikoyi-luxury-residences",
-    title: "Ikoyi Luxury Residential Tower",
-    location: "Old Ikoyi, Lagos",
-    region: "IKOYI",
-    category: "RESIDENTIAL",
-    lifecycle: "COMPLETED" as const,
-    image:
-      "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&q=80",
-    tokenPriceNGN: 100000,
-    expectedReturn: 14.8,
-    rentalYield: 8.1,
-    availableTokens: 4500,
-    totalTokens: 25000,
-    funded: 72,
-  },
-  {
-    id: "maitama-commercial-workspace",
-    title: "Maitama Corporate Suites",
-    location: "Maitama District, Abuja",
-    region: "ABUJA",
-    category: "COMMERCIAL",
-    lifecycle: "COMPLETED" as const,
-    image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
-    tokenPriceNGN: 75000,
-    expectedReturn: 13.2,
-    rentalYield: 7.8,
-    availableTokens: 18400,
-    totalTokens: 40000,
-    funded: 65,
-  },
-  {
-    id: "lekki-logistics-hub",
-    title: "Lekki Phase 1 Fulfillment Hub",
-    location: "Lekki Phase 1, Lagos",
-    region: "LEKKI",
-    category: "INFRASTRUCTURE",
-    lifecycle: "UNDER_CONSTRUCTION" as const,
-    currentMilestone: "Superstructure Framing",
-    image:
-      "https://images.unsplash.com/photo-1480796927426-f609979314bd?w=800&q=80",
-    tokenPriceNGN: 25000,
-    expectedReturn: 22.1,
-    rentalYield: 11.5,
-    availableTokens: 9600,
-    totalTokens: 80000,
-    funded: 88,
-  },
-];
+interface Property {
+  id: string;
+  title: string;
+  location: string;
+  region: string;
+  category: string;
+  lifecycle: string;
+  currentMilestone: string;
+  lat: number;
+  lng: number;
+  image: string;
+  images: string[];
+  tokenPriceUSD: number;
+  tokenPriceNGN: number;
+  totalValueNGN: number;
+  totalValueUSD: number;
+  expectedReturn: number;
+  rentalYield: number;
+  availableTokens: number;
+  totalTokens: number;
+  funded: number;
+  completionPercentage: number;
+  features: string[];
+  documents: string[];
+}
 
 export default function InvestPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,7 +38,8 @@ export default function InvestPage() {
   const [selectedLifecycle, setSelectedLifecycle] = useState("ALL");
   const [selectedRegion, setSelectedRegion] = useState("ALL");
 
-  // Core functional mapping filtering state changes immediately down to grid views
+  const institutionalProperties = propertiesData as Property[];
+
   const filteredProperties = useMemo(() => {
     return institutionalProperties.filter((property) => {
       const matchesSearch =
@@ -99,7 +57,25 @@ export default function InvestPage() {
         matchesSearch && matchesCategory && matchesLifecycle && matchesRegion
       );
     });
-  }, [searchQuery, selectedCategory, selectedLifecycle, selectedRegion]);
+  }, [searchQuery, selectedCategory, selectedLifecycle, selectedRegion, institutionalProperties]);
+
+  // Dynamic calculations for each property
+  const dynamicProperties = useMemo(() => {
+    return filteredProperties.map((p) => {
+      const tokenPriceUSD = p.tokenPriceUSD || 0;
+      const totalTokens = p.totalTokens || 0;
+      const totalValueUSD = totalTokens * tokenPriceUSD;
+      const fundedPercent = totalTokens > 0
+        ? Math.round(((totalTokens - (p.availableTokens || 0)) / totalTokens) * 100)
+        : 0;
+      return {
+        ...p,
+        tokenPrice: p.tokenPriceNGN,
+        totalValueUSD,
+        funded: fundedPercent,
+      };
+    });
+  }, [filteredProperties]);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 py-6 min-h-screen text-white bg-[#090A0C]">
@@ -138,10 +114,7 @@ export default function InvestPage() {
 
       {/* Pipeline Asset Grid */}
       <PropertiesGrid
-        properties={filteredProperties.map((p) => ({
-          ...p,
-          tokenPrice: p.tokenPriceNGN,
-        }))}
+        properties={dynamicProperties}
       />
     </div>
   );

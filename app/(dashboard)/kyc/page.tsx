@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ShieldCheck,
   UserCheck,
@@ -49,12 +49,39 @@ export default function KYCOnboardingPortal() {
     "RETAIL" | "HNW" | "INSTITUTIONAL"
   >("RETAIL");
 
-  // Documentation
-  const [uploadedFiles, setUploadedFiles] = useState({
-    identityDoc: false,
-    utilityBill: false,
-    selfie: false,
+  // Documentation - real file upload tracking
+  const [uploadedFiles, setUploadedFiles] = useState<{
+    identityDoc: File | null;
+    utilityBill: File | null;
+    selfie: File | null;
+  }>({
+    identityDoc: null,
+    utilityBill: null,
+    selfie: null,
   });
+  
+  const identityInputRef = useRef<HTMLInputElement>(null);
+  const utilityInputRef = useRef<HTMLInputElement>(null);
+  const selfieInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (target: "identityDoc" | "utilityBill" | "selfie") => {
+    const refs = {
+      identityDoc: identityInputRef,
+      utilityBill: utilityInputRef,
+      selfie: selfieInputRef,
+    };
+    refs[target].current?.click();
+  };
+
+  const handleFileChange = (target: "identityDoc" | "utilityBill" | "selfie", e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setUploadedFiles((prev) => ({
+        ...prev,
+        [target]: file,
+      }));
+    }
+  };
 
   // Address fields
   const [address, setAddress] = useState("");
@@ -509,6 +536,29 @@ export default function KYCOnboardingPortal() {
               </p>
             </div>
 
+            {/* Hidden file inputs */}
+            <input
+              ref={identityInputRef}
+              type="file"
+              accept="image/*,.pdf"
+              className="hidden"
+              onChange={(e) => handleFileChange("identityDoc", e)}
+            />
+            <input
+              ref={utilityInputRef}
+              type="file"
+              accept="image/*,.pdf"
+              className="hidden"
+              onChange={(e) => handleFileChange("utilityBill", e)}
+            />
+            <input
+              ref={selfieInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleFileChange("selfie", e)}
+            />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-5 rounded-xl bg-[#090A0C] border border-white/5 border-dashed flex flex-col items-center justify-center text-center space-y-3">
                 <UploadCloud className="w-8 h-8 text-neutral-500" />
@@ -520,9 +570,7 @@ export default function KYCOnboardingPortal() {
                 </div>
                 <Button
                   type="button"
-                  onClick={() =>
-                    setUploadedFiles((p) => ({ ...p, identityDoc: true }))
-                  }
+                  onClick={() => handleFileSelect("identityDoc")}
                   size="sm"
                   className={`font-mono text-xs h-8 rounded-lg ${
                     uploadedFiles.identityDoc
@@ -531,7 +579,7 @@ export default function KYCOnboardingPortal() {
                   }`}
                 >
                   {uploadedFiles.identityDoc
-                    ? "✓ ID Uploaded Successfully"
+                    ? `✓ ${uploadedFiles.identityDoc.name}`
                     : "Select Document File"}
                 </Button>
               </div>
@@ -548,9 +596,7 @@ export default function KYCOnboardingPortal() {
                 </div>
                 <Button
                   type="button"
-                  onClick={() =>
-                    setUploadedFiles((p) => ({ ...p, utilityBill: true }))
-                  }
+                  onClick={() => handleFileSelect("utilityBill")}
                   size="sm"
                   className={`font-mono text-xs h-8 rounded-lg ${
                     uploadedFiles.utilityBill
@@ -559,7 +605,7 @@ export default function KYCOnboardingPortal() {
                   }`}
                 >
                   {uploadedFiles.utilityBill
-                    ? "✓ Bill Uploaded Successfully"
+                    ? `✓ ${uploadedFiles.utilityBill.name}`
                     : "Select Utility File"}
                 </Button>
               </div>
@@ -576,9 +622,7 @@ export default function KYCOnboardingPortal() {
                 </div>
                 <Button
                   type="button"
-                  onClick={() =>
-                    setUploadedFiles((p) => ({ ...p, selfie: true }))
-                  }
+                  onClick={() => handleFileSelect("selfie")}
                   size="sm"
                   className={`font-mono text-xs h-8 rounded-lg ${
                     uploadedFiles.selfie
@@ -586,7 +630,9 @@ export default function KYCOnboardingPortal() {
                       : "bg-white/5 border border-white/10 text-white"
                   }`}
                 >
-                  {uploadedFiles.selfie ? "✓ Selfie Captured" : "Take Selfie"}
+                  {uploadedFiles.selfie
+                    ? `✓ ${uploadedFiles.selfie.name}`
+                    : "Take Selfie"}
                 </Button>
               </div>
             </div>

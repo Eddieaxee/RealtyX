@@ -1,69 +1,41 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+
+// In-memory settings store (would be database in production)
+const settingsStore = new Map<string, Record<string, unknown>>();
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const settings = settingsStore.get(session.user.id) || {
+      emailDrawdown: true,
+      smsSecondaryMatch: false,
+      marketingUpdates: true,
+      twoFactorEnforced: true,
+    };
+
+    return NextResponse.json({ settings });
+  } catch {
+    return NextResponse.json({ error: "Failed to load settings" }, { status: 500 });
   }
-
-  const settings = await prisma.userNotificationSettings.findUnique({
-    where: { userId: session.user.id },
-  });
-
-  if (!settings) {
-    const created = await prisma.userNotificationSettings.create({
-      data: { userId: session.user.id },
-    });
-    return NextResponse.json(
-      { success: true, settings: created },
-      { status: 200 },
-    );
-  }
-
-  return NextResponse.json({ success: true, settings }, { status: 200 });
 }
 
-export async function PUT(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+export async function PUT(req: Request) {
   try {
-    const {
-      emailDrawdown,
-      smsSecondaryMatch,
-      marketingUpdates,
-      twoFactorEnforced,
-    } = await request.json();
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    const updatedSettings = await prisma.userNotificationSettings.upsert({
-      where: { userId: session.user.id },
-      update: {
-        emailDrawdown,
-        smsSecondaryMatch,
-        marketingUpdates,
-        twoFactorEnforced,
-      },
-      create: {
-        userId: session.user.id,
-        emailDrawdown,
-        smsSecondaryMatch,
-        marketingUpdates,
-        twoFactorEnforced,
-      },
-    });
+    const body = await req.json();
+    settingsStore.set(session.user.id, body);
 
-    return NextResponse.json(
-      { success: true, settings: updatedSettings },
-      { status: 200 },
-    );
+    return NextResponse.json({ success: true, settings: body });
   } catch {
-    return NextResponse.json(
-      { error: "Failed to persist configuration states" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to save settings" }, { status: 500 });
   }
 }

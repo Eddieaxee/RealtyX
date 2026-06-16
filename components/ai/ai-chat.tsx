@@ -70,11 +70,27 @@ export function AIChat() {
         body: JSON.stringify({ messages: updatedMessages }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to generate AI response");
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error("Invalid response from AI service");
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        // Show the actual error message from the API
+        const errorMessage =
+          data?.content ||
+          data?.error ||
+          `AI service error (${response.status}). Please try again.`;
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: errorMessage,
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+        return;
+      }
 
       // 3. Append the real AI assistant response
       const assistantMessage: Message = {
@@ -91,13 +107,14 @@ export function AIChat() {
       console.error("AI Chat Error:", error);
 
       // Graceful user-facing error message fallback
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now().toString(),
           role: "assistant",
           content:
-            "Sorry, I'm having trouble connecting to the network right now. Please try your request again shortly.",
+            `Sorry, I'm having trouble connecting right now. ${errorMsg.includes("API key") ? "Please add your OPENAI_API_KEY to the .env file." : "Please try your request again shortly."}`,
         },
       ]);
     } finally {

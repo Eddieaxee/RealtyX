@@ -110,10 +110,14 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
   const formatValue = useCallback(
     (
-      amountInUSD: number,
+      amountInUSD: number | undefined | null,
       options?: { noSymbol?: boolean; digits?: number },
     ) => {
-      const converted = convertValue(amountInUSD);
+      const safeAmount =
+        typeof amountInUSD === "number" && isFinite(amountInUSD)
+          ? amountInUSD
+          : 0;
+      const converted = convertValue(safeAmount);
       const digits =
         options?.digits !== undefined
           ? options.digits
@@ -121,7 +125,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
             ? 2
             : 0;
 
-      const formattedNumber = converted.toLocaleString("en-NG", {
+      const formattedNumber = (converted || 0).toLocaleString("en-NG", {
         minimumFractionDigits: digits,
         maximumFractionDigits: digits,
       });

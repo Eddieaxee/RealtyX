@@ -298,22 +298,47 @@ export function PropertiesPreview() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2">
-                  <div>
-                    <div className="text-xs text-muted-foreground">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-2 rounded-lg bg-white/5">
+                    <div className="text-xs text-muted-foreground mb-1">
                       Token Price
                     </div>
-                    <div className="font-semibold">
+                    <div className="text-sm font-semibold">
                       {formatValue(property.tokenPriceUSD)}
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="p-2 rounded-lg bg-white/5">
+                    <div className="text-xs text-muted-foreground mb-1">
+                      Total Value
+                    </div>
+                    <div className="text-sm font-semibold text-[#E2B93B]">
+                      {formatValue(property.totalValueUSD)}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-2">
+                  <div>
                     <div className="text-xs text-muted-foreground">
-                      Available
+                      Available Tokens
                     </div>
                     <div className="font-semibold text-sm">
                       {property.availableTokens.toLocaleString()} /{" "}
                       {property.totalTokens.toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-muted-foreground">
+                      Funded
+                    </div>
+                    <div className="font-semibold text-sm text-green-400">
+                      {property.totalTokens > 0
+                        ? Math.round(
+                            ((property.totalTokens - property.availableTokens) /
+                              property.totalTokens) *
+                              100
+                          )
+                        : 0}
+                      %
                     </div>
                   </div>
                 </div>
@@ -330,7 +355,7 @@ export function PropertiesPreview() {
                 </div>
 
                 <Link
-                  href={`/properties/${property.id}`}
+                  href={`/auth/signup`}
                   aria-label={`Invest in ${property.title}`}
                 >
                   <Button className="w-full gradient-gold text-white hover:opacity-90">

@@ -9,9 +9,11 @@ import {
   Check,
   ExternalLink,
   Loader2,
+  Link2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCurrency } from "@/context/currency-context";
+import { useAccount, useBalance } from "wagmi";
 
 interface WalletData {
   id: string;
@@ -28,6 +30,10 @@ export function WalletBalance() {
   const [loading, setLoading] = useState(true);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const { formatValue } = useCurrency();
+  
+  // RainbowKit connected wallet state
+  const { address: connectedAddress, isConnected, chain } = useAccount();
+  const { data: balanceData } = useBalance({ address: connectedAddress });
 
   useEffect(() => {
     async function fetchWallets() {
@@ -47,10 +53,13 @@ export function WalletBalance() {
     fetchWallets();
   }, []);
 
-  const totalBalance = wallets.reduce(
-    (sum, w) => sum + (parseFloat(w.balance) || 0),
-    0,
-  );
+  // Compute total balance from both API wallets and RainbowKit connected wallet
+  const rainbowKitBalance = balanceData
+    ? parseFloat(balanceData.formatted) || 0
+    : 0;
+  const totalBalance =
+    wallets.reduce((sum, w) => sum + (parseFloat(w.balance) || 0), 0) +
+    rainbowKitBalance;
 
   const handleCopy = async (text: string, index: number) => {
     await navigator.clipboard.writeText(text);
@@ -104,7 +113,39 @@ export function WalletBalance() {
       </div>
 
       <div className="space-y-3">
-        {wallets.length === 0 ? (
+        {/* Show RainbowKit connected wallet if available */}
+        {isConnected && connectedAddress && (
+          <div className="p-4 rounded-xl bg-[#13161C]/50 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-white/10 transition-colors">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <Link2 className="w-3 h-3 text-[#E2B93B]" />
+                <span className="text-xs font-bold text-white">
+                  {chain?.name || "Connected Wallet"}
+                </span>
+                <span className="text-xs font-mono text-neutral-500">
+                  {`${connectedAddress.slice(0, 6)}...${connectedAddress.slice(-4)}`}
+                </span>
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  CONNECTED
+                </span>
+              </div>
+              <div className="text-sm font-bold font-mono text-neutral-300">
+                {rainbowKitBalance.toLocaleString(undefined, {
+                  maximumFractionDigits: 8,
+                })}{" "}
+                {chain?.nativeCurrency?.symbol || "ETH"}
+              </div>
+            </div>
+            <div className="sm:text-right">
+              <div className="text-sm font-bold font-mono text-white">
+                {formatValue(rainbowKitBalance * (chain?.nativeCurrency?.symbol === "ETH" ? 3500 : 1))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Show API-stored wallets */}
+        {wallets.length === 0 && !isConnected ? (
           <div className="p-4 rounded-xl bg-[#13161C]/50 border border-white/5 text-center">
             <p className="text-xs text-neutral-400">
               No wallets connected yet. Use the Web3 connector to link your

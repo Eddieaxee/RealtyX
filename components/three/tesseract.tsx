@@ -28,9 +28,9 @@ function TesseractFallback() {
 }
 
 /**
- * 3D Tesseract (4D Hypercube) - Wireframe aesthetic for high-end fintech look.
- * Projects a 4D hypercube into 3D space and rotates it slowly.
- * Uses a clean wireframe with golden accent colors matching the RealtyX brand.
+ * 3D Tesseract (4D Hypercube) - Premium solid aesthetic.
+ * Projects a 4D hypercube into 3D space with solid edges, frosted glass material,
+ * and floating particles. No orbit rings.
  */
 
 function generateHypercubeVertices() {
@@ -58,6 +58,33 @@ function generateHypercubeEdges() {
     }
   }
   return edges;
+}
+
+function generateHypercubeFaces() {
+  const faces: number[][] = [];
+  for (let i = 0; i < 16; i++) {
+    for (let j = i + 1; j < 16; j++) {
+      for (let k = j + 1; k < 16; k++) {
+        for (let l = k + 1; l < 16; l++) {
+          const vertices = [i, j, k, l];
+          // Check if all pairs differ by exactly 1 bit
+          let allDifferByOne = true;
+          for (let a = 0; a < vertices.length && allDifferByOne; a++) {
+            for (let b = a + 1; b < vertices.length && allDifferByOne; b++) {
+              let diff = 0;
+              for (let c = 0; c < 4; c++) {
+                if (((vertices[a] >> c) & 1) !== ((vertices[b] >> c) & 1))
+                  diff++;
+              }
+              if (diff !== 1) allDifferByOne = false;
+            }
+          }
+          if (allDifferByOne) faces.push(vertices);
+        }
+      }
+    }
+  }
+  return faces;
 }
 
 function project4Dto3D(
@@ -103,21 +130,92 @@ function rotateZW(vertex: number[], angle: number): number[] {
   ];
 }
 
-function TesseractWireframe() {
-  const groupRef = useRef<THREE.Group>(null);
-  const innerGroupRef = useRef<THREE.Group>(null);
+/** Floating particles around the tesseract */
+function FloatingParticles() {
+  const particlesRef = useRef<THREE.Points>(null);
+  const count = 200;
 
+  const [positions, sizes] = useMemo(() => {
+    const pos = new Float32Array(count * 3);
+    const siz = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 2 + Math.random() * 3;
+      pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      pos[i * 3 + 2] = r * Math.cos(phi);
+      siz[i] = Math.random() * 0.03 + 0.01;
+    }
+    return [pos, siz];
+  }, []);
+
+  useFrame((state: RootState) => {
+    if (!particlesRef.current) return;
+    const t = state.clock.elapsedTime;
+    const posArray = particlesRef.current.geometry.attributes.position
+      .array as Float32Array;
+    for (let i = 0; i < count; i++) {
+      const idx = i * 3;
+      const speed = 0.1 + (i % 5) * 0.02;
+      const offset = i * 0.1;
+      posArray[idx] += Math.sin(t * speed + offset) * 0.002;
+      posArray[idx + 1] += Math.cos(t * speed * 0.7 + offset) * 0.002;
+      posArray[idx + 2] += Math.sin(t * speed * 0.5 + offset + 1) * 0.002;
+    }
+    particlesRef.current.geometry.attributes.position.needsUpdate = true;
+    particlesRef.current.rotation.y = t * 0.02;
+  });
+
+  return (
+    <points ref={particlesRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={count}
+          array={positions}
+          itemSize={3}
+        />
+        <bufferAttribute
+          attach="attributes-size"
+          count={count}
+          array={sizes}
+          itemSize={1}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.04}
+        color="#E2B93B"
+        transparent
+        opacity={0.6}
+        sizeAttenuation
+        depthWrite={false}
+      />
+    </points>
+  );
+}
+
+
+function TesseractWireframe() {
   const vertices = useMemo(() => generateHypercubeVertices(), []);
   const edges = useMemo(() => generateHypercubeEdges(), []);
 
-  const linePositions = useMemo(
-    () => new Float32Array(edges.length * 6),
-    [edges],
-  );
-  const innerLinePositions = useMemo(
-    () => new Float32Array(edges.length * 6),
-    [edges],
-  );
+  // Create tube geometry for solid edges
+  const tubeMeshes = useMemo(() => {
+    return edges.map(() => {
+      const geo = new THREE.CylinderGeometry(0.015, 0.015, 1, 8);
+      const mat = new THREE.MeshPhysicalMaterial({
+        color: "#E2B93B",
+        metalness: 0.8,
+        roughness: 0.2,
+        transparent: true,
+        opacity: 0.4,
+        emissive: "#E2B93B",
+        emissiveIntensity: 0.1,
+      });
+      return new THREE.Mesh(geo, mat);
+    });
+  }, [edges]);
 
   useFrame((state: RootState) => {
     const t = state.clock.elapsedTime;
@@ -125,129 +223,61 @@ function TesseractWireframe() {
     const angleYW = t * 0.12;
     const angleZW = t * 0.1;
 
-    const geo = (groupRef.current?.children[0] as THREE.LineSegments)?.geometry;
-    if (geo) {
-      const posArray = geo.attributes.position.array as Float32Array;
-      for (let i = 0; i < edges.length; i++) {
-        const [a, b] = edges[i];
-        const vA = rotateZW(
-          rotateYW(rotateXW(vertices[a], angleXW), angleYW),
-          angleZW,
-        );
-        const vB = rotateZW(
-          rotateYW(rotateXW(vertices[b], angleXW), angleYW),
-          angleZW,
-        );
-        const pA = project4Dto3D(vA, 0.8);
-        const pB = project4Dto3D(vB, 0.8);
-        posArray[i * 6] = pA[0];
-        posArray[i * 6 + 1] = pA[1];
-        posArray[i * 6 + 2] = pA[2];
-        posArray[i * 6 + 3] = pB[0];
-        posArray[i * 6 + 4] = pB[1];
-        posArray[i * 6 + 5] = pB[2];
-      }
-      geo.attributes.position.needsUpdate = true;
+    // Update solid edges (cylinders)
+    for (let i = 0; i < edges.length; i++) {
+      const [a, b] = edges[i];
+      const vA = rotateZW(
+        rotateYW(rotateXW(vertices[a], angleXW), angleYW),
+        angleZW,
+      );
+      const vB = rotateZW(
+        rotateYW(rotateXW(vertices[b], angleXW), angleYW),
+        angleZW,
+      );
+      const pA = project4Dto3D(vA, 0.8);
+      const pB = project4Dto3D(vB, 0.8);
+
+      const mesh = tubeMeshes[i];
+      const start = new THREE.Vector3(pA[0], pA[1], pA[2]);
+      const end = new THREE.Vector3(pB[0], pB[1], pB[2]);
+      const mid = new THREE.Vector3()
+        .addVectors(start, end)
+        .multiplyScalar(0.5);
+      const dir = new THREE.Vector3().subVectors(end, start);
+      const len = dir.length();
+
+      mesh.position.copy(mid);
+      mesh.scale.y = len;
+      mesh.lookAt(end);
+      mesh.rotateX(Math.PI / 2);
     }
 
-    const innerGeo = (innerGroupRef.current?.children[0] as THREE.LineSegments)
-      ?.geometry;
-    if (innerGeo) {
-      const posArray = innerGeo.attributes.position.array as Float32Array;
-      for (let i = 0; i < edges.length; i++) {
-        const [a, b] = edges[i];
-        const vA = rotateZW(
-          rotateYW(rotateXW(vertices[a], angleXW + 0.5), angleYW + 0.3),
-          angleZW + 0.2,
-        );
-        const vB = rotateZW(
-          rotateYW(rotateXW(vertices[b], angleXW + 0.5), angleYW + 0.3),
-          angleZW + 0.2,
-        );
-        const pA = project4Dto3D(vA, 0.5);
-        const pB = project4Dto3D(vB, 0.5);
-        posArray[i * 6] = pA[0];
-        posArray[i * 6 + 1] = pA[1];
-        posArray[i * 6 + 2] = pA[2];
-        posArray[i * 6 + 3] = pB[0];
-        posArray[i * 6 + 4] = pB[1];
-        posArray[i * 6 + 5] = pB[2];
-      }
-      innerGeo.attributes.position.needsUpdate = true;
-    }
-
-    if (groupRef.current) {
-      groupRef.current.position.y = Math.sin(t * 0.5) * 0.15;
-    }
   });
 
   return (
     <group>
-      <group ref={groupRef}>
-        <lineSegments>
-          <bufferGeometry>
-            <bufferAttribute
-              attach="attributes-position"
-              count={edges.length * 2}
-              array={linePositions}
-              itemSize={3}
-            />
-          </bufferGeometry>
-          <lineBasicMaterial color="#E2B93B" transparent opacity={0.35} />
-        </lineSegments>
+      {/* Solid edges with metallic material - no wireframes */}
+      <group>
+        {tubeMeshes.map((mesh, i) => (
+          <primitive key={i} object={mesh} />
+        ))}
       </group>
-      <group ref={innerGroupRef} scale={0.6}>
-        <lineSegments>
-          <bufferGeometry>
-            <bufferAttribute
-              attach="attributes-position"
-              count={edges.length * 2}
-              array={innerLinePositions}
-              itemSize={3}
-            />
-          </bufferGeometry>
-          <lineBasicMaterial color="#B89221" transparent opacity={0.2} />
-        </lineSegments>
-      </group>
+      {/* Center glow */}
       <mesh>
-        <sphereGeometry args={[0.08, 16, 16]} />
-        <meshBasicMaterial color="#E2B93B" transparent opacity={0.4} />
+        <sphereGeometry args={[0.15, 32, 32]} />
+        <meshPhysicalMaterial
+          color="#E2B93B"
+          metalness={0.95}
+          roughness={0.05}
+          transparent
+          opacity={0.4}
+          emissive="#E2B93B"
+          emissiveIntensity={0.8}
+          clearcoat={1.0}
+          clearcoatRoughness={0.1}
+        />
       </mesh>
     </group>
-  );
-}
-
-function TesseractOrbitRing() {
-  const ringRef = useRef<THREE.Mesh>(null);
-  useFrame((state: RootState) => {
-    if (ringRef.current) {
-      ringRef.current.rotation.x =
-        Math.PI / 2 + Math.sin(state.clock.elapsedTime * 0.3) * 0.1;
-      ringRef.current.rotation.z = state.clock.elapsedTime * 0.05;
-    }
-  });
-  return (
-    <mesh ref={ringRef}>
-      <torusGeometry args={[2.2, 0.005, 8, 128]} />
-      <meshBasicMaterial color="#E2B93B" transparent opacity={0.15} />
-    </mesh>
-  );
-}
-
-function TesseractOrbitRing2() {
-  const ringRef = useRef<THREE.Mesh>(null);
-  useFrame((state: RootState) => {
-    if (ringRef.current) {
-      ringRef.current.rotation.x =
-        Math.PI / 3 + Math.cos(state.clock.elapsedTime * 0.2) * 0.15;
-      ringRef.current.rotation.y = state.clock.elapsedTime * 0.08;
-    }
-  });
-  return (
-    <mesh ref={ringRef}>
-      <torusGeometry args={[2.5, 0.004, 8, 128]} />
-      <meshBasicMaterial color="#B89221" transparent opacity={0.1} />
-    </mesh>
   );
 }
 
@@ -260,12 +290,14 @@ export function Tesseract() {
           dpr={[1, 2]}
           gl={{ antialias: true, alpha: true }}
         >
-          <ambientLight intensity={0.1} />
-          <pointLight position={[5, 5, 5]} intensity={0.3} color="#E2B93B" />
-          <pointLight position={[-5, -5, -5]} intensity={0.2} color="#B89221" />
+          <ambientLight intensity={0.4} />
+          <pointLight position={[5, 5, 5]} intensity={1.2} color="#E2B93B" />
+          <pointLight position={[-5, -5, -5]} intensity={0.6} color="#B89221" />
+          <pointLight position={[0, 0, 3]} intensity={0.5} color="#ffffff" />
+          <pointLight position={[3, -3, 2]} intensity={0.4} color="#f3c94a" />
+          <pointLight position={[-3, 3, -2]} intensity={0.3} color="#E2B93B" />
           <TesseractWireframe />
-          <TesseractOrbitRing />
-          <TesseractOrbitRing2 />
+          <FloatingParticles />
         </Canvas>
       </Suspense>
     </div>

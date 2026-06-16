@@ -5,99 +5,9 @@ import { PublicNav } from "@/components/layout/public-nav";
 import { Footer } from "@/components/layout/footer";
 import { PropertiesGrid } from "@/components/dashboard/properties-grid";
 import { InvestmentFilters } from "@/components/dashboard/investment-filters";
-
-const allProperties = [
-  {
-    id: "eko-atlantic-alpha",
-    title: "Eko Atlantic High-Rise Alpha",
-    location: "Victoria Island, Lagos",
-    region: "VI",
-    category: "RESIDENTIAL",
-    lifecycle: "COMPLETED",
-    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80",
-    tokenPrice: 50000,
-    expectedReturn: 16.4,
-    rentalYield: 9.2,
-    availableTokens: 14200,
-    totalTokens: 50000,
-    funded: 85,
-  },
-  {
-    id: "ikoyi-luxury-residences",
-    title: "Ikoyi Luxury Residential Tower",
-    location: "Ikoyi, Lagos",
-    region: "IKOYI",
-    category: "RESIDENTIAL",
-    lifecycle: "UNDER_CONSTRUCTION",
-    image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&q=80",
-    tokenPrice: 100000,
-    expectedReturn: 14.8,
-    rentalYield: 8.1,
-    availableTokens: 4500,
-    totalTokens: 25000,
-    funded: 72,
-  },
-  {
-    id: "maitama-commercial-workspace",
-    title: "Maitama Corporate Suites",
-    location: "Maitama, Abuja",
-    region: "ABUJA",
-    category: "COMMERCIAL",
-    lifecycle: "COMPLETED",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
-    tokenPrice: 75000,
-    expectedReturn: 13.2,
-    rentalYield: 7.8,
-    availableTokens: 18400,
-    totalTokens: 40000,
-    funded: 65,
-  },
-  {
-    id: "lekki-logistics-hub",
-    title: "Lekki Phase 1 Fulfillment Hub",
-    location: "Lekki, Lagos",
-    region: "LEKKI",
-    category: "INFRASTRUCTURE",
-    lifecycle: "COMPLETED",
-    image: "https://images.unsplash.com/photo-1480796927426-f609979314bd?w=800&q=80",
-    tokenPrice: 25000,
-    expectedReturn: 22.1,
-    rentalYield: 11.5,
-    availableTokens: 9600,
-    totalTokens: 80000,
-    funded: 88,
-  },
-  {
-    id: "ikeja-medical-workspace",
-    title: "GRA Medical Professional Suites",
-    location: "Ikeja, Lagos",
-    region: "LEKKI",
-    category: "COMMERCIAL",
-    lifecycle: "UNDER_CONSTRUCTION",
-    image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80",
-    tokenPrice: 40000,
-    expectedReturn: 15.1,
-    rentalYield: 8.7,
-    availableTokens: 32000,
-    totalTokens: 60000,
-    funded: 45,
-  },
-  {
-    id: "banana-island-marina-view",
-    title: "Banana Island Waterfront Estate",
-    location: "Banana Island, Lagos",
-    region: "IKOYI",
-    category: "RESIDENTIAL",
-    lifecycle: "COMPLETED",
-    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80",
-    tokenPrice: 150000,
-    expectedReturn: 17.5,
-    rentalYield: 10.2,
-    availableTokens: 11000,
-    totalTokens: 50000,
-    funded: 78,
-  },
-];
+import { PropertyMapSystem } from "@/components/maps/property-maps";
+import { Map, List } from "lucide-react";
+import propertiesData from "@/data/properties.json";
 
 export default function PropertiesPage() {
   const [filters, setFilters] = useState({
@@ -106,6 +16,31 @@ export default function PropertiesPage() {
     lifecycle: "ALL",
     region: "ALL",
   });
+  const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
+
+  const allProperties = propertiesData as Array<{
+    id: string;
+    title: string;
+    location: string;
+    region: string;
+    category: string;
+    lifecycle: string;
+    lat: number;
+    lng: number;
+    image: string;
+    tokenPriceUSD: number;
+    tokenPriceNGN: number;
+    totalValueUSD: number;
+    totalValueNGN: number;
+    expectedReturn: number;
+    rentalYield: number;
+    availableTokens: number;
+    totalTokens: number;
+    funded: number;
+    images: string[];
+    features: string[];
+    documents: string[];
+  }>;
 
   const filteredProperties = useMemo(() => {
     return allProperties.filter((property) => {
@@ -118,7 +53,32 @@ export default function PropertiesPage() {
       const matchesRegion = filters.region === "ALL" || property.region === filters.region;
       return matchesSearch && matchesCategory && matchesLifecycle && matchesRegion;
     });
-  }, [filters]);
+  }, [filters, allProperties]);
+
+  // Dynamic calculations for each property
+  const dynamicProperties = useMemo(() => {
+    return filteredProperties.map((p) => {
+      const tokenPriceUSD = p.tokenPriceUSD || 0;
+      const totalTokens = p.totalTokens || 0;
+      const totalValueUSD = totalTokens * tokenPriceUSD;
+      const fundedPercent = totalTokens > 0
+        ? Math.round(((totalTokens - (p.availableTokens || 0)) / totalTokens) * 100)
+        : 0;
+      return {
+        ...p,
+        tokenPrice: p.tokenPriceNGN,
+        totalValueUSD,
+        funded: fundedPercent,
+      };
+    });
+  }, [filteredProperties]);
+
+  const centerLat = filteredProperties.length > 0 
+    ? filteredProperties.reduce((sum, p) => sum + p.lat, 0) / filteredProperties.length 
+    : 6.45;
+  const centerLng = filteredProperties.length > 0 
+    ? filteredProperties.reduce((sum, p) => sum + p.lng, 0) / filteredProperties.length 
+    : 3.4;
 
   return (
     <div className="min-h-screen bg-[#030712] text-slate-100">
@@ -133,9 +93,55 @@ export default function PropertiesPage() {
             </p>
           </div>
           <InvestmentFilters onFilterChange={setFilters} />
-          <div className="mt-8">
-            <PropertiesGrid properties={filteredProperties} />
+
+          {/* View Toggle: Grid / Map */}
+          <div className="flex items-center gap-2 mt-6 mb-4">
+            <div className="flex gap-1 bg-[#0D0E12] border border-white/5 p-1 rounded-xl font-mono text-xs">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`px-3 py-1.5 rounded-lg transition-all font-bold flex items-center gap-1.5 ${
+                  viewMode === "grid"
+                    ? "bg-white/10 text-white"
+                    : "text-neutral-500 hover:text-white"
+                }`}
+              >
+                <List className="w-3.5 h-3.5" /> Grid
+              </button>
+              <button
+                onClick={() => setViewMode("map")}
+                className={`px-3 py-1.5 rounded-lg transition-all font-bold flex items-center gap-1.5 ${
+                  viewMode === "map"
+                    ? "bg-white/10 text-white"
+                    : "text-neutral-500 hover:text-white"
+                }`}
+              >
+                <Map className="w-3.5 h-3.5" /> Map
+              </button>
+            </div>
+            <span className="text-[10px] font-mono text-neutral-500">
+              {filteredProperties.length} asset{filteredProperties.length !== 1 ? "s" : ""} displayed
+            </span>
           </div>
+
+          {/* Map View */}
+          {viewMode === "map" && (
+            <div className="mb-8">
+              <PropertyMapSystem
+                lat={centerLat}
+                lng={centerLng}
+                propertyName={`${filteredProperties.length} Properties`}
+                neighborhood="Nigeria"
+              />
+            </div>
+          )}
+
+          {/* Grid View */}
+          {viewMode === "grid" && (
+            <div className="mt-4">
+              <PropertiesGrid properties={dynamicProperties} />
+            </div>
+          )}
+
           {filteredProperties.length === 0 && (
             <div className="text-center py-16">
               <p className="text-lg text-muted-foreground">No properties match your filters.</p>

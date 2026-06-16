@@ -2,6 +2,29 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+/* Leaflet map styles */
+@import "leaflet/dist/leaflet.css";
+
+/* Custom scrollbar for map container */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #0D0E12 !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+.leaflet-popup-tip {
+  background: #0D0E12 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
 /* Converted base layer to standard CSS for editor compatibility */
 :root {
   --background: 0 0% 100%;

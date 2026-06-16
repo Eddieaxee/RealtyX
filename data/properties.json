@@ -1,0 +1,563 @@
+[
+  {
+    "id": "eko-atlantic-alpha",
+    "slug": "eko-atlantic-high-rise-alpha",
+    "title": "Eko Atlantic High-Rise Alpha",
+    "description": "A premium 28-storey mixed-use tower in the heart of Eko Atlantic City, featuring Grade-A office spaces, luxury residential units, and retail zones. This landmark development offers panoramic ocean views, smart building technologies, and direct access to the Eko Atlantic financial district.",
+    "location": "Victoria Island, Lagos",
+    "city": "Victoria Island",
+    "state": "Lagos",
+    "region": "VI",
+    "country": "Nigeria",
+    "category": "RESIDENTIAL",
+    "lifecycle": "COMPLETED",
+    "currentMilestone": "Completed & Operational",
+    "lat": 6.4258,
+    "lng": 3.4167,
+    "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80",
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
+      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80"
+    ],
+    "tokenPriceUSD": 85,
+    "tokenPriceNGN": 50000,
+    "totalValueNGN": 2500000000,
+    "totalValueUSD": 4200000,
+    "expectedReturn": 16.4,
+    "rentalYield": 9.2,
+    "availableTokens": 14200,
+    "totalTokens": 50000,
+    "funded": 85,
+    "completionPercentage": 100,
+    "features": [
+      "28 Storeys - Mixed Use Development",
+      "Smart Building Management System",
+      "24/7 Concierge & Security",
+      "Swimming Pool & Fitness Center",
+      "Underground Parking - 450 Spaces",
+      "Green Building Certified",
+      "Backup Power Generation",
+      "High-Speed Elevators (6 Units)"
+    ],
+    "documents": [
+      "Title Deed - RX-TD-2024-001",
+      "Structural Integrity Report - 2024",
+      "Fire Safety Compliance Certificate",
+      "Environmental Impact Assessment",
+      "Fractional Ownership Smart Contract"
+    ],
+    "neighborhoodInsights": {
+      "walkScore": 92,
+      "safetyIndex": "Premium / Low Risk",
+      "transitAccess": "Excellent",
+      "infrastructure": [
+        {
+          "name": "Eko Atlantic Marina & Yacht Club",
+          "distance": "450m",
+          "type": "Leisure"
+        },
+        {
+          "name": "The Institutional Financial Center",
+          "distance": "1.2km",
+          "type": "Business"
+        },
+        {
+          "name": "Admiralty Medical Outpost",
+          "distance": "800m",
+          "type": "Health"
+        },
+        {
+          "name": "International Tech Academy",
+          "distance": "2.1km",
+          "type": "Education"
+        }
+      ]
+    }
+  },
+  {
+    "id": "ikoyi-luxury-residences",
+    "slug": "ikoyi-luxury-residential-tower",
+    "title": "Ikoyi Luxury Residential Tower",
+    "description": "An exclusive 18-storey residential tower in the prestigious Ikoyi district, offering 2-4 bedroom luxury apartments with panoramic Lagos Lagoon views. Features world-class amenities and premium finishes throughout.",
+    "location": "Ikoyi, Lagos",
+    "city": "Ikoyi",
+    "state": "Lagos",
+    "region": "IKOYI",
+    "country": "Nigeria",
+    "category": "RESIDENTIAL",
+    "lifecycle": "UNDER_CONSTRUCTION",
+    "currentMilestone": "Superstructure - Level 12",
+    "lat": 6.4667,
+    "lng": 3.4,
+    "image": "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&q=80",
+      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80",
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"
+    ],
+    "tokenPriceUSD": 65,
+    "tokenPriceNGN": 40000,
+    "totalValueNGN": 2500000000,
+    "totalValueUSD": 4200000,
+    "expectedReturn": 14.8,
+    "rentalYield": 8.1,
+    "availableTokens": 4500,
+    "totalTokens": 25000,
+    "funded": 72,
+    "completionPercentage": 65,
+    "features": [
+      "18 Storeys - Luxury Residential",
+      "Lagoon View Panoramic Windows",
+      "Rooftop Infinity Pool",
+      "Private Gym & Spa",
+      "24/7 Butler Service",
+      "Smart Home Automation",
+      "Terraced Gardens",
+      "Private Cinema Room"
+    ],
+    "documents": [
+      "Title Deed - RX-TD-2024-002",
+      "Structural Integrity Report - 2024",
+      "Fire Safety Compliance Certificate",
+      "Construction Progress Report - Q1 2025"
+    ],
+    "neighborhoodInsights": {
+      "walkScore": 85,
+      "safetyIndex": "Premium / Low Risk",
+      "transitAccess": "Very Good",
+      "infrastructure": [
+        { "name": "Ikoyi Golf Club", "distance": "1.5km", "type": "Leisure" },
+        {
+          "name": "Lagos Business School",
+          "distance": "3.2km",
+          "type": "Education"
+        },
+        {
+          "name": "St. Nicholas Hospital",
+          "distance": "2.1km",
+          "type": "Health"
+        },
+        {
+          "name": "The Palms Shopping Mall",
+          "distance": "4.5km",
+          "type": "Retail"
+        }
+      ]
+    }
+  },
+  {
+    "id": "maitama-commercial-workspace",
+    "slug": "maitama-corporate-suites",
+    "title": "Maitama Corporate Suites",
+    "description": "Prime commercial office complex in Abuja's most prestigious district, featuring flexible workspace solutions, conference facilities, and retail spaces on the ground floor. Ideal for businesses seeking a premium Abuja address.",
+    "location": "Maitama, Abuja",
+    "city": "Maitama",
+    "state": "Abuja",
+    "region": "ABUJA",
+    "country": "Nigeria",
+    "category": "COMMERCIAL",
+    "lifecycle": "COMPLETED",
+    "currentMilestone": "Completed & Fully Leased",
+    "lat": 9.0833,
+    "lng": 7.4833,
+    "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
+      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&q=80",
+      "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80"
+    ],
+    "tokenPriceUSD": 50,
+    "tokenPriceNGN": 30000,
+    "totalValueNGN": 3000000000,
+    "totalValueUSD": 5000000,
+    "expectedReturn": 13.2,
+    "rentalYield": 7.8,
+    "availableTokens": 18400,
+    "totalTokens": 40000,
+    "funded": 65,
+    "completionPercentage": 100,
+    "features": [
+      "12 Storeys - Grade A Office Space",
+      "LEED Gold Certified",
+      "Conference Center for 200 People",
+      "Rooftop Restaurant & Bar",
+      "Secure Underground Parking",
+      "Backup Generators & Solar",
+      "High-Speed Fiber Internet",
+      "24/7 Security & Access Control"
+    ],
+    "documents": [
+      "Title Deed - RX-TD-2024-003",
+      "Energy Performance Certificate",
+      "Fire Safety Compliance Certificate",
+      "Tenancy Schedule - Q1 2025"
+    ],
+    "neighborhoodInsights": {
+      "walkScore": 78,
+      "safetyIndex": "Premium / Low Risk",
+      "transitAccess": "Good",
+      "infrastructure": [
+        {
+          "name": "Transcorp Hilton Hotel",
+          "distance": "1.8km",
+          "type": "Business"
+        },
+        { "name": "Abuja City Gate", "distance": "800m", "type": "Landmark" },
+        {
+          "name": "Ceddi Medical Center",
+          "distance": "1.5km",
+          "type": "Health"
+        },
+        {
+          "name": "Maitama International School",
+          "distance": "2.3km",
+          "type": "Education"
+        }
+      ]
+    }
+  },
+  {
+    "id": "lekki-logistics-hub",
+    "slug": "lekki-phase-1-fulfillment-hub",
+    "title": "Lekki Phase 1 Fulfillment Hub",
+    "description": "A state-of-the-art logistics and fulfillment center strategically located in Lekki Phase 1, serving the rapidly growing e-commerce sector in Lagos. Features automated sorting systems, cold storage, and last-mile delivery infrastructure.",
+    "location": "Lekki, Lagos",
+    "city": "Lekki",
+    "state": "Lagos",
+    "region": "LEKKI",
+    "country": "Nigeria",
+    "category": "INFRASTRUCTURE",
+    "lifecycle": "UNDER_CONSTRUCTION",
+    "currentMilestone": "Superstructure Framing",
+    "lat": 6.4488,
+    "lng": 3.5325,
+    "image": "https://images.unsplash.com/photo-1480796927426-f609979314bd?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1480796927426-f609979314bd?w=800&q=80",
+      "https://images.unsplash.com/photo-1566576912324-9c7c7e1a2e0f?w=800&q=80",
+      "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?w=800&q=80"
+    ],
+    "tokenPriceUSD": 95,
+    "tokenPriceNGN": 58000,
+    "totalValueNGN": 2000000000,
+    "totalValueUSD": 3300000,
+    "expectedReturn": 22.1,
+    "rentalYield": 11.5,
+    "availableTokens": 9600,
+    "totalTokens": 80000,
+    "funded": 88,
+    "completionPercentage": 42,
+    "features": [
+      "50,000 sqm Warehouse Space",
+      "Automated Sorting System",
+      "Cold Storage - 5,000 sqm",
+      "Last-Mile Delivery Fleet",
+      "Solar Power - 500kW Array",
+      "AI Inventory Management",
+      "48 Loading Bays",
+      "Staff Quarters & Canteen"
+    ],
+    "documents": [
+      "Title Deed - RX-TD-2024-004",
+      "Construction Permit - LA/2024/056",
+      "Environmental Impact Assessment",
+      "Structural Report - Phase 1"
+    ],
+    "neighborhoodInsights": {
+      "walkScore": 45,
+      "safetyIndex": "Medium / Standard",
+      "transitAccess": "Good",
+      "infrastructure": [
+        {
+          "name": "Lekki Deep Sea Port",
+          "distance": "12km",
+          "type": "Infrastructure"
+        },
+        { "name": "Dangote Refinery", "distance": "8km", "type": "Industry" },
+        {
+          "name": "Lekki Business District",
+          "distance": "3.5km",
+          "type": "Business"
+        },
+        {
+          "name": "Lekki Conservation Centre",
+          "distance": "5km",
+          "type": "Leisure"
+        }
+      ]
+    }
+  },
+  {
+    "id": "ikeja-medical-workspace",
+    "slug": "gra-medical-professional-suites",
+    "title": "GRA Medical Professional Suites",
+    "description": "Specialized medical office complex in Ikeja GRA, designed for healthcare professionals. Features consulting rooms, diagnostic centers, a pharmacy, and emergency care facilities. Strategically located near major hospitals.",
+    "location": "Ikeja, Lagos",
+    "city": "Ikeja",
+    "state": "Lagos",
+    "region": "LEKKI",
+    "country": "Nigeria",
+    "category": "COMMERCIAL",
+    "lifecycle": "UNDER_CONSTRUCTION",
+    "currentMilestone": "Foundation Works",
+    "lat": 6.5965,
+    "lng": 3.3417,
+    "image": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80",
+      "https://images.unsplash.com/photo-1540483761895-143f18d8e342?w=800&q=80",
+      "https://images.unsplash.com/photo-1587351021759-3772687fe598?w=800&q=80"
+    ],
+    "tokenPriceUSD": 40,
+    "tokenPriceNGN": 24000,
+    "totalValueNGN": 2400000000,
+    "totalValueUSD": 4000000,
+    "expectedReturn": 15.1,
+    "rentalYield": 8.7,
+    "availableTokens": 32000,
+    "totalTokens": 60000,
+    "funded": 45,
+    "completionPercentage": 25,
+    "features": [
+      "8 Storeys - Medical Complex",
+      "50 Consulting Suites",
+      "Diagnostic Imaging Center",
+      "In-House Pharmacy",
+      "Emergency Care Unit",
+      "Ambulance Bay",
+      "Medical Gas System",
+      "Backup Power & Water"
+    ],
+    "documents": [
+      "Title Deed - RX-TD-2024-005",
+      "Healthcare Facility Permit",
+      "Construction Permit - LA/2024/072",
+      "Structural Design Certificate"
+    ],
+    "neighborhoodInsights": {
+      "walkScore": 72,
+      "safetyIndex": "High / Low Risk",
+      "transitAccess": "Excellent",
+      "infrastructure": [
+        {
+          "name": "Lagos State University Teaching Hospital",
+          "distance": "1.5km",
+          "type": "Health"
+        },
+        { "name": "Ikeja City Mall", "distance": "2km", "type": "Retail" },
+        {
+          "name": "Murtala Muhammed Airport",
+          "distance": "4km",
+          "type": "Transport"
+        },
+        { "name": "Ikeja Golf Club", "distance": "2.8km", "type": "Leisure" }
+      ]
+    }
+  },
+  {
+    "id": "banana-island-marina-view",
+    "slug": "banana-island-waterfront-estate",
+    "title": "Banana Island Waterfront Estate",
+    "description": "An ultra-luxury waterfront estate on exclusive Banana Island, featuring 12 custom-built villas with private docks, infinity pools, and panoramic Lagos Lagoon views. The epitome of luxury living in Lagos.",
+    "location": "Banana Island, Lagos",
+    "city": "Banana Island",
+    "state": "Lagos",
+    "region": "IKOYI",
+    "country": "Nigeria",
+    "category": "RESIDENTIAL",
+    "lifecycle": "COMPLETED",
+    "currentMilestone": "Completed & Occupied",
+    "lat": 6.445,
+    "lng": 3.39,
+    "image": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80",
+      "https://images.unsplash.com/photo-1600573472550-8090b5e0745e?w=800&q=80"
+    ],
+    "tokenPriceUSD": 100,
+    "tokenPriceNGN": 60000,
+    "totalValueNGN": 7500000000,
+    "totalValueUSD": 12500000,
+    "expectedReturn": 17.5,
+    "rentalYield": 10.2,
+    "availableTokens": 11000,
+    "totalTokens": 50000,
+    "funded": 78,
+    "completionPercentage": 100,
+    "features": [
+      "12 Custom-Built Waterfront Villas",
+      "Private Docks & Boat Parking",
+      "Infinity Pools per Villa",
+      "Private Beach Access",
+      "Helipad",
+      "24/7 Concierge & Security",
+      "Smart Home Systems",
+      "Wine Cellars & Entertainment Rooms"
+    ],
+    "documents": [
+      "Title Deed - RX-TD-2024-006",
+      "Coastal Development Approval",
+      "Environmental Impact Assessment",
+      "Property Valuation - Q1 2025"
+    ],
+    "neighborhoodInsights": {
+      "walkScore": 55,
+      "safetyIndex": "Premium / Ultra-Low Risk",
+      "transitAccess": "Private Only",
+      "infrastructure": [
+        {
+          "name": "Banana Island Marina Club",
+          "distance": "500m",
+          "type": "Leisure"
+        },
+        { "name": "Eko Atlantic City", "distance": "3km", "type": "Business" },
+        {
+          "name": "Victoria Island Business District",
+          "distance": "5km",
+          "type": "Business"
+        },
+        { "name": "Ikoyi Medical Center", "distance": "4km", "type": "Health" }
+      ]
+    }
+  },
+  {
+    "id": "lagoon-heights-apartment",
+    "slug": "lagoon-heights serviced-apartments",
+    "title": "Lagoon Heights Serviced Apartments",
+    "description": "A modern 15-storey serviced apartment building on Victoria Island, offering fully furnished short-let and long-let apartments. High occupancy rates driven by expatriate demand and business tourism.",
+    "location": "Victoria Island, Lagos",
+    "city": "Victoria Island",
+    "state": "Lagos",
+    "region": "VI",
+    "country": "Nigeria",
+    "category": "RESIDENTIAL",
+    "lifecycle": "COMPLETED",
+    "currentMilestone": "Completed & 92% Occupied",
+    "lat": 6.4312,
+    "lng": 3.4085,
+    "image": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80",
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80"
+    ],
+    "tokenPriceUSD": 75,
+    "tokenPriceNGN": 45000,
+    "totalValueNGN": 1800000000,
+    "totalValueUSD": 3000000,
+    "expectedReturn": 18.2,
+    "rentalYield": 12.4,
+    "availableTokens": 8200,
+    "totalTokens": 40000,
+    "funded": 80,
+    "completionPercentage": 100,
+    "features": [
+      "15 Storeys - Serviced Apartments",
+      "Fully Furnished Units",
+      "Short-Let & Long-Let Options",
+      "Rooftop Lounge & Bar",
+      "Co-Working Space",
+      "24/7 Room Service",
+      "Fitness Center & Pool",
+      "Airport Shuttle Service"
+    ],
+    "documents": [
+      "Title Deed - RX-TD-2024-007",
+      "Hotel & Hospitality License",
+      "Fire Safety Compliance Certificate",
+      "Occupancy Certificates"
+    ],
+    "neighborhoodInsights": {
+      "walkScore": 88,
+      "safetyIndex": "Premium / Low Risk",
+      "transitAccess": "Excellent",
+      "infrastructure": [
+        {
+          "name": "Eko Hotel & Suites",
+          "distance": "1km",
+          "type": "Hospitality"
+        },
+        { "name": "Art Lagos Gallery", "distance": "1.5km", "type": "Culture" },
+        {
+          "name": "Lagos Oriental Hotel",
+          "distance": "2km",
+          "type": "Hospitality"
+        },
+        { "name": "Muri Okunola Park", "distance": "3km", "type": "Leisure" }
+      ]
+    }
+  },
+  {
+    "id": "abuja-tech-park",
+    "slug": "abuja-innovation-tech-park",
+    "title": "Abuja Innovation Tech Park",
+    "description": "A cutting-edge technology park in Abuja's satellite town, designed to house tech startups, fintech companies, and innovation labs. Features fiber-optic connectivity, incubator spaces, and modern office infrastructure.",
+    "location": "Gwarinpa, Abuja",
+    "city": "Gwarinpa",
+    "state": "Abuja",
+    "region": "ABUJA",
+    "country": "Nigeria",
+    "category": "COMMERCIAL",
+    "lifecycle": "UNDER_CONSTRUCTION",
+    "currentMilestone": "Superstructure - Level 5",
+    "lat": 9.0643,
+    "lng": 7.3824,
+    "image": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
+      "https://images.unsplash.com/photo-1562654501-a0caf84fc867?w=800&q=80",
+      "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&q=80"
+    ],
+    "tokenPriceUSD": 55,
+    "tokenPriceNGN": 33000,
+    "totalValueNGN": 1500000000,
+    "totalValueUSD": 2500000,
+    "expectedReturn": 19.5,
+    "rentalYield": 10.8,
+    "availableTokens": 22000,
+    "totalTokens": 45000,
+    "funded": 52,
+    "completionPercentage": 35,
+    "features": [
+      "10 Storeys - Tech Park",
+      "Fiber-Optic Connectivity Throughout",
+      "Startup Incubator Spaces",
+      "Conference & Event Center",
+      "Rooftop Garden & Recreation",
+      "EV Charging Stations",
+      "High-Speed Elevators",
+      "Green Building Design"
+    ],
+    "documents": [
+      "Title Deed - RX-TD-2024-008",
+      "FCT Development Permit",
+      "Environmental Impact Assessment",
+      "Technology Infrastructure Plan"
+    ],
+    "neighborhoodInsights": {
+      "walkScore": 60,
+      "safetyIndex": "High / Low Risk",
+      "transitAccess": "Good",
+      "infrastructure": [
+        {
+          "name": "National Assembly Complex",
+          "distance": "8km",
+          "type": "Government"
+        },
+        {
+          "name": "Abuja International Conference Center",
+          "distance": "5km",
+          "type": "Business"
+        },
+        { "name": "Wuse Market", "distance": "4km", "type": "Retail" },
+        {
+          "name": "Gwarinpa General Hospital",
+          "distance": "2km",
+          "type": "Health"
+        }
+      ]
+    }
+  }
+]

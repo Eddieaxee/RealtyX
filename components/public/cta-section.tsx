@@ -103,7 +103,7 @@ export function CTASection() {
                 transition={{ duration: 0.6, delay: 0.45 }}
                 className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
               >
-                <Link href="/dashboard">
+                <Link href="/auth/signup">
                   <Button
                     size="lg"
                     className="relative group bg-gradient-to-r from-[#E2B93B] to-[#B89221] hover:from-[#f3c94a] hover:to-[#cbab3a] text-[#090A0C] font-bold text-lg px-10 py-7 rounded-2xl shadow-2xl shadow-[#E2B93B]/20 hover:shadow-[#E2B93B]/30 transition-all duration-300 w-full sm:w-auto"

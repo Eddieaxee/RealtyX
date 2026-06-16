@@ -3,21 +3,56 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield, TrendingUp, Users } from "lucide-react";
+import { ArrowRight, Shield, TrendingUp, Users, MapPin, Building2 } from "lucide-react";
 import { Tesseract } from "@/components/three/tesseract";
-import { useCurrency } from "@/context/currency-context";
+
+const FEATURED_PROPERTIES = [
+  {
+    id: "eko-atlantic-alpha",
+    title: "Eko Atlantic High-Rise",
+    location: "Victoria Island, Lagos",
+    tokenPrice: "$85",
+    returnRate: "16.4%",
+    status: "Active",
+    funded: 85,
+  },
+  {
+    id: "banana-island-marina-view",
+    title: "Banana Island Estate",
+    location: "Banana Island, Lagos",
+    tokenPrice: "$100",
+    returnRate: "17.5%",
+    status: "Active",
+    funded: 78,
+  },
+  {
+    id: "abuja-tech-park",
+    title: "Abuja Tech Park",
+    location: "Gwarinpa, Abuja",
+    tokenPrice: "$55",
+    returnRate: "19.5%",
+    status: "Under Construction",
+    funded: 52,
+  },
+];
 
 export function HeroSection() {
-  const { formatValue } = useCurrency();
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
+    <section className="relative min-h-screen flex items-center overflow-hidden">
+      {/* 3D Tesseract - Continuous full-section background */}
+      <div className="absolute inset-0 z-0">
+        <Tesseract />
+      </div>
+
+      {/* Gradient overlay to ensure text readability */}
+      <div className="absolute inset-0 z-[1] bg-gradient-to-r from-[#030712]/90 via-[#030712]/60 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 z-[1] bg-gradient-to-b from-transparent via-transparent to-[#030712]/80 pointer-events-none" />
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20 w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left side - Text content */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
@@ -78,47 +113,90 @@ export function HeroSection() {
             </div>
           </motion.div>
 
+          {/* Right side - Glassmorphism Properties Summary Box */}
           <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="relative hidden lg:flex items-center justify-center"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="hidden lg:block"
           >
-            {/* 3D Tesseract - Interactive rotating hypercube */}
-            <div className="relative w-full h-[500px]">
-              <div className="absolute -inset-4 bg-gradient-to-r from-gold-500/10 to-primary/10 rounded-3xl blur-2xl" />
-              <div className="relative w-full h-full rounded-3xl overflow-hidden">
-                <Tesseract />
-              </div>
-              {/* Floating portfolio overlay */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.2 }}
-                className="absolute bottom-6 left-6 right-6 glass rounded-2xl p-5 space-y-3 backdrop-blur-xl bg-white/5 border border-white/10"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    Portfolio Value
-                  </span>
-                  <span className="text-sm font-medium text-green-500">
-                    +18.4%
-                  </span>
-                </div>
-                <div className="text-3xl font-bold">{formatValue(142850)}</div>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { label: "Properties", value: "6" },
-                    { label: "Tokens", value: "8.4K" },
-                    { label: "Yield", value: "12.5%" },
-                  ].map((stat) => (
-                    <div key={stat.label} className="text-center p-2 rounded-lg bg-white/5">
-                      <div className="text-sm font-bold">{stat.value}</div>
-                      <div className="text-[10px] text-muted-foreground">{stat.label}</div>
+            <div className="relative">
+              {/* Outer glow */}
+              <div className="absolute -inset-2 bg-gradient-to-br from-[#E2B93B]/15 via-transparent to-blue-500/10 rounded-3xl blur-xl opacity-60" />
+
+              {/* Glass container */}
+              <div className="relative rounded-3xl overflow-hidden backdrop-blur-xl border border-white/[0.08]">
+                {/* Glass background */}
+                <div className="absolute inset-0 bg-white/[0.03]" />
+                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.06] via-transparent to-white/[0.02]" />
+
+                <div className="relative p-6 space-y-4">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-[#E2B93B]" />
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">Featured Assets</span>
                     </div>
+                    <Link href="/properties" className="text-[10px] text-[#E2B93B] hover:underline font-medium">
+                      View All →
+                    </Link>
+                  </div>
+
+                  {/* Property Cards */}
+                  {FEATURED_PROPERTIES.map((prop) => (
+                    <Link
+                      key={prop.id}
+                      href={`/invest/${prop.id}`}
+                      className="block p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-[#E2B93B]/20 hover:bg-white/[0.05] transition-all duration-300"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h4 className="text-sm font-bold text-white">{prop.title}</h4>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-3 h-3 text-neutral-500" />
+                            <span className="text-[10px] text-neutral-400">{prop.location}</span>
+                          </div>
+                        </div>
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                          prop.status === "Active"
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                        }`}>
+                          {prop.status}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div>
+                            <div className="text-[9px] text-neutral-500 uppercase">Token</div>
+                            <div className="text-xs font-bold text-[#E2B93B] font-mono">{prop.tokenPrice}</div>
+                          </div>
+                          <div>
+                            <div className="text-[9px] text-neutral-500 uppercase">Return</div>
+                            <div className="text-xs font-bold text-emerald-400 font-mono">{prop.returnRate}</div>
+                          </div>
+                        </div>
+                        {/* Mini progress bar */}
+                        <div className="w-16">
+                          <div className="h-1 rounded-full bg-white/10 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-[#E2B93B] to-[#B89221]"
+                              style={{ width: `${prop.funded}%` }}
+                            />
+                          </div>
+                          <div className="text-[8px] text-neutral-500 text-right mt-0.5">{prop.funded}%</div>
+                        </div>
+                      </div>
+                    </Link>
                   ))}
+
+                  {/* Footer stat */}
+                  <div className="pt-2 border-t border-white/[0.05] flex items-center justify-between">
+                    <span className="text-[10px] text-neutral-500">Total Tokenized Value</span>
+                    <span className="text-xs font-bold text-[#E2B93B] font-mono">$25M+</span>
+                  </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         </div>

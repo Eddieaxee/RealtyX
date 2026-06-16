@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { AddPropertyModal } from "@/components/admin/add-property-modal";
+import { AnimatePresence } from "framer-motion";
 import { useCurrency } from "@/context/currency-context";
 import {
   Building2,
@@ -90,32 +92,34 @@ export default function PropertyManagementPage() {
     "tenants",
   );
   const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  async function fetchData() {
+    try {
+      const [tenantsRes, maintenanceRes] = await Promise.all([
+        fetch("/api/property-management/tenants"),
+        fetch("/api/property-management/maintenance"),
+      ]);
+
+      if (tenantsRes.ok) {
+        const d = await tenantsRes.json();
+        setTenants(d.tenants || []);
+        if (d.stats) setTStats(d.stats);
+      }
+
+      if (maintenanceRes.ok) {
+        const d = await maintenanceRes.json();
+        setMaintenanceRequests(d.requests || []);
+        if (d.stats) setMStats(d.stats);
+      }
+    } catch {
+      console.error("Failed to fetch property management data");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const [tenantsRes, maintenanceRes] = await Promise.all([
-          fetch("/api/property-management/tenants"),
-          fetch("/api/property-management/maintenance"),
-        ]);
-
-        if (tenantsRes.ok) {
-          const d = await tenantsRes.json();
-          setTenants(d.tenants || []);
-          if (d.stats) setTStats(d.stats);
-        }
-
-        if (maintenanceRes.ok) {
-          const d = await maintenanceRes.json();
-          setMaintenanceRequests(d.requests || []);
-          if (d.stats) setMStats(d.stats);
-        }
-      } catch {
-        console.error("Failed to fetch property management data");
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchData();
   }, []);
 
@@ -143,7 +147,10 @@ export default function PropertyManagementPage() {
             rent collection.
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 h-10 rounded-xl bg-gradient-to-r from-[#E2B93B] to-[#B89221] text-black font-bold text-xs uppercase tracking-wider">
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-2 px-4 h-10 rounded-xl bg-gradient-to-r from-[#E2B93B] to-[#B89221] text-black font-bold text-xs uppercase tracking-wider hover:from-[#B89221] hover:to-[#917116] transition-all"
+        >
           <Plus className="w-4 h-4" /> Add New
         </button>
       </div>
@@ -350,6 +357,17 @@ export default function PropertyManagementPage() {
           )}
         </div>
       )}
+      {/* Add Property Modal */}
+      <AnimatePresence>
+        {showAddModal && (
+          <AddPropertyModal
+            onClose={() => setShowAddModal(false)}
+            onPropertyAdded={() => {
+              fetchData();
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

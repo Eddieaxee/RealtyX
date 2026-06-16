@@ -10,6 +10,7 @@ import {
   Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { KYCAnalyticsDashboard } from "@/components/admin/kyc-analytics";
 
 interface KYCProfile {
   id: string;
@@ -137,7 +138,12 @@ export default function AdminKYCDashboard() {
         <div className="flex justify-center p-20">
           <Loader2 className="animate-spin w-10 h-10 text-[#E2B93B]" />
         </div>
-      ) : (
+      ) : null}
+
+      {/* KYC Analytics Dashboard */}
+      <KYCAnalyticsDashboard />
+
+      {!loading && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Records List */}
           <div

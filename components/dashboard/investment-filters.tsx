@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Search, MapPin, Building2, X, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+// Support BOTH interfaces: separate props (from invest page) and onFilterChange (from public page)
 interface InvestmentFiltersProps {
   onFilterChange?: (filters: {
     search: string;
@@ -12,14 +13,90 @@ interface InvestmentFiltersProps {
     lifecycle: string;
     region: string;
   }) => void;
+  searchQuery?: string;
+  onSearchChange?: (value: string) => void;
+  selectedCategory?: string;
+  onCategorySelect?: (value: string) => void;
+  selectedLifecycle?: string;
+  onLifecycleSelect?: (value: string) => void;
+  selectedRegion?: string;
+  onRegionSelect?: (value: string) => void;
 }
 
-export function InvestmentFilters({ onFilterChange }: InvestmentFiltersProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("ALL");
-  const [selectedLifecycle, setSelectedLifecycle] = useState("ALL");
-  const [selectedRegion, setSelectedRegion] = useState("ALL");
+export function InvestmentFilters({
+  onFilterChange,
+  searchQuery: externalSearch,
+  onSearchChange: externalSearchChange,
+  selectedCategory: externalCategory,
+  onCategorySelect: externalCategorySelect,
+  selectedLifecycle: externalLifecycle,
+  onLifecycleSelect: externalLifecycleSelect,
+  selectedRegion: externalRegion,
+  onRegionSelect: externalRegionSelect,
+}: InvestmentFiltersProps) {
+  const [internalSearch, setInternalSearch] = useState("");
+  const [internalCategory, setInternalCategory] = useState("ALL");
+  const [internalLifecycle, setInternalLifecycle] = useState("ALL");
+  const [internalRegion, setInternalRegion] = useState("ALL");
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Determine if we're in "external" mode (invest page) or "internal" mode (public page)
+  const isExternalMode = !!externalSearchChange;
+
+  const searchQuery = isExternalMode ? externalSearch || "" : internalSearch;
+  const selectedCategory = isExternalMode ? externalCategory || "ALL" : internalCategory;
+  const selectedLifecycle = isExternalMode ? externalLifecycle || "ALL" : internalLifecycle;
+  const selectedRegion = isExternalMode ? externalRegion || "ALL" : internalRegion;
+
+  const emitFilters = useCallback(
+    (updates: Partial<{ search: string; category: string; lifecycle: string; region: string }>) => {
+      if (!isExternalMode && onFilterChange) {
+        onFilterChange({
+          search: updates.search ?? searchQuery,
+          category: updates.category ?? selectedCategory,
+          lifecycle: updates.lifecycle ?? selectedLifecycle,
+          region: updates.region ?? selectedRegion,
+        });
+      }
+    },
+    [searchQuery, selectedCategory, selectedLifecycle, selectedRegion, onFilterChange, isExternalMode]
+  );
+
+  const handleSearch = (value: string) => {
+    if (isExternalMode && externalSearchChange) {
+      externalSearchChange(value);
+    } else {
+      setInternalSearch(value);
+      emitFilters({ search: value });
+    }
+  };
+
+  const handleCategory = (id: string) => {
+    if (isExternalMode && externalCategorySelect) {
+      externalCategorySelect(id);
+    } else {
+      setInternalCategory(id);
+      emitFilters({ category: id });
+    }
+  };
+
+  const handleLifecycle = (id: string) => {
+    if (isExternalMode && externalLifecycleSelect) {
+      externalLifecycleSelect(id);
+    } else {
+      setInternalLifecycle(id);
+      emitFilters({ lifecycle: id });
+    }
+  };
+
+  const handleRegion = (id: string) => {
+    if (isExternalMode && externalRegionSelect) {
+      externalRegionSelect(id);
+    } else {
+      setInternalRegion(id);
+      emitFilters({ region: id });
+    }
+  };
 
   const categories = [
     { id: "ALL", label: "All Sectors" },
@@ -42,47 +119,21 @@ export function InvestmentFilters({ onFilterChange }: InvestmentFiltersProps) {
     { id: "ABUJA", label: "FCT Abuja" },
   ];
 
-  const emitFilters = useCallback(
-    (updates: Partial<{ search: string; category: string; lifecycle: string; region: string }>) => {
-      const filters = {
-        search: updates.search ?? searchQuery,
-        category: updates.category ?? selectedCategory,
-        lifecycle: updates.lifecycle ?? selectedLifecycle,
-        region: updates.region ?? selectedRegion,
-      };
-      onFilterChange?.(filters);
-    },
-    [searchQuery, selectedCategory, selectedLifecycle, selectedRegion, onFilterChange]
-  );
-
-  const handleSearch = (value: string) => {
-    setSearchQuery(value);
-    emitFilters({ search: value });
-  };
-
-  const handleCategory = (id: string) => {
-    setSelectedCategory(id);
-    emitFilters({ category: id });
-  };
-
-  const handleLifecycle = (id: string) => {
-    setSelectedLifecycle(id);
-    emitFilters({ lifecycle: id });
-  };
-
-  const handleRegion = (id: string) => {
-    setSelectedRegion(id);
-    emitFilters({ region: id });
-  };
-
   const activeFilterCount = [selectedCategory !== "ALL", selectedLifecycle !== "ALL", selectedRegion !== "ALL"].filter(Boolean).length;
 
   const clearAll = () => {
-    setSearchQuery("");
-    setSelectedCategory("ALL");
-    setSelectedLifecycle("ALL");
-    setSelectedRegion("ALL");
-    emitFilters({ search: "", category: "ALL", lifecycle: "ALL", region: "ALL" });
+    if (isExternalMode) {
+      externalSearchChange?.("");
+      externalCategorySelect?.("ALL");
+      externalLifecycleSelect?.("ALL");
+      externalRegionSelect?.("ALL");
+    } else {
+      setInternalSearch("");
+      setInternalCategory("ALL");
+      setInternalLifecycle("ALL");
+      setInternalRegion("ALL");
+      emitFilters({ search: "", category: "ALL", lifecycle: "ALL", region: "ALL" });
+    }
   };
 
   return (
@@ -136,7 +187,6 @@ export function InvestmentFilters({ onFilterChange }: InvestmentFiltersProps) {
 
         {/* Asset Lifecycle Stage & Regional Matrix */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-1">
-          {/* Asset Lifecycle Stage */}
           <div className="space-y-1.5">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-500">
               Asset Lifecycle Stage
@@ -160,7 +210,6 @@ export function InvestmentFilters({ onFilterChange }: InvestmentFiltersProps) {
             </div>
           </div>
 
-          {/* Regional/Zonal Matrix */}
           <div className="space-y-1.5">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-500 flex items-center gap-1">
               <MapPin className="w-3 h-3 text-neutral-500" /> Regional/Zonal Matrix

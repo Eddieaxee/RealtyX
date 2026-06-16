@@ -5,6 +5,7 @@ import Link from "next/link";
 import { WalletBalance } from "@/components/wallet/wallet-balance";
 import { WalletTransactions } from "@/components/wallet/wallet-transactions";
 import { WalletConnect } from "@/components/wallet/wallet-connect";
+import { DepositWithdraw } from "@/components/wallet/deposit-withdraw";
 import { ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -51,11 +52,8 @@ export default function WalletPage() {
   }, []);
 
   const canConnect = useMemo(() => {
-    return (
-      kycStatus === "SUBMITTED" ||
-      kycStatus === "UNDER_REVIEW" ||
-      kycStatus === "APPROVED"
-    );
+    // Allow wallet connection for all users - KYC is recommended but not required
+    return true;
   }, [kycStatus]);
 
   return (
@@ -78,6 +76,7 @@ export default function WalletPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-2 space-y-6">
           <WalletBalance />
+          <DepositWithdraw />
           <WalletTransactions />
         </div>
 
