@@ -9,7 +9,6 @@ import {
   CreditCard,
   Landmark,
   Banknote,
-  ChevronDown,
   CheckCircle2,
   Loader2,
   Shield,
@@ -18,7 +17,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCurrency } from "@/context/currency-context";
-import { useAccount } from "wagmi";
 
 type FlowMode = "DEPOSIT" | "WITHDRAW";
 type DepositMethod = "crypto" | "bank" | "card";
@@ -84,8 +82,7 @@ export function DepositWithdraw() {
   const [amount, setAmount] = useState<string>("");
   const [step, setStep] = useState<"SELECT" | "CONFIRM" | "PROCESSING" | "SUCCESS">("SELECT");
   const [txRef, setTxRef] = useState("");
-  const { formatValue, convertValue, currency } = useCurrency();
-  const { isConnected } = useAccount();
+  const { formatValue, convertValue } = useCurrency();
 
   const methods = mode === "DEPOSIT" ? depositMethods : withdrawMethods;
   const selected = methods.find((m) => m.id === selectedMethod);
@@ -113,7 +110,7 @@ export function DepositWithdraw() {
       }
       return formatValue(num, { noSymbol: false });
     }
-  }, [amount, mode, selectedMethod, formatValue, convertValue, currency]);
+  }, [amount, mode, selectedMethod, formatValue, convertValue]);
 
   const handleSubmit = () => {
     if (!amount || parseFloat(amount) <= 0) return;

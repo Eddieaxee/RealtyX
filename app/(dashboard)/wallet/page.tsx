@@ -54,7 +54,7 @@ export default function WalletPage() {
   const canConnect = useMemo(() => {
     // Allow wallet connection for all users - KYC is recommended but not required
     return true;
-  }, [kycStatus]);
+  }, []);
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto px-4 sm:px-6 py-6 min-h-screen text-white bg-[#090A0C]">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { InvestmentFilters } from "@/components/dashboard/investment-filters";
 import { PropertiesGrid } from "@/components/dashboard/properties-grid";
 import { ShieldCheck, Layers3 } from "lucide-react";
@@ -37,6 +37,17 @@ export default function InvestPage() {
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [selectedLifecycle, setSelectedLifecycle] = useState("ALL");
   const [selectedRegion, setSelectedRegion] = useState("ALL");
+  const [purchasedTokens, setPurchasedTokens] = useState<Record<string, number>>({});
+
+  // Fetch token purchases on mount to adjust available tokens
+  useEffect(() => {
+    fetch("/api/invest")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.purchases) setPurchasedTokens(data.purchases);
+      })
+      .catch(() => { /* ignore */ });
+  }, []);
 
   const institutionalProperties = propertiesData as Property[];
 
@@ -59,23 +70,26 @@ export default function InvestPage() {
     });
   }, [searchQuery, selectedCategory, selectedLifecycle, selectedRegion, institutionalProperties]);
 
-  // Dynamic calculations for each property
+  // Dynamic calculations for each property, accounting for token purchases
   const dynamicProperties = useMemo(() => {
     return filteredProperties.map((p) => {
       const tokenPriceUSD = p.tokenPriceUSD || 0;
       const totalTokens = p.totalTokens || 0;
+      const purchased = purchasedTokens[p.id] || 0;
+      const adjustedAvailable = Math.max(0, (p.availableTokens || 0) - purchased);
       const totalValueUSD = totalTokens * tokenPriceUSD;
       const fundedPercent = totalTokens > 0
-        ? Math.round(((totalTokens - (p.availableTokens || 0)) / totalTokens) * 100)
+        ? Math.round(((totalTokens - adjustedAvailable) / totalTokens) * 100)
         : 0;
       return {
         ...p,
+        availableTokens: adjustedAvailable,
         tokenPrice: p.tokenPriceNGN,
         totalValueUSD,
         funded: fundedPercent,
       };
     });
-  }, [filteredProperties]);
+  }, [filteredProperties, purchasedTokens]);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 py-6 min-h-screen text-white bg-[#090A0C]">

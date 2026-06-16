@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -8,14 +8,9 @@ import {
   MapPin,
   TrendingUp,
   Building2,
-  ShieldCheck,
   FileText,
   Layers,
   CheckCircle2,
-  Clock,
-  DollarSign,
-  Percent,
-  Users,
   Star,
   ChevronRight,
 } from "lucide-react";
@@ -68,10 +63,26 @@ export default function PropertyDetailPage() {
   const { formatValue } = useCurrency();
   const [showInvestModal, setShowInvestModal] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
+  const [slideshow, setSlideshow] = useState(false);
+  const [purchasedTokens, setPurchasedTokens] = useState<
+    Record<string, number>
+  >({});
+
+  // Fetch token purchases on mount to adjust available tokens
+  useEffect(() => {
+    fetch("/api/invest")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.purchases) setPurchasedTokens(data.purchases);
+      })
+      .catch(() => {
+        /* ignore */
+      });
+  }, []);
 
   const property = useMemo(() => {
     const found = (propertiesData as PropertyDetail[]).find(
-      (p) => p.id === id || p.slug === id
+      (p) => p.id === id || p.slug === id,
     );
     if (!found) return null;
 
@@ -81,11 +92,13 @@ export default function PropertyDetailPage() {
     const calculatedTotalValueUSD =
       calculatedTotalTokens * calculatedTokenPriceUSD;
     const calculatedTotalValueNGN =
-      calculatedTotalValueUSD * (found.tokenPriceNGN && calculatedTokenPriceUSD
+      calculatedTotalValueUSD *
+      (found.tokenPriceNGN && calculatedTokenPriceUSD
         ? found.tokenPriceNGN / calculatedTokenPriceUSD
         : 1520);
     const calculatedTokenPriceNGN =
-      calculatedTokenPriceUSD * (found.tokenPriceNGN && calculatedTokenPriceUSD
+      calculatedTokenPriceUSD *
+      (found.tokenPriceNGN && calculatedTokenPriceUSD
         ? found.tokenPriceNGN / calculatedTokenPriceUSD
         : 1520);
     const fundedPercent =
@@ -93,9 +106,15 @@ export default function PropertyDetailPage() {
         ? Math.round(
             ((calculatedTotalTokens - (found.availableTokens || 0)) /
               calculatedTotalTokens) *
-              100
+              100,
           )
         : 0;
+
+    const purchased = purchasedTokens[found.id] || 0;
+    const adjustedAvailable = Math.max(
+      0,
+      (found.availableTokens || 0) - purchased,
+    );
 
     return {
       ...found,
@@ -103,9 +122,24 @@ export default function PropertyDetailPage() {
       tokenPriceNGN: calculatedTokenPriceNGN,
       totalValueUSD: calculatedTotalValueUSD,
       totalValueNGN: calculatedTotalValueNGN,
+      availableTokens: adjustedAvailable,
       funded: fundedPercent,
     };
-  }, [id]);
+  }, [id, purchasedTokens]);
+
+  // Auto-advance slideshow — must be after property is defined
+  const advanceImage = useCallback(() => {
+    setActiveImage((prev) => {
+      if (!property) return 0;
+      return (prev + 1) % property.images.length;
+    });
+  }, [property]);
+
+  useEffect(() => {
+    if (!slideshow) return;
+    const interval = setInterval(advanceImage, 3000);
+    return () => clearInterval(interval);
+  }, [slideshow, advanceImage]);
 
   if (!property) {
     return (
@@ -196,6 +230,49 @@ export default function PropertyDetailPage() {
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#090A0C] via-transparent to-transparent" />
+          {/* Slideshow controls */}
+          <div className="absolute top-4 right-4 flex gap-2 z-10">
+            <button
+              onClick={() => {
+                setSlideshow(!slideshow);
+              }}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold font-mono backdrop-blur-sm transition-all ${
+                slideshow
+                  ? "bg-[#E2B93B] text-black"
+                  : "bg-black/50 text-white hover:bg-black/70"
+              }`}
+            >
+              {slideshow ? "⏸ Pause" : "▶ Slideshow"}
+            </button>
+          </div>
+
+          {/* Prev / Next arrows */}
+          <button
+            type="button"
+            aria-label="Previous image"
+            onClick={() => {
+              setSlideshow(false);
+              setActiveImage(
+                (activeImage - 1 + property.images.length) %
+                  property.images.length,
+              );
+            }}
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-sm transition-all z-10"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            aria-label="Next image"
+            onClick={() => {
+              setSlideshow(false);
+              setActiveImage((activeImage + 1) % property.images.length);
+            }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-sm transition-all z-10"
+          >
+            ›
+          </button>
+
           <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
             <div className="text-xs font-mono text-neutral-300 bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-lg">
               {activeImage + 1} / {property.images.length}
@@ -204,7 +281,12 @@ export default function PropertyDetailPage() {
               {property.images.map((_, idx) => (
                 <button
                   key={idx}
-                  onClick={() => setActiveImage(idx)}
+                  type="button"
+                  aria-label={`Show image ${idx + 1}`}
+                  onClick={() => {
+                    setSlideshow(false);
+                    setActiveImage(idx);
+                  }}
                   className={`w-2 h-2 rounded-full transition-all ${
                     idx === activeImage
                       ? "bg-[#E2B93B] w-6"
@@ -224,25 +306,33 @@ export default function PropertyDetailPage() {
             </h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-neutral-400">Token Price (USD)</span>
+                <span className="text-xs text-neutral-400">
+                  Token Price (USD)
+                </span>
                 <span className="text-sm font-bold text-white font-mono">
                   ${property.tokenPriceUSD}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-neutral-400">Token Price (NGN)</span>
+                <span className="text-xs text-neutral-400">
+                  Token Price (NGN)
+                </span>
                 <span className="text-sm font-bold text-white font-mono">
                   ₦{property.tokenPriceNGN.toLocaleString()}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-neutral-400">Total Property Value</span>
+                <span className="text-xs text-neutral-400">
+                  Total Property Value
+                </span>
                 <span className="text-sm font-bold text-[#E2B93B] font-mono">
                   {formatValue(property.totalValueNGN)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-neutral-400">Expected Return</span>
+                <span className="text-xs text-neutral-400">
+                  Expected Return
+                </span>
                 <span className="text-sm font-bold text-emerald-400 font-mono flex items-center gap-1">
                   <TrendingUp className="w-3 h-3" />
                   {property.expectedReturn}% APY
@@ -270,10 +360,7 @@ export default function PropertyDetailPage() {
               <span className="text-white font-bold">{property.funded}%</span>
             </div>
             <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#E2B93B] to-[#B89221]"
-                style={{ width: `${property.funded}%` }}
-              />
+              <div className="h-full rounded-full bg-gradient-to-r from-[#E2B93B] to-[#B89221] progress-fill" />
             </div>
             <div className="flex justify-between text-[10px] font-mono text-neutral-500">
               <span>
@@ -283,6 +370,11 @@ export default function PropertyDetailPage() {
               <span>{property.totalTokens.toLocaleString()} total</span>
             </div>
           </div>
+          <style jsx>{`
+            .progress-fill {
+              width: ${property.funded}%;
+            }
+          `}</style>
 
           <Button
             onClick={() => setShowInvestModal(true)}
@@ -370,9 +462,29 @@ export default function PropertyDetailPage() {
                 <FileText className="w-3.5 h-3.5 text-neutral-500" />
                 <span className="text-xs text-neutral-300">{doc}</span>
               </div>
-              <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                Verified
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                  Verified
+                </span>
+                <button
+                  onClick={() => {
+                    // Create a text blob and trigger download
+                    const content = `RealtyX Document\n================\n\nProperty: ${property.title}\nDocument: ${doc}\nProperty ID: ${property.id}\n\nThis is a verified document for fractional ownership on the RealtyX platform.\n\nFor official verification, please visit https://realtyx.io/verify?id=${property.id}`;
+                    const blob = new Blob([content], { type: "text/plain" });
+                    const url = URL.createObjectURL(blob);
+                    const a = window.document.createElement("a");
+                    a.href = url;
+                    a.download = `${doc.replace(/[^a-zA-Z0-9]/g, "_")}.txt`;
+                    window.document.body.appendChild(a);
+                    a.click();
+                    window.document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="text-[9px] font-mono text-[#E2B93B] bg-[#E2B93B]/10 px-2 py-0.5 rounded border border-[#E2B93B]/20 hover:bg-[#E2B93B]/20 transition-colors cursor-pointer"
+                >
+                  ↓ Download
+                </button>
+              </div>
             </div>
           ))}
         </div>

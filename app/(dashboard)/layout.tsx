@@ -13,7 +13,6 @@ import {
   TrendingUp,
   Brain,
   Bell,
-  CreditCard,
   Landmark,
   LogOut,
   DollarSign,
@@ -21,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { LogoutButton } from "@/components/layout/logout-button";
+import { useCurrency } from "@/context/currency-context";
 
 // Grouped sidebar navigation for the investor workspace
 const navSections = [
@@ -70,6 +70,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { currency, setCurrency } = useCurrency();
 
   return (
     <div className="min-h-screen bg-[#090A0C] text-white flex selection:bg-[#E2B93B]/30 selection:text-[#E2B93B]">
@@ -134,6 +135,29 @@ export default function DashboardLayout({
               pathname={pathname}
               onNavigate={() => setMobileOpen(false)}
             />
+            {/* Currency Toggle - Mobile */}
+            <div className="flex gap-1 bg-[#090A0C] border border-white/5 p-1 rounded-xl mb-3">
+              <button
+                onClick={() => setCurrency("USD")}
+                className={`flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold font-mono transition-all ${
+                  currency === "USD"
+                    ? "bg-[#E2B93B]/10 text-[#E2B93B] border border-[#E2B93B]/20"
+                    : "text-neutral-500 hover:text-white border border-transparent"
+                }`}
+              >
+                $ USD
+              </button>
+              <button
+                onClick={() => setCurrency("NGN")}
+                className={`flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold font-mono transition-all ${
+                  currency === "NGN"
+                    ? "bg-[#E2B93B]/10 text-[#E2B93B] border border-[#E2B93B]/20"
+                    : "text-neutral-500 hover:text-white border border-transparent"
+                }`}
+              >
+                ₦ NGN
+              </button>
+            </div>
             <div className="mt-4 pt-4 border-t border-white/5">
               <LogoutButton />
             </div>
@@ -197,7 +221,30 @@ export default function DashboardLayout({
             <LogOut className="w-4 h-4" />
             <span>Back to Home</span>
           </Link>
-          <div className="p-3 bg-[#090A0C] border border-white/5 rounded-xl flex items-center gap-2 text-[10px] font-mono text-neutral-500">
+          {/* Currency Toggle */}
+        <div className="flex gap-1 bg-[#090A0C] border border-white/5 p-1 rounded-xl">
+          <button
+            onClick={() => setCurrency("USD")}
+            className={`flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold font-mono transition-all ${
+              currency === "USD"
+                ? "bg-[#E2B93B]/10 text-[#E2B93B] border border-[#E2B93B]/20"
+                : "text-neutral-500 hover:text-white border border-transparent"
+            }`}
+          >
+            $ USD
+          </button>
+          <button
+            onClick={() => setCurrency("NGN")}
+            className={`flex-1 px-3 py-1.5 rounded-lg text-[10px] font-bold font-mono transition-all ${
+              currency === "NGN"
+                ? "bg-[#E2B93B]/10 text-[#E2B93B] border border-[#E2B93B]/20"
+                : "text-neutral-500 hover:text-white border border-transparent"
+            }`}
+          >
+            ₦ NGN
+          </button>
+        </div>
+        <div className="p-3 bg-[#090A0C] border border-white/5 rounded-xl flex items-center gap-2 text-[10px] font-mono text-neutral-500">
             <Landmark className="w-3.5 h-3.5 text-[#E2B93B]" />
             <span>CBN / SEC Sandbox Active</span>
           </div>

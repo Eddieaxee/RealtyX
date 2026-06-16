@@ -7,9 +7,7 @@ import { PendingKYC } from "@/components/admin/pending-kyc";
 import { PlatformActivity } from "@/components/admin/platform-activity";
 import {
   Building2,
-  TrendingUp,
   Shield,
-  Users,
   Wallet,
   BarChart3,
   Globe,

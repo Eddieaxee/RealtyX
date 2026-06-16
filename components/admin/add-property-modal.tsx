@@ -4,12 +4,10 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
-  Plus,
   Building2,
   MapPin,
   DollarSign,
   Percent,
-  Layers,
   Save,
   Loader2,
   CheckCircle2,
@@ -23,7 +21,6 @@ interface AddPropertyModalProps {
 }
 
 export function AddPropertyModal({ onClose, onPropertyAdded }: AddPropertyModalProps) {
-  const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [formData, setFormData] = useState({

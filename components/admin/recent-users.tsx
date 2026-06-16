@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { formatDate } from "@/lib/utils";
 import { UserCheck, UserX, Clock, Users, ExternalLink } from "lucide-react";
 
 const users = [

@@ -72,7 +72,7 @@ export default function CompliancePage() {
               <div className="space-y-2">
                 <h3 className="font-semibold text-sm text-[#E2B93B]">Identity Verification</h3>
                 <p className="text-xs text-muted-foreground">
-                  All investors must complete identity verification using a government-issued photo ID. We accept national IDs, passports, and driver's licenses from over 190 countries.
+                  All investors must complete identity verification using a government-issued photo ID. We accept national IDs, passports, and driver{'\''}s licenses from over 190 countries.
                 </p>
               </div>
               <div className="space-y-2">

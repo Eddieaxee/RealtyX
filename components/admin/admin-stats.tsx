@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, DollarSign, Building2, AlertTriangle, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Users, DollarSign, Building2, AlertTriangle, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 
 const stats = [

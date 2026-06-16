@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { UserCheck, Wallet, Building2, TrendingUp } from "lucide-react";
 import styles from "./how-it-works.module.css";
 
@@ -127,13 +127,6 @@ function StepCard({ item, index }: { item: (typeof steps)[0]; index: number }) {
 export function HowItWorks() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-10%" });
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
-
-  const lineWidth = useTransform(scrollYProgress, [0.1, 0.5], ["0%", "100%"]);
 
   return (
     <section

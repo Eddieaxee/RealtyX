@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { AddPropertyModal } from "@/components/admin/add-property-modal";
 import { AnimatePresence } from "framer-motion";
 import { useCurrency } from "@/context/currency-context";

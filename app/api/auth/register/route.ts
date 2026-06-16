@@ -51,11 +51,8 @@ export async function POST(req: Request) {
             status: "PENDING",
             firstName: parsed.data.name.split(" ")[0] || "Investor",
             lastName: parsed.data.name.split(" ").slice(1).join(" ") || "Profile",
-            nationality: "Nigerian",
             country: "Nigeria",
-            state: "Lagos",
             idType: "BVN",
-            investmentGoals: [],
           }
         }
       },

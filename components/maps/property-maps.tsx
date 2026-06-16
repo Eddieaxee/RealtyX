@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import {
   Map,
@@ -176,7 +176,7 @@ export function PropertyMapSystem({
             </h4>
             <div className="space-y-2">
               {analytics.infrastructure.map((item, index) => {
-                const Icon = item.icon || Navigation;
+                const Icon = (item as { icon?: typeof Navigation }).icon || Navigation;
                 return (
                   <div
                     key={index}

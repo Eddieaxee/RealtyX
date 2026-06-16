@@ -1,21 +1,23 @@
 import { PrismaClient } from "@prisma/client";
-import { withAccelerate } from "@prisma/extension-accelerate";
-
-type ExtendedPrismaClient = ReturnType<typeof createPrismaClient>;
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: ExtendedPrismaClient | undefined;
+  prisma: PrismaClient | undefined;
 };
 
 const createPrismaClient = () => {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error(
-      "CRITICAL_CONFIG_ERROR: DATABASE_URL environment variable is missing.",
-    );
+  // For local SQLite (file:./dev.db), use better-sqlite3 adapter
+  const isLocal = !process.env.PRISMA_ORM || process.env.DATABASE_URL?.startsWith("file:");
+  
+  if (isLocal) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { PrismaBetterSqlite3 } = require("@prisma/adapter-better-sqlite3");
+    const adapter = new PrismaBetterSqlite3({ url: "file:./dev.db" });
+    return new PrismaClient({ adapter, log: ["error"] });
   }
 
-  // Production-grade pooling wrapper using stable native Prisma mechanisms with Accelerate edge optimization
+  // Production: use Accelerate
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { withAccelerate } = require("@prisma/extension-accelerate");
   return new PrismaClient({
     accelerateUrl: process.env.PRISMA_ORM,
   }).$extends(withAccelerate());

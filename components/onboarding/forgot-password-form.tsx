@@ -9,7 +9,6 @@ import {
   ArrowLeft,
   ShieldCheck,
   CheckCircle2,
-  Lock,
   MessageSquare,
   KeyRound,
 } from "lucide-react";
@@ -173,7 +172,7 @@ export function ForgotPasswordForm() {
             Restore Access to Your Investor Portal.
           </h2>
           <p className="text-sm text-neutral-400 leading-relaxed max-w-md">
-            Choose your preferred recovery method and we'll guide you through the secure account restoration process.
+            Choose your preferred recovery method and we{'\''}ll guide you through the secure account restoration process.
           </p>
           <div className="space-y-3 pt-4 border-t border-white/5 max-w-sm">
             <div className="flex items-start gap-3 text-xs text-neutral-400">

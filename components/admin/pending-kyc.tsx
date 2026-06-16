@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, X, Check, Shield, FileCheck, AlertTriangle } from "lucide-react";
+import { Clock, X, Check, Shield, AlertTriangle } from "lucide-react";
 
 const kycItems = [
   {

@@ -12,7 +12,6 @@ import {
   CreditCard,
   Landmark,
   Bitcoin,
-  Coins,
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -87,6 +86,16 @@ export function InvestmentModal({ property, onClose }: InvestmentModalProps) {
 
       if (data.success) {
         setTxRef(data.reference || `RX-${selectedPayment.toUpperCase()}-${Date.now()}`);
+        // Record token purchase to reduce available tokens
+        try {
+          await fetch("/api/invest", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ propertyId: property.id, quantity }),
+          });
+        } catch {
+          // Non-critical — token tracking is best-effort
+        }
         // If there's a redirect URL, open it
         if (data.redirectUrl) {
           window.open(data.redirectUrl, "_blank");
@@ -95,11 +104,31 @@ export function InvestmentModal({ property, onClose }: InvestmentModalProps) {
       } else {
         // If payment provider is not configured, simulate success
         setTxRef(`RX-${selectedPayment.toUpperCase()}-${Date.now()}`);
+        // Record token purchase
+        try {
+          await fetch("/api/invest", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ propertyId: property.id, quantity }),
+          });
+        } catch {
+          // Non-critical
+        }
         setStep("SUCCESS");
       }
     } catch {
       // If API fails, simulate success for demo
       setTxRef(`RX-${selectedPayment.toUpperCase()}-${Date.now()}`);
+      // Record token purchase
+      try {
+        await fetch("/api/invest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ propertyId: property.id, quantity }),
+        });
+      } catch {
+        // Non-critical
+      }
       setStep("SUCCESS");
     }
   };

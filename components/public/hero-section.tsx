@@ -5,38 +5,23 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, TrendingUp, Users, MapPin, Building2 } from "lucide-react";
 import { Tesseract } from "@/components/three/tesseract";
+import { useCurrency } from "@/context/currency-context";
+import propertiesData from "@/data/properties.json";
 
-const FEATURED_PROPERTIES = [
-  {
-    id: "eko-atlantic-alpha",
-    title: "Eko Atlantic High-Rise",
-    location: "Victoria Island, Lagos",
-    tokenPrice: "$85",
-    returnRate: "16.4%",
-    status: "Active",
-    funded: 85,
-  },
-  {
-    id: "banana-island-marina-view",
-    title: "Banana Island Estate",
-    location: "Banana Island, Lagos",
-    tokenPrice: "$100",
-    returnRate: "17.5%",
-    status: "Active",
-    funded: 78,
-  },
-  {
-    id: "abuja-tech-park",
-    title: "Abuja Tech Park",
-    location: "Gwarinpa, Abuja",
-    tokenPrice: "$55",
-    returnRate: "19.5%",
-    status: "Under Construction",
-    funded: 52,
-  },
-];
+// Pick the first 3 properties as featured — always from the same source data
+const FEATURED_PROPERTIES = (propertiesData as Array<{
+  id: string;
+  title: string;
+  location: string;
+  lifecycle: string;
+  tokenPriceUSD: number;
+  totalTokens: number;
+  availableTokens: number;
+  expectedReturn: number;
+}>).slice(0, 3);
 
 export function HeroSection() {
+  const { formatValue } = useCurrency();
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -142,58 +127,73 @@ export function HeroSection() {
                     </Link>
                   </div>
 
-                  {/* Property Cards */}
-                  {FEATURED_PROPERTIES.map((prop) => (
-                    <Link
-                      key={prop.id}
-                      href={`/invest/${prop.id}`}
-                      className="block p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-[#E2B93B]/20 hover:bg-white/[0.05] transition-all duration-300"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h4 className="text-sm font-bold text-white">{prop.title}</h4>
-                          <div className="flex items-center gap-1 mt-0.5">
-                            <MapPin className="w-3 h-3 text-neutral-500" />
-                            <span className="text-[10px] text-neutral-400">{prop.location}</span>
-                          </div>
-                        </div>
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                          prop.status === "Active"
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                            : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                        }`}>
-                          {prop.status}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
+                  {/* Property Cards — dynamically from data */}
+                  {FEATURED_PROPERTIES.map((prop) => {
+                    const fundedPercent =
+                      prop.totalTokens > 0
+                        ? Math.round(
+                            ((prop.totalTokens - prop.availableTokens) /
+                              prop.totalTokens) *
+                              100
+                          )
+                        : 0;
+                    return (
+                      <Link
+                        key={prop.id}
+                        href={`/invest/${prop.id}`}
+                        className="block p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-[#E2B93B]/20 hover:bg-white/[0.05] transition-all duration-300"
+                      >
+                        <div className="flex items-start justify-between mb-2">
                           <div>
-                            <div className="text-[9px] text-neutral-500 uppercase">Token</div>
-                            <div className="text-xs font-bold text-[#E2B93B] font-mono">{prop.tokenPrice}</div>
+                            <h4 className="text-sm font-bold text-white">{prop.title}</h4>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <MapPin className="w-3 h-3 text-neutral-500" />
+                              <span className="text-[10px] text-neutral-400">{prop.location}</span>
+                            </div>
                           </div>
-                          <div>
-                            <div className="text-[9px] text-neutral-500 uppercase">Return</div>
-                            <div className="text-xs font-bold text-emerald-400 font-mono">{prop.returnRate}</div>
-                          </div>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                            prop.lifecycle === "COMPLETED"
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                          }`}>
+                            {prop.lifecycle === "COMPLETED" ? "Active" : "Under Construction"}
+                          </span>
                         </div>
-                        {/* Mini progress bar */}
-                        <div className="w-16">
-                          <div className="h-1 rounded-full bg-white/10 overflow-hidden">
-                            <div
-                              className="h-full rounded-full bg-gradient-to-r from-[#E2B93B] to-[#B89221]"
-                              style={{ width: `${prop.funded}%` }}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div>
+                              <div className="text-[9px] text-neutral-500 uppercase">Token</div>
+                              <div className="text-xs font-bold text-[#E2B93B] font-mono">{formatValue(prop.tokenPriceUSD)}</div>
+                            </div>
+                            <div>
+                              <div className="text-[9px] text-neutral-500 uppercase">Return</div>
+                              <div className="text-xs font-bold text-emerald-400 font-mono">{prop.expectedReturn}%</div>
+                            </div>
+                          </div>
+                          {/* Mini progress bar */}
+                          <div className="w-16">
+                            <progress
+                              value={fundedPercent}
+                              max={100}
+                              className="w-full h-1 rounded-full bg-white/10 overflow-hidden progress-bar"
                             />
+                            <div className="text-[8px] text-neutral-500 text-right mt-0.5">{fundedPercent}%</div>
                           </div>
-                          <div className="text-[8px] text-neutral-500 text-right mt-0.5">{prop.funded}%</div>
                         </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    );
+                  })}
 
-                  {/* Footer stat */}
+                  {/* Footer stat — dynamically computed */}
                   <div className="pt-2 border-t border-white/[0.05] flex items-center justify-between">
                     <span className="text-[10px] text-neutral-500">Total Tokenized Value</span>
-                    <span className="text-xs font-bold text-[#E2B93B] font-mono">$25M+</span>
+                    <span className="text-xs font-bold text-[#E2B93B] font-mono">
+                      {(() => {
+                        const totalUSD = (propertiesData as Array<{ totalTokens: number; tokenPriceUSD: number }>)
+                          .reduce((sum, p) => sum + (p.totalTokens || 0) * (p.tokenPriceUSD || 0), 0);
+                        return formatValue(totalUSD);
+                      })()}
+                    </span>
                   </div>
                 </div>
               </div>

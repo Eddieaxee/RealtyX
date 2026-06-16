@@ -1,15 +1,23 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { PublicNav } from "@/components/layout/public-nav";
 import { Footer } from "@/components/layout/footer";
 import { PropertiesGrid } from "@/components/dashboard/properties-grid";
 import { InvestmentFilters } from "@/components/dashboard/investment-filters";
-import { PropertyMapSystem } from "@/components/maps/property-maps";
 import { Map, List } from "lucide-react";
 import propertiesData from "@/data/properties.json";
+import { useRouter } from "next/navigation";
+
+// Dynamically import the multi-property map (client-side only)
+const MultiPropertyMap = dynamic(
+  () => import("@/components/maps/multi-property-map"),
+  { ssr: false }
+);
 
 export default function PropertiesPage() {
+  const router = useRouter();
   const [filters, setFilters] = useState({
     search: "",
     category: "ALL",
@@ -73,6 +81,23 @@ export default function PropertiesPage() {
     });
   }, [filteredProperties]);
 
+  // Map properties for the multi-pin map
+  const mapProperties = useMemo(() => {
+    return filteredProperties.map((p) => ({
+      id: p.id,
+      title: p.title,
+      lat: p.lat,
+      lng: p.lng,
+      location: p.location,
+      tokenPriceUSD: p.tokenPriceUSD,
+      expectedReturn: p.expectedReturn,
+      funded: p.totalTokens > 0
+        ? Math.round(((p.totalTokens - p.availableTokens) / p.totalTokens) * 100)
+        : 0,
+      image: p.image,
+    }));
+  }, [filteredProperties]);
+
   const centerLat = filteredProperties.length > 0 
     ? filteredProperties.reduce((sum, p) => sum + p.lat, 0) / filteredProperties.length 
     : 6.45;
@@ -123,14 +148,23 @@ export default function PropertiesPage() {
             </span>
           </div>
 
-          {/* Map View */}
+          {/* Map View — individual pins for each property */}
           {viewMode === "map" && (
-            <div className="mb-8">
-              <PropertyMapSystem
-                lat={centerLat}
-                lng={centerLng}
-                propertyName={`${filteredProperties.length} Properties`}
-                neighborhood="Nigeria"
+            <div className="mb-8 rounded-2xl overflow-hidden border border-white/5 bg-[#0D0E12]">
+              <div className="p-4 border-b border-white/5">
+                <h3 className="text-sm font-bold text-white font-mono flex items-center gap-2">
+                  <Map className="w-4 h-4 text-[#E2B93B]" />
+                  All Properties — {filteredProperties.length} Pins
+                </h3>
+                <p className="text-[11px] text-neutral-400 font-mono mt-0.5">
+                  Click a pin to view property details. Scroll to zoom.
+                </p>
+              </div>
+              <MultiPropertyMap
+                properties={mapProperties}
+                centerLat={centerLat}
+                centerLng={centerLng}
+                onPropertyClick={(id) => router.push(`/invest/${id}`)}
               />
             </div>
           )}

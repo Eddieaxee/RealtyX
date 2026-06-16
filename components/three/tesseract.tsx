@@ -60,33 +60,6 @@ function generateHypercubeEdges() {
   return edges;
 }
 
-function generateHypercubeFaces() {
-  const faces: number[][] = [];
-  for (let i = 0; i < 16; i++) {
-    for (let j = i + 1; j < 16; j++) {
-      for (let k = j + 1; k < 16; k++) {
-        for (let l = k + 1; l < 16; l++) {
-          const vertices = [i, j, k, l];
-          // Check if all pairs differ by exactly 1 bit
-          let allDifferByOne = true;
-          for (let a = 0; a < vertices.length && allDifferByOne; a++) {
-            for (let b = a + 1; b < vertices.length && allDifferByOne; b++) {
-              let diff = 0;
-              for (let c = 0; c < 4; c++) {
-                if (((vertices[a] >> c) & 1) !== ((vertices[b] >> c) & 1))
-                  diff++;
-              }
-              if (diff !== 1) allDifferByOne = false;
-            }
-          }
-          if (allDifferByOne) faces.push(vertices);
-        }
-      }
-    }
-  }
-  return faces;
-}
-
 function project4Dto3D(
   vertex: number[],
   w: number,
