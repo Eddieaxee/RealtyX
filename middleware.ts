@@ -4,7 +4,7 @@ import { authConfig } from "./lib/auth.config";
 /**
  * Auth.js v5 official middleware pattern.
  * Uses the `authorized` callback from authConfig to handle route protection.
- * This eliminates manual cookie checking and prevents the request waterfalling issue.
+ * Strips unauthorized requests to /admin/* and protected routes.
  */
 export default NextAuth(authConfig).auth;
 

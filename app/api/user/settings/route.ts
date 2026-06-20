@@ -1,41 +1,72 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
 
-// In-memory settings store (would be database in production)
-const settingsStore = new Map<string, Record<string, unknown>>();
-
+/**
+ * GET /api/user/settings - Fetch current user settings
+ */
 export async function GET() {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const settings = settingsStore.get(session.user.id) || {
-      emailDrawdown: true,
-      smsSecondaryMatch: false,
-      marketingUpdates: true,
-      twoFactorEnforced: true,
-    };
+    const settings = await db.userSettings.findUnique({
+      where: { userId: session.user.id },
+    });
 
-    return NextResponse.json({ settings });
-  } catch {
-    return NextResponse.json({ error: "Failed to load settings" }, { status: 500 });
+    // If no settings exist, create defaults
+    if (!settings) {
+      const defaults = await db.userSettings.create({
+        data: { userId: session.user.id },
+      });
+      return NextResponse.json({ success: true, settings: defaults });
+    }
+
+    return NextResponse.json({ success: true, settings });
+  } catch (error) {
+    console.error("Failed to fetch settings:", error);
+    return NextResponse.json({ success: false, error: "Internal error" }, { status: 500 });
   }
 }
 
-export async function PUT(req: Request) {
+/**
+ * PATCH /api/user/settings - Update user settings
+ */
+export async function PATCH(req: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
-    settingsStore.set(session.user.id, body);
+    const allowedFields = [
+      "allowNotifications", "emailAlerts", "soundEffects", "pushNotifications",
+      "darkMode", "language", "currency", "timezone", "marketingEmails", "loginAlerts",
+    ];
 
-    return NextResponse.json({ success: true, settings: body });
-  } catch {
-    return NextResponse.json({ error: "Failed to save settings" }, { status: 500 });
+    // Filter to only allowed fields
+    const updateData: Record<string, string | number | boolean> = {};
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        updateData[field] = body[field];
+      }
+    }
+
+    const settings = await db.userSettings.upsert({
+      where: { userId: session.user.id },
+      update: updateData,
+      create: {
+        userId: session.user.id,
+        ...updateData,
+      },
+    });
+
+    return NextResponse.json({ success: true, settings });
+  } catch (error) {
+    console.error("Failed to update settings:", error);
+    return NextResponse.json({ success: false, error: "Internal error" }, { status: 500 });
   }
 }

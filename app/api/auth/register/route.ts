@@ -1,78 +1,101 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/db";
-import { z } from "zod";
-
-const registerSchema = z.object({
-  name: z.string().min(2, "Name must accurately reference your legal identification registry."),
-  email: z.string().email("A valid transactional communication email path is required."),
-  password: z.string().min(6, "Password length must clear minimum security limits."),
-});
+import { db } from "@/lib/db";
+import { sendEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const parsed = registerSchema.safeParse(body);
-    
-    if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 });
-    }
+    const { name, email, password } = await req.json();
 
-    const normalizedEmail = parsed.data.email.toLowerCase().trim();
-
-    // Structural concurrency verification mapping check
-    const existingUser = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    });
-
-    if (existingUser) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: "Identical investor allocation profile already registered." },
-        { status: 400 },
+        { success: false, error: "Email and password are required" },
+        { status: 400 }
       );
     }
 
-    const hashedPassword = await bcrypt.hash(parsed.data.password, 12);
+    if (password.length < 8) {
+      return NextResponse.json(
+        { success: false, error: "Password must be at least 8 characters" },
+        { status: 400 }
+      );
+    }
 
-    // Administrative override tracking configuration context
-    const administrativeRole = normalizedEmail === "edisonelvisy@gmail.com" ? "ADMIN" : "USER";
+    // Check if user already exists
+    const existingUser = await db.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return NextResponse.json(
+        { success: false, error: "An account with this email already exists" },
+        { status: 409 }
+      );
+    }
 
-    // Atomically instantiate deep ledger assets to prevent asynchronous structural relation errors
-    const user = await prisma.user.create({
-      data: {
-        name: parsed.data.name.trim(),
-        email: normalizedEmail,
-        password: hashedPassword,
-        role: administrativeRole,
-        status: "ACTIVE",
-        // Nested relation creation ensures downstream runtime queries resolve natively instantly
-        kyc: {
-          create: {
-            status: "PENDING",
-            firstName: parsed.data.name.split(" ")[0] || "Investor",
-            lastName: parsed.data.name.split(" ").slice(1).join(" ") || "Profile",
-            country: "Nigeria",
-            idType: "BVN",
-          }
-        }
-      },
-      include: {
-        kyc: true
-      }
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create user with profile, settings, and wallet in a transaction
+    const user = await db.$transaction(async (tx) => {
+      const newUser = await tx.user.create({
+        data: {
+          name: name || email.split("@")[0],
+          email,
+          password: hashedPassword,
+          role: "USER",
+          status: "ACTIVE",
+        },
+      });
+
+      // Create profile
+      await tx.profile.create({
+        data: {
+          userId: newUser.id,
+          firstName: name || email.split("@")[0],
+        },
+      });
+
+      // Create default settings
+      await tx.userSettings.create({
+        data: {
+          userId: newUser.id,
+        },
+      });
+
+      // Create wallet
+      await tx.wallet.create({
+        data: {
+          userId: newUser.id,
+        },
+      });
+
+      return newUser;
     });
 
-    return NextResponse.json({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role
-    }, { status: 201 });
+    // Send welcome email (non-blocking)
+    sendEmail({
+      to: email,
+      subject: "Welcome to RealtyX",
+      template: "welcome",
+      data: {
+        userName: name || email.split("@")[0],
+      },
+      userId: user.id,
+    }).catch(() => {});
 
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        redirectTo: "/dashboard",
+      },
+    });
   } catch (error) {
-    console.error("CRITICAL_REGISTRATION_FAULT:", error);
+    console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "Internal core infrastructure registration transaction failure." },
-      { status: 500 },
+      { success: false, error: "An unexpected error occurred" },
+      { status: 500 }
     );
   }
 }

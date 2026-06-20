@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, TrendingUp, Users, MapPin, Building2 } from "lucide-react";
 import { Tesseract } from "@/components/three/tesseract";
-import { useCurrency } from "@/context/currency-context";
 import propertiesData from "@/data/properties.json";
 
 // Pick the first 3 properties as featured — always from the same source data
@@ -20,8 +19,14 @@ const FEATURED_PROPERTIES = (propertiesData as Array<{
   expectedReturn: number;
 }>).slice(0, 3);
 
+const formatValue = (value: number) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value);
+
 export function HeroSection() {
-  const { formatValue } = useCurrency();
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">

@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { useCurrency } from "@/context/currency-context";
 import { useEffect, useState } from "react";
 import propertiesData from "@/data/properties.json";
-import "./properties-preview.css";
 
 interface Property {
   id: string;
@@ -59,7 +58,22 @@ const FEATURED_FROM_DATA: Property[] = (propertiesData as Array<Record<string, u
   });
 
 export function PropertiesPreview() {
-  const { formatValue } = useCurrency();
+  const currency = useCurrency();
+  const formatValue = (value: number) => {
+    // support different currency context shapes without depending on a specific property
+    const cur: unknown = currency;
+
+    const hasFormatValue = (c: unknown): c is { formatValue: (n: number) => string } =>
+      typeof c === "object" && c !== null && typeof (c as Record<string, unknown>).formatValue === "function";
+
+    const hasFormat = (c: unknown): c is { format: (n: number) => string } =>
+      typeof c === "object" && c !== null && typeof (c as Record<string, unknown>).format === "function";
+
+    if (hasFormatValue(cur)) return cur.formatValue(value);
+    if (hasFormat(cur)) return cur.format(value);
+    // fallback
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+  };
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
 

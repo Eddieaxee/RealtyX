@@ -1,111 +1,114 @@
 import NextAuth from "next-auth";
-import type { Session, DefaultSession } from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import Credentials from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import { z } from "zod";
-import { prisma } from "@/lib/db";
 import { authConfig } from "./auth.config";
+import { db } from "./db";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 
-const credentialsSchema = z.object({
-  email: z.string().email("Invalid corporate or personal email configuration"),
-  password: z
-    .string()
-    .min(6, "Security parameters demand minimum 6 characters"),
-});
-
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
-} = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(prisma),
-  providers: [
-    ...authConfig.providers.filter((provider) => provider.id !== "credentials"),
-    Credentials({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email Address", type: "email" },
-        password: { label: "Secure Password", type: "password" },
-      },
-      async authorize(credentials) {
-        const parsed = credentialsSchema.safeParse(credentials);
-        if (!parsed.success) return null;
-
-        const user = await prisma.user.findUnique({
-          where: { email: parsed.data.email.toLowerCase().trim() },
-        });
-
-        if (!user || !user.password) return null;
-
-        const isPasswordValid = await bcrypt.compare(
-          parsed.data.password,
-          user.password,
-        );
-
-        if (!isPasswordValid) return null;
-
-        // Prevent suspended or banned actors from generating valid active runtime scopes
-        if (user.status === "SUSPENDED" || user.status === "BANNED") {
-          throw new Error("ACCOUNT_RESTRICTED");
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role, // Inherited cleanly from localization schema (USER, INVESTOR, ADMIN, SUPER_ADMIN)
-        };
-      },
-    }),
-  ],
+  adapter: PrismaAdapter(db),
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user, trigger, session }) {
-      // Execute foundational mappings via the shared configuration first
-      const baseToken = await authConfig.callbacks.jwt({
-        token,
-        user,
-        trigger,
-        session,
+    async signIn({ user, account }) {
+      // Allow OAuth sign-in
+      if (account?.provider !== "credentials") return true;
+
+      // For credentials, verify user exists in DB
+      const existingUser = await db.user.findUnique({
+        where: { email: user.email! },
+        include: { kyc: true, settings: true },
       });
 
-      if (user) {
-        baseToken.role = (user as { role?: string }).role;
+      if (!existingUser) {
+        // No profile found - this triggers redirect to /register
+        return "/auth/register";
       }
-      return baseToken;
+
+      // Check if user is suspended/banned
+      if (existingUser.status === "SUSPENDED" || existingUser.status === "BANNED") {
+        return false;
+      }
+
+      // Check 2FA requirement
+      if (existingUser.twoFactorEnabled) {
+        // Attach 2FA requirement to the session
+        (user as { twoFactorRequired?: boolean }).twoFactorRequired = true;
+      }
+
+      return true;
+    },
+    async jwt({ token, user, trigger, session }) {
+      if (user) {
+        token.id = user.id;
+        token.role = (user as { role?: string }).role ?? "USER";
+        token.twoFactorRequired = (user as { twoFactorRequired?: boolean }).twoFactorRequired ?? false;
+        token.twoFactorVerified = false;
+      }
+      if (trigger === "update" && session) {
+        token.name = session.name;
+        token.image = session.image;
+        if (session.role) token.role = session.role;
+        if (session.twoFactorVerified) token.twoFactorVerified = true;
+      }
+
+      // Fetch latest user data from DB
+      if (token.id) {
+        const dbUser = await db.user.findUnique({
+          where: { id: token.id as string },
+          select: { role: true, status: true, twoFactorEnabled: true },
+        });
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.status = dbUser.status;
+        }
+      }
+
+      return token;
     },
     async session({ session, token }) {
-      // Synthesize default mapping frames across the pipeline
-      // Call the shared session callback first (may not include `expires`)
-      const baseSession = (await authConfig.callbacks.session({
-        session,
-        token,
-        user: { id: token.id as string },
-      } as Parameters<typeof authConfig.callbacks.session>[0])) as
-        | Session
-        | DefaultSession
-        | null
-        | undefined;
-
-      // Ensure the returned object conforms to DefaultSession / Session by preserving or injecting `expires`
-      const result = {
-        ...(baseSession || {}),
-        // Prefer the explicit expires from the incoming session, fallback to baseSession.expires if present
-        expires:
-          (session as Session | DefaultSession)?.expires ??
-          (baseSession as Session | DefaultSession)?.expires,
-      } as Session | DefaultSession;
-
-      if (result.user && token) {
-        (result.user as DefaultSession["user"] & { role?: string }).role =
-          token.role as string;
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+      (session.user as { twoFactorRequired?: boolean; twoFactorVerified?: boolean; status?: string }).twoFactorRequired = token.twoFactorRequired;
+      (session.user as { twoFactorRequired?: boolean; twoFactorVerified?: boolean; status?: string }).twoFactorVerified = token.twoFactorVerified;
+      (session.user as { twoFactorRequired?: boolean; twoFactorVerified?: boolean; status?: string }).status = token.status;
       }
-
-      return result;
+      return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // Handles deterministic redirect based on role
+      const redirectUrl = url.startsWith("/") ? new URL(url, baseUrl).toString() : url;
+      return redirectUrl;
+    },
+  },
+  events: {
+    async signIn(message) {
+      // Log sign-in event
+      if (message.user?.id) {
+        await db.auditLog.create({
+          data: {
+            userId: message.user.id,
+            action: "LOGIN",
+            resource: "User",
+            resourceId: message.user.id,
+          },
+        }).catch(() => {}); // Non-blocking
+      }
+    },
+    async signOut(message) {
+      if (message.session?.userId) {
+        await db.auditLog.create({
+          data: {
+            userId: message.session.userId,
+            action: "LOGOUT",
+            resource: "User",
+            resourceId: message.session.userId,
+          },
+        }).catch(() => {});
+      }
     },
   },
 });

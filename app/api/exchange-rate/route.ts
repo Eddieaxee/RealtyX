@@ -1,26 +1,49 @@
 import { NextResponse } from "next/server";
 
-const DEFAULT_RATE = 1520; // Fallback NGN per USD
+// Cache for exchange rates
+let rateCache: { usdToNgn: number; lastUpdated: Date } | null = null;
 
-export async function GET() {
+async function fetchLiveRate(): Promise<number> {
   try {
-    // Try to fetch live rate from a free API
-    const res = await fetch(
-      "https://api.exchangerate-api.com/v4/latest/USD",
-      { next: { revalidate: 1800 } }, // Cache for 30 minutes
-    );
+    // Try multiple free APIs for redundancy
+    const responses = await Promise.allSettled([
+      fetch("https://api.exchangerate-api.com/v4/latest/USD", { signal: AbortSignal.timeout(5000) }),
+      fetch("https://open.er-api.com/v6/latest/USD", { signal: AbortSignal.timeout(5000) }),
+    ]);
 
-    if (res.ok) {
-      const data = await res.json();
-      const ngnRate = data?.rates?.NGN;
-      if (typeof ngnRate === "number" && ngnRate > 0) {
-        return NextResponse.json({ rate: ngnRate, source: "live" });
+    for (const res of responses) {
+      if (res.status === "fulfilled") {
+        const data = await res.value.json();
+        const ngnRate = data.rates?.NGN;
+        if (ngnRate && typeof ngnRate === "number") {
+          return ngnRate;
+        }
       }
     }
 
-    // Fallback to default rate
-    return NextResponse.json({ rate: DEFAULT_RATE, source: "fallback" });
-  } catch {
-    return NextResponse.json({ rate: DEFAULT_RATE, source: "fallback" });
+    // Fallback to approximate rate if APIs fail
+    console.warn("Exchange rate APIs failed, using fallback rate");
+    return 1540;
+  } catch (error) {
+    console.error("Exchange rate fetch failed:", error);
+    // Return last known good rate if available, otherwise fallback
+    return rateCache?.usdToNgn || 1540;
   }
+}
+
+export async function GET() {
+  const now = new Date();
+
+  // Refresh cache every 1 hour
+  if (!rateCache || (now.getTime() - rateCache.lastUpdated.getTime()) > 3600000) {
+    const rate = await fetchLiveRate();
+    rateCache = { usdToNgn: rate, lastUpdated: now };
+  }
+
+  return NextResponse.json({
+    success: true,
+    usdToNgn: rateCache.usdToNgn,
+    ngnToUsd: 1 / rateCache.usdToNgn,
+    lastUpdated: rateCache.lastUpdated.toISOString(),
+  });
 }

@@ -49,9 +49,18 @@ export function SignInForm() {
           setError("Invalid cryptographic parameters or unauthorized email identity signature.");
         }
       } else {
-        // Force a hard navigation to /dashboard to trigger a fresh server-side session read.
-        // This prevents the infinite auth loop caused by client-side re-renders.
-        window.location.assign("/dashboard");
+        // Fetch session to determine user role for correct redirect
+        try {
+          const sessionRes = await fetch("/api/auth/session");
+          const session = await sessionRes.json();
+          if (session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN") {
+            window.location.assign("/admin");
+          } else {
+            window.location.assign("/dashboard");
+          }
+        } catch {
+          window.location.assign("/dashboard");
+        }
       }
     } catch {
       setError("Core network communication failure. Please verify connection rails.");

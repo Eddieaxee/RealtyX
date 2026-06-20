@@ -1,10 +1,15 @@
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+  engineType = "library"
 }
 
 datasource db {
   provider = "sqlite"
 }
+
+// ============================================================
+// AUTH & ACCOUNT MODELS (NextAuth.js v5 compatible)
+// ============================================================
 
 model Account {
   id                String  @id @default(cuid())
@@ -19,8 +24,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -36,79 +40,239 @@ model Session {
   @@map("sessions")
 }
 
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================================
+// USER & PROFILE MODELS
+// ============================================================
+
 model User {
-  id            String    @id @default(cuid())
+  id            String       @id @default(cuid())
   name          String?
-  email         String    @unique
-  emailVerified DateTime? @map("email_verified")
+  email         String       @unique
+  emailVerified DateTime?    @map("email_verified")
   image         String?
   password      String?
-  role          String    @default("USER")
-  status        String    @default("ACTIVE")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  role          String       @default("USER") // USER | ADMIN | SUPER_ADMIN
+  status        String       @default("ACTIVE") // ACTIVE | SUSPENDED | BANNED
+  twoFactorEnabled Boolean   @default(false) @map("two_factor_enabled")
+  twoFactorSecret String?    @map("two_factor_secret")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
 
+  // Relations
   accounts      Account[]
   sessions      Session[]
-  investments   Investment[]
+  profile       Profile?
+  settings      UserSettings?
   kyc           Kyc?
+  wallet        Wallet?
+  investments   Investment[]
+  transactions  Transaction[]
+  notifications Notification[]
+  propertyDocuments PropertyDocument[]
 
   @@map("users")
 }
 
-model Kyc {
-  id          String   @id @default(cuid())
-  userId      String   @unique @map("user_id")
-  status      String   @default("PENDING")
-  firstName   String?  @map("first_name")
-  lastName    String?  @map("last_name")
-  dateOfBirth DateTime? @map("date_of_birth")
-  phoneNumber String?  @map("phone_number")
-  address     String?
-  country     String?
-  idType      String?  @map("id_type")
-  idNumber    String?  @map("id_number")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+model Profile {
+  id        String  @id @default(cuid())
+  userId    String  @unique @map("user_id")
+  firstName String? @map("first_name")
+  lastName  String? @map("last_name")
+  phone     String?
+  dob       DateTime?
+  address   String?
+  city      String?
+  state     String?
+  country   String?
+  postalCode String? @map("postal_code")
+  avatar    String?
+  bio       String?
+  occupation String?
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("profiles")
+}
+
+model UserSettings {
+  id                    String  @id @default(cuid())
+  userId                String  @unique @map("user_id")
+  allowNotifications    Boolean @default(true) @map("allow_notifications")
+  emailAlerts           Boolean @default(true) @map("email_alerts")
+  soundEffects          Boolean @default(true) @map("sound_effects")
+  pushNotifications     Boolean @default(true) @map("push_notifications")
+  twoFactorEnabled      Boolean @default(false) @map("two_factor_enabled")
+  darkMode              Boolean @default(true) @map("dark_mode")
+  language              String  @default("en")
+  currency              String  @default("USD")
+  timezone              String  @default("Africa/Lagos")
+  marketingEmails       Boolean @default(false) @map("marketing_emails")
+  loginAlerts           Boolean @default(true) @map("login_alerts")
+  deviceTokens          String? @map("device_tokens") // JSON array of push notification tokens
+  user                  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+// ============================================================
+// KYC / COMPLIANCE MODELS
+// ============================================================
+
+model Kyc {
+  id             String    @id @default(cuid())
+  userId         String    @unique @map("user_id")
+  status         String    @default("PENDING") // PENDING | UNDER_REVIEW | APPROVED | REJECTED
+  firstName      String?   @map("first_name")
+  lastName       String?   @map("last_name")
+  dateOfBirth    DateTime? @map("date_of_birth")
+  phoneNumber    String?   @map("phone_number")
+  address        String?
+  country        String?
+  idType         String?   @map("id_type") // PASSPORT | DRIVERS_LICENSE | NATIONAL_ID
+  idNumber       String?   @map("id_number")
+  idDocumentUrl  String?   @map("id_document_url")
+  selfieUrl      String?   @map("selfie_url")
+  proofOfAddress String?   @map("proof_of_address")
+  notes          String?   // Admin rejection/approval notes
+  reviewedBy     String?   @map("reviewed_by")
+  reviewedAt     DateTime? @map("reviewed_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("kyc")
 }
 
+model ComplianceCheck {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  checkType   String   @map("check_type") // AML | SANCTIONS | PEP | ACCREDITED_INVESTOR
+  status      String   @default("PENDING") // PENDING | PASSED | FAILED
+  providerRef String?  @map("provider_ref")
+  resultData  String?  @map("result_data") // JSON blob
+  checkedAt   DateTime? @map("checked_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("compliance_checks")
+}
+
+// ============================================================
+// WALLET & FINANCIAL MODELS
+// ============================================================
+
+model Wallet {
+  id            String  @id @default(cuid())
+  userId        String  @unique @map("user_id")
+  balanceUSD    Float   @default(0) @map("balance_usd")
+  balanceNGN    Float   @default(0) @map("balance_ngn")
+  totalInvested Float   @default(0) @map("total_invested")
+  totalReturns  Float   @default(0) @map("total_returns")
+  totalWithdrawn Float  @default(0) @map("total_withdrawn")
+  walletAddress String? @map("wallet_address") // Blockchain wallet address
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("wallets")
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  type          String   // INVESTMENT | WITHDRAWAL | DEPOSIT | DIVIDEND | REFERRAL
+  amountUSD     Float    @map("amount_usd")
+  amountNGN     Float?   @map("amount_ngn")
+  status        String   @default("PENDING") // PENDING | COMPLETED | FAILED | CANCELLED
+  paymentMethod String?  @map("payment_method") // CARD | BANK_TRANSFER | USDC | USDT | PAYSTACK | FLUTTERWAVE
+  txReference   String?  @map("tx_reference")
+  providerRef   String?  @map("provider_ref")
+  metadata      String?  // JSON blob for extra data
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+// ============================================================
+// PROPERTY & ASSET MODELS (RWA Tokenization)
+// ============================================================
+
 model Property {
-  id                   String   @id @default(cuid())
+  id                   String       @id @default(cuid())
   title                String
   description          String?
-  slug                 String   @unique
-  type                 String   @default("RESIDENTIAL")
-  status               String   @default("AVAILABLE")
-  developmentStatus    String   @default("COMPLETED") @map("development_status")
-  completionPercentage Float    @default(0) @map("completion_percentage")
+  slug                 String       @unique
+  type                 String       @default("RESIDENTIAL") // RESIDENTIAL | COMMERCIAL | INDUSTRIAL | LAND | MIXED_USE
+  status               String       @default("AVAILABLE") // AVAILABLE | SOLD | RESERVED | COMING_SOON
+  developmentStatus    String       @default("COMPLETED") @map("development_status") // PLANNING | UNDER_CONSTRUCTION | COMPLETED
+  completionPercentage Float        @default(0) @map("completion_percentage")
   location             String?
   city                 String?
   state                String?
-  country              String   @default("Nigeria")
+  country              String       @default("Nigeria")
+  region               String?
   lat                  Float?
   lng                  Float?
-  priceUSD             Float    @default(0) @map("price_usd")
-  priceNGN             Float    @default(0) @map("price_ngn")
-  totalTokens          Int      @default(0) @map("total_tokens")
-  availableTokens      Int      @default(0) @map("available_tokens")
-  tokenPriceUSD        Float    @default(0) @map("token_price_usd")
-  tokenPriceNGN        Float    @default(0) @map("token_price_ngn")
-  expectedReturn       Float?   @map("expected_return")
-  rentalYield          Float?   @map("rental_yield")
-  images               String?
-  features             String?
-  documents            String?
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
+  priceUSD             Float        @default(0) @map("price_usd")
+  priceNGN             Float        @default(0) @map("price_ngn")
+  totalTokens          Int          @default(0) @map("total_tokens")
+  availableTokens      Int          @default(0) @map("available_tokens")
+  tokenPriceUSD        Float        @default(0) @map("token_price_usd")
+  tokenPriceNGN        Float        @default(0) @map("token_price_ngn")
+  expectedReturn       Float?       @map("expected_return")
+  rentalYield          Float?       @map("rental_yield")
+  images               String?      // JSON array of image URLs
+  features             String?      // JSON array of features
+  documents            String?      // JSON array of document names
+  occupancyRate        Float?       @default(0) @map("occupancy_rate")
+  maintenanceCosts     Float?       @default(0) @map("maintenance_costs")
+  netOperatingIncome   Float?       @default(0) @map("net_operating_income")
+  appreciationRate     Float?       @default(0) @map("appreciation_rate")
+  spvName              String?      @map("spv_name") // Special Purpose Vehicle legal entity
+  spvRegistration      String?      @map("spv_registration")
+  deedTitleRef         String?      @map("deed_title_ref")
+  contractAddress      String?      @map("contract_address") // Deployed ERC-1155/ERC-3643 address
+  tokenURI             String?      @map("token_uri") // IPFS metadata URI
+  createdAt            DateTime     @default(now()) @map("created_at")
+  updatedAt            DateTime     @updatedAt @map("updated_at")
 
-  investments Investment[]
+  // Relations
+  investments          Investment[]
+  propertyDocuments    PropertyDocument[]
+  distributions        Distribution[]
 
   @@map("properties")
 }
+
+model PropertyDocument {
+  id         String   @id @default(cuid())
+  propertyId String   @map("property_id")
+  userId     String?  @map("user_id") // Uploaded by (admin)
+  title      String
+  type       String   // DEED | SURVEY | STRUCTURAL_REPORT | ENVIRONMENTAL | BIM_MODEL | LEGAL | OTHER
+  url        String
+  fileSize   Int?     @map("file_size")
+  mimeType   String?  @map("mime_type")
+  isVerified Boolean  @default(false) @map("is_verified")
+  createdAt  DateTime @default(now()) @map("created_at")
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [userId], references: [id])
+
+  @@map("property_documents")
+}
+
+// ============================================================
+// INVESTMENT & DISTRIBUTION MODELS
+// ============================================================
 
 model Investment {
   id            String   @id @default(cuid())
@@ -117,26 +281,92 @@ model Investment {
   tokens        Int
   amountUSD     Float    @map("amount_usd")
   amountNGN     Float    @map("amount_ngn")
-  status        String   @default("PENDING")
+  status        String   @default("PENDING") // PENDING | ACTIVE | REDEEMED | CANCELLED
   paymentMethod String?  @map("payment_method")
   txReference   String?  @map("tx_reference")
+  tokenIds      String?  @map("token_ids") // JSON array of on-chain token IDs
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
-
-  user     User     @relation(fields: [userId], references: [id])
-  property Property @relation(fields: [propertyId], references: [id])
+  property      Property @relation(fields: [propertyId], references: [id])
+  user          User     @relation(fields: [userId], references: [id])
 
   @@map("investments")
 }
+
+model Distribution {
+  id          String   @id @default(cuid())
+  propertyId  String   @map("property_id")
+  type        String   // DIVIDEND | RENTAL_YIELD | CAPITAL_GAIN
+  totalAmount Float    @map("total_amount")
+  perToken    Float    @map("per_token")
+  currency    String   @default("USD")
+  snapshotDate DateTime? @map("snapshot_date")
+  paidAt      DateTime? @map("paid_at")
+  status      String   @default("PENDING") // PENDING | PAID | CANCELLED
+  createdAt   DateTime @default(now()) @map("created_at")
+  property    Property @relation(fields: [propertyId], references: [id])
+
+  @@map("distributions")
+}
+
+// ============================================================
+// NOTIFICATION & COMMUNICATION MODELS
+// ============================================================
 
 model Notification {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
   title     String
   message   String?
-  type      String   @default("INFO")
+  type      String   @default("INFO") // INFO | SUCCESS | WARNING | ERROR | INVESTMENT | KYC | PROPERTY
   read      Boolean  @default(false)
+  link      String?  // Deep link URL
   createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+}
+
+model EmailLog {
+  id        String   @id @default(cuid())
+  userId    String?  @map("user_id")
+  to        String
+  subject   String
+  template  String?
+  status    String   @default("SENT") // SENT | DELIVERED | BOUNCED | FAILED
+  provider  String   @default("SENDGRID")
+  providerId String? @map("provider_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("email_logs")
+}
+
+// ============================================================
+// AUDIT & COMPLIANCE LOGGING
+// ============================================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?  @map("user_id")
+  action    String   // LOGIN | LOGOUT | KYC_APPROVE | KYC_REJECT | PROPERTY_CREATE | PROPERTY_UPDATE | PROPERTY_DELETE | INVESTMENT | WITHDRAWAL
+  resource  String?  // Affected model name
+  resourceId String? @map("resource_id")
+  metadata  String?  // JSON blob
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
+
+// ============================================================
+// PLATFORM CONFIGURATION
+// ============================================================
+
+model PlatformConfig {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+
+  @@map("platform_config")
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -14,7 +15,6 @@ import {
   Shield,
   LogOut,
   Landmark,
-  Wallet,
   Activity,
   AlertTriangle,
   Globe,
@@ -54,6 +54,25 @@ const navSections = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const [stats, setStats] = useState({ users: "—", properties: "—" });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [usersRes, propsRes] = await Promise.all([
+          fetch("/api/admin/users"),
+          fetch("/api/admin/properties"),
+        ]);
+        const users = await usersRes.json();
+        const props = await propsRes.json();
+        if (users.success) setStats((s) => ({ ...s, users: users.users.length.toLocaleString() }));
+        if (props.success) setStats((s) => ({ ...s, properties: props.properties.length.toString() }));
+      } catch {
+        // Silently fail
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 border-r border-white/5 bg-[#090A0C]/60 backdrop-blur-sm hidden lg:flex flex-col">
@@ -61,10 +80,10 @@ export function AdminSidebar() {
       <div className="p-4 border-b border-white/5">
         <div className="grid grid-cols-2 gap-2">
           {[
-            { label: "Users", value: "52.4K", icon: Users, color: "text-blue-400" },
-            { label: "AUM", value: "$284M", icon: Wallet, color: "text-[#E2B93B]" },
-            { label: "Assets", value: "156", icon: Building2, color: "text-emerald-400" },
-            { label: "Alerts", value: "7", icon: AlertTriangle, color: "text-amber-400" },
+            { label: "Users", value: stats.users, icon: Users, color: "text-blue-400" },
+            { label: "Assets", value: stats.properties, icon: Building2, color: "text-emerald-400" },
+            { label: "System", value: "Online", icon: Globe, color: "text-[#E2B93B]" },
+            { label: "Alerts", value: "0", icon: AlertTriangle, color: "text-amber-400" },
           ].map((stat) => (
             <div key={stat.label} className="p-2 rounded-lg bg-white/[0.02] border border-white/5">
               <div className="flex items-center gap-1 mb-1">
@@ -108,7 +127,7 @@ export function AdminSidebar() {
                     <span>{item.label}</span>
                     {item.href === "/admin/kyc" && (
                       <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                        234
+                        Live
                       </span>
                     )}
                   </Link>

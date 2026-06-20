@@ -1,4 +1,5 @@
-import propertiesData from "@/data/properties.json";
+// Database-backed properties
+// No hardcoded JSON - all data comes from the database via API
 
 export interface Property {
   id: string;
@@ -32,29 +33,143 @@ export interface Property {
     transitAccess: string;
     infrastructure: { name: string; distance: string; type: string }[];
   };
+  type: string;
+  status: string;
+  priceUSD: number;
+  priceNGN: number;
+  tokenPriceUSD: number;
+  developmentStatus: string;
+  country: string;
 }
 
-export function getAllProperties(): Property[] {
-  return propertiesData as Property[];
+function mapDBProperty(dbProp: {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  city: string | null;
+  state: string | null;
+  type: string | null;
+  developmentStatus: string | null;
+  lat: number | null;
+  lng: number | null;
+  images: string | unknown[];
+  features: string | unknown[];
+  documents: string | unknown[];
+  tokenPriceUSD: number | null;
+  priceUSD: number | null;
+  priceNGN: number | null;
+  tokenPriceNGN: number | null;
+  expectedReturn: number | null;
+  rentalYield: number | null;
+  availableTokens: number | null;
+  totalTokens: number | null;
+  completionPercentage: number | null;
+  status: string | null;
+  country: string | null;
+}): Property {
+  const images = typeof dbProp.images === 'string' ? JSON.parse(dbProp.images || '[]') : (dbProp.images || []);
+  const features = typeof dbProp.features === 'string' ? JSON.parse(dbProp.features || '[]') : (dbProp.features || []);
+  const documents = typeof dbProp.documents === 'string' ? JSON.parse(dbProp.documents || '[]') : (dbProp.documents || []);
+
+  return {
+    id: dbProp.id,
+    slug: dbProp.slug,
+    title: dbProp.title,
+    description: dbProp.description || '',
+    location: dbProp.location || '',
+    city: dbProp.city || '',
+    state: dbProp.state || '',
+    region: dbProp.state || 'Lagos',
+    category: dbProp.type || 'RESIDENTIAL',
+    lifecycle: dbProp.developmentStatus || 'COMPLETED',
+    currentMilestone: dbProp.developmentStatus || 'COMPLETED',
+    lat: dbProp.lat || 6.5244,
+    lng: dbProp.lng || 3.3792,
+    image: images[0] || '',
+    images,
+    tokenPriceNGN: dbProp.tokenPriceNGN || dbProp.tokenPriceUSD * 1500 || 0,
+    totalValueNGN: dbProp.priceNGN || dbProp.priceUSD * 1500 || 0,
+    expectedReturn: dbProp.expectedReturn || 12,
+    rentalYield: dbProp.rentalYield || 8,
+    availableTokens: dbProp.availableTokens || 0,
+    totalTokens: dbProp.totalTokens || 100,
+    funded: dbProp.totalTokens ? ((dbProp.totalTokens - dbProp.availableTokens) / dbProp.totalTokens) * 100 : 0,
+    completionPercentage: dbProp.completionPercentage || 100,
+    features,
+    documents,
+    neighborhoodInsights: {
+      walkScore: 85,
+      safetyIndex: 'High',
+      transitAccess: 'Excellent',
+      infrastructure: [],
+    },
+    type: dbProp.type || 'RESIDENTIAL',
+    status: dbProp.status || 'AVAILABLE',
+    priceUSD: dbProp.priceUSD || 0,
+    priceNGN: dbProp.priceNGN || 0,
+    tokenPriceUSD: dbProp.tokenPriceUSD || 0,
+    developmentStatus: dbProp.developmentStatus || 'COMPLETED',
+    country: dbProp.country || 'Nigeria',
+  };
 }
 
-export function getPropertyByIdOrSlug(idOrSlug: string): Property | undefined {
-  return (propertiesData as Property[]).find(
-    (p) => p.id === idOrSlug || p.slug === idOrSlug
-  );
+let cachedProperties: Property[] | null = null;
+let cacheTimestamp = 0;
+const CACHE_DURATION = 60000; // 1 minute
+
+export async function getAllProperties(): Promise<Property[]> {
+  if (cachedProperties && Date.now() - cacheTimestamp < CACHE_DURATION) {
+    return cachedProperties;
+  }
+
+  try {
+    const res = await fetch(process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/properties` : '/api/admin/properties', {
+      cache: 'no-store',
+    });
+    const data = await res.json();
+    if (data.success) {
+      cachedProperties = data.properties.map(mapDBProperty);
+      cacheTimestamp = Date.now();
+      return cachedProperties!;
+    }
+  } catch {
+    // Fallback: try without admin auth (public properties endpoint)
+    try {
+      const res = await fetch('/api/properties', { cache: 'no-store' });
+      const data = await res.json();
+      if (data.success) {
+        cachedProperties = data.properties.map(mapDBProperty);
+        cacheTimestamp = Date.now();
+        return cachedProperties!;
+      }
+    } catch {
+      // Return empty
+    }
+  }
+  return [];
 }
 
-export function getPropertiesByCategory(category: string): Property[] {
-  if (category === "ALL") return getAllProperties();
-  return (propertiesData as Property[]).filter((p) => p.category === category);
+export async function getPropertyByIdOrSlug(idOrSlug: string): Promise<Property | undefined> {
+  const properties = await getAllProperties();
+  return properties.find((p) => p.id === idOrSlug || p.slug === idOrSlug);
 }
 
-export function getPropertiesByLifecycle(lifecycle: string): Property[] {
-  if (lifecycle === "ALL") return getAllProperties();
-  return (propertiesData as Property[]).filter((p) => p.lifecycle === lifecycle);
+export async function getPropertiesByCategory(category: string): Promise<Property[]> {
+  const all = await getAllProperties();
+  if (category === 'ALL') return all;
+  return all.filter((p) => p.category === category);
 }
 
-export function getPropertiesByRegion(region: string): Property[] {
-  if (region === "ALL") return getAllProperties();
-  return (propertiesData as Property[]).filter((p) => p.region === region);
+export async function getPropertiesByLifecycle(lifecycle: string): Promise<Property[]> {
+  const all = await getAllProperties();
+  if (lifecycle === 'ALL') return all;
+  return all.filter((p) => p.lifecycle === lifecycle);
+}
+
+export async function getPropertiesByRegion(region: string): Promise<Property[]> {
+  const all = await getAllProperties();
+  if (region === 'ALL') return all;
+  return all.filter((p) => p.region === region);
 }

@@ -1,0 +1,7 @@
+.fundingBar {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(to right, #E2B93B, #B89221);
+  transition: all 0.3s ease;
+  width: var(--funding-width);
+}

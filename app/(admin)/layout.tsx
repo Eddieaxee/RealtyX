@@ -11,8 +11,8 @@ export default function AdminLayout({
       <AdminNav />
       <div className="flex">
         <AdminSidebar />
-        <main className="flex-1 ml-0 lg:ml-64 pt-16 min-h-screen">
-          <div className="p-6 lg:p-8 max-w-7xl">
+        <main className="flex-1 ml-0 lg:ml-64 pt-16 min-h-screen min-w-0">
+          <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto overflow-x-hidden">
             {children}
           </div>
         </main>
