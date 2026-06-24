@@ -1,9 +1,9 @@
 /**
  * RealtyX Blockchain Interaction Utility
- * 
+ *
  * This module provides server-side interactions with the RealtyXAssetManager
  * ERC-1155 smart contract using viem (for the Next.js API server).
- * 
+ *
  * Key operations:
  * - setKYCStatus: Called when admin approves/rejects KYC in the portal
  * - mintPropertyFractions: Called when a new property is listed
@@ -117,7 +117,8 @@ export function getContractConfig() {
     adminAddress: (process.env.ADMIN_WALLET_ADDRESS ||
       "0x0000000000000000000000000000000000000000") as `0x${string}`,
     rpcUrl:
-      process.env.NEXT_PUBLIC_RPC_URL || "https://polygon-mainnet.infura.io/v3/demo",
+      process.env.NEXT_PUBLIC_RPC_URL ||
+      "https://polygon-mainnet.infura.io/v3/demo",
     chainId: parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "137"), // Polygon mainnet default
   };
 }
@@ -128,7 +129,7 @@ export function getContractConfig() {
  */
 export async function setKYCStatusOnChain(
   userAddress: `0x${string}`,
-  status: boolean
+  status: boolean,
 ): Promise<{ success: boolean; txHash?: string; error?: string }> {
   try {
     const config = getContractConfig();
@@ -136,7 +137,7 @@ export async function setKYCStatusOnChain(
     if (!config.adminPrivateKey) {
       // In development, simulate the transaction
       console.log(
-        `[DEV] Simulating setKYCStatus(${userAddress}, ${status}) on contract ${config.contractAddress}`
+        `[DEV] Simulating setKYCStatus(${userAddress}, ${status}) on contract ${config.contractAddress}`,
       );
       return {
         success: true,
@@ -146,12 +147,14 @@ export async function setKYCStatusOnChain(
 
     // Dynamic import of viem for server-side usage
     const { createWalletClient, http } = await import("viem");
-    const { polygon, amoy } = await import("viem/chains");
+    const { polygon, polygonMumbai } = await import("viem/chains");
     const { privateKeyToAccount } = await import("viem/accounts");
 
-    const chain = config.chainId === 137 ? polygon : amoy;
+    const chain = config.chainId === 137 ? polygon : polygonMumbai;
 
-    const account = privateKeyToAccount(config.adminPrivateKey as `0x${string}`);
+    const account = privateKeyToAccount(
+      config.adminPrivateKey as `0x${string}`,
+    );
     const walletClient = createWalletClient({
       account,
       chain,
@@ -193,14 +196,14 @@ export async function mintPropertyFractionsOnChain(
   recipientAddress: `0x${string}`,
   propertyId: number,
   supply: number,
-  propertyURI: string
+  propertyURI: string,
 ): Promise<{ success: boolean; txHash?: string; error?: string }> {
   try {
     const config = getContractConfig();
 
     if (!config.adminPrivateKey) {
       console.log(
-        `[DEV] Simulating mintPropertyFractions(${recipientAddress}, ${propertyId}, ${supply})`
+        `[DEV] Simulating mintPropertyFractions(${recipientAddress}, ${propertyId}, ${supply})`,
       );
       return {
         success: true,
@@ -209,11 +212,13 @@ export async function mintPropertyFractionsOnChain(
     }
 
     const { createWalletClient, http } = await import("viem");
-    const { polygon, amoy } = await import("viem/chains");
+    const { polygon, polygonMumbai } = await import("viem/chains");
     const { privateKeyToAccount } = await import("viem/accounts");
 
-    const chain = config.chainId === 137 ? polygon : amoy;
-    const account = privateKeyToAccount(config.adminPrivateKey as `0x${string}`);
+    const chain = config.chainId === 137 ? polygon : polygonMumbai;
+    const account = privateKeyToAccount(
+      config.adminPrivateKey as `0x${string}`,
+    );
     const walletClient = createWalletClient({
       account,
       chain,
@@ -238,7 +243,13 @@ export async function mintPropertyFractionsOnChain(
         },
       ],
       functionName: "mintPropertyFractions",
-      args: [recipientAddress, BigInt(propertyId), BigInt(supply), "0x", propertyURI],
+      args: [
+        recipientAddress,
+        BigInt(propertyId),
+        BigInt(supply),
+        "0x",
+        propertyURI,
+      ],
     });
 
     return { success: true, txHash };
@@ -258,7 +269,7 @@ export async function transferTokensOnChain(
   fromAddress: `0x${string}`,
   toAddress: `0x${string}`,
   propertyId: number,
-  amount: number
+  amount: number,
 ): Promise<{ success: boolean; txHash?: string; error?: string }> {
   try {
     const config = getContractConfig();
@@ -272,11 +283,13 @@ export async function transferTokensOnChain(
     }
 
     const { createWalletClient, http } = await import("viem");
-    const { polygon, amoy } = await import("viem/chains");
+    const { polygon, polygonMumbai } = await import("viem/chains");
     const { privateKeyToAccount } = await import("viem/accounts");
 
-    const chain = config.chainId === 137 ? polygon : amoy;
-    const account = privateKeyToAccount(config.adminPrivateKey as `0x${string}`);
+    const chain = config.chainId === 137 ? polygon : polygonMumbai;
+    const account = privateKeyToAccount(
+      config.adminPrivateKey as `0x${string}`,
+    );
     const walletClient = createWalletClient({
       account,
       chain,

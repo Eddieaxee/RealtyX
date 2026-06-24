@@ -1,11 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  Search,
-  RefreshCw,
-  Filter,
-} from "lucide-react";
+import { Search, RefreshCw, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -77,35 +73,73 @@ export default function AdminTransactionsPage() {
     }
   }, [page, typeFilter, statusFilter, gatewayFilter, search]);
 
-  useEffect(() => { fetchTransactions(); }, [fetchTransactions]);
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "SUCCESS":
       case "COMPLETED":
-        return <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Success</Badge>;
+        return (
+          <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+            Success
+          </Badge>
+        );
       case "PENDING":
-        return <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20">Pending</Badge>;
+        return (
+          <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20">
+            Pending
+          </Badge>
+        );
       case "FAILED":
       case "CANCELLED":
-        return <Badge className="bg-red-500/10 text-red-400 border-red-500/20">Failed</Badge>;
+        return (
+          <Badge className="bg-red-500/10 text-red-400 border-red-500/20">
+            Failed
+          </Badge>
+        );
       default:
-        return <Badge className="bg-neutral-500/10 text-neutral-400 border-neutral-500/20">{status}</Badge>;
+        return (
+          <Badge className="bg-neutral-500/10 text-neutral-400 border-neutral-500/20">
+            {status}
+          </Badge>
+        );
     }
   };
 
   const getTypeBadge = (type: string) => {
     switch (type) {
       case "DEPOSIT":
-        return <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20">Deposit</Badge>;
+        return (
+          <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20">
+            Deposit
+          </Badge>
+        );
       case "INVESTMENT":
-        return <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20">Investment</Badge>;
+        return (
+          <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20">
+            Investment
+          </Badge>
+        );
       case "WITHDRAWAL":
-        return <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20">Withdrawal</Badge>;
+        return (
+          <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20">
+            Withdrawal
+          </Badge>
+        );
       case "DIVIDEND":
-        return <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Dividend</Badge>;
+        return (
+          <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+            Dividend
+          </Badge>
+        );
       default:
-        return <Badge className="bg-neutral-500/10 text-neutral-400 border-neutral-500/20">{type}</Badge>;
+        return (
+          <Badge className="bg-neutral-500/10 text-neutral-400 border-neutral-500/20">
+            {type}
+          </Badge>
+        );
     }
   };
 
@@ -118,7 +152,13 @@ export default function AdminTransactionsPage() {
       WEB3: "bg-orange-500/10 text-orange-400 border-orange-500/20",
       PAYPAL: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
     };
-    return <Badge className={colors[gateway] || "bg-neutral-500/10 text-neutral-400"}>{gateway}</Badge>;
+    return (
+      <Badge
+        className={colors[gateway] || "bg-neutral-500/10 text-neutral-400"}
+      >
+        {gateway}
+      </Badge>
+    );
   };
 
   return (
@@ -133,7 +173,8 @@ export default function AdminTransactionsPage() {
             Transaction Ledger
           </h1>
           <p className="text-neutral-500 mt-1 text-sm">
-            {stats?.totalTransactions || 0} total transactions · ${(stats?.totalVolumeUSD || 0).toLocaleString()} volume
+            {stats?.totalTransactions || 0} total transactions · $
+            {(stats?.totalVolumeUSD || 0).toLocaleString()} volume
           </p>
         </div>
         <Button
@@ -149,14 +190,37 @@ export default function AdminTransactionsPage() {
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: "Total Volume", value: `$${(stats.totalVolumeUSD / 1000).toFixed(1)}K`, color: "text-[#E2B93B]" },
-            { label: "Success", value: stats.successCount, color: "text-emerald-400" },
-            { label: "Pending", value: stats.pendingCount, color: "text-amber-400" },
-            { label: "Failed", value: stats.failedCount, color: "text-red-400" },
+            {
+              label: "Total Volume",
+              value: `$${(stats.totalVolumeUSD / 1000).toFixed(1)}K`,
+              color: "text-[#E2B93B]",
+            },
+            {
+              label: "Success",
+              value: stats.successCount,
+              color: "text-emerald-400",
+            },
+            {
+              label: "Pending",
+              value: stats.pendingCount,
+              color: "text-amber-400",
+            },
+            {
+              label: "Failed",
+              value: stats.failedCount,
+              color: "text-red-400",
+            },
           ].map((stat) => (
-            <div key={stat.label} className="p-3 rounded-xl bg-[#0D0E12] border border-white/5">
-              <div className="text-[10px] text-neutral-500 font-mono uppercase">{stat.label}</div>
-              <div className={`text-lg font-bold font-mono ${stat.color}`}>{stat.value}</div>
+            <div
+              key={stat.label}
+              className="p-3 rounded-xl bg-[#0D0E12] border border-white/5"
+            >
+              <div className="text-[10px] text-neutral-500 font-mono uppercase">
+                {stat.label}
+              </div>
+              <div className={`text-lg font-bold font-mono ${stat.color}`}>
+                {stat.value}
+              </div>
             </div>
           ))}
         </div>
@@ -177,8 +241,12 @@ export default function AdminTransactionsPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <select
+            aria-label="Filter by transaction type"
             value={typeFilter}
-            onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setTypeFilter(e.target.value);
+              setPage(1);
+            }}
             className="px-3 py-2 rounded-xl bg-[#13161C] border border-white/5 text-xs text-white font-mono outline-none"
           >
             <option value="all">All Types</option>
@@ -188,8 +256,12 @@ export default function AdminTransactionsPage() {
             <option value="DIVIDEND">Dividend</option>
           </select>
           <select
+            aria-label="Filter by transaction status"
             value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
             className="px-3 py-2 rounded-xl bg-[#13161C] border border-white/5 text-xs text-white font-mono outline-none"
           >
             <option value="all">All Status</option>
@@ -198,8 +270,12 @@ export default function AdminTransactionsPage() {
             <option value="FAILED">Failed</option>
           </select>
           <select
+            aria-label="Filter by transaction gateway"
             value={gatewayFilter}
-            onChange={(e) => { setGatewayFilter(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setGatewayFilter(e.target.value);
+              setPage(1);
+            }}
             className="px-3 py-2 rounded-xl bg-[#13161C] border border-white/5 text-xs text-white font-mono outline-none"
           >
             <option value="all">All Gateways</option>
@@ -221,7 +297,9 @@ export default function AdminTransactionsPage() {
         <div className="rounded-2xl border border-white/5 bg-[#0D0E12] p-12 text-center">
           <Filter className="w-12 h-12 text-neutral-700 mx-auto mb-3" />
           <h3 className="text-white font-bold mb-1">No Transactions Found</h3>
-          <p className="text-neutral-500 text-sm">No transactions match your current filters.</p>
+          <p className="text-neutral-500 text-sm">
+            No transactions match your current filters.
+          </p>
         </div>
       ) : (
         <div className="rounded-2xl border border-white/5 bg-[#0D0E12] overflow-hidden">
@@ -229,22 +307,43 @@ export default function AdminTransactionsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/5 bg-[#090A0C]">
-                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">User</th>
-                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">Type</th>
-                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">Amount</th>
-                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">Gateway</th>
-                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">Status</th>
-                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">Reference</th>
-                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">Date</th>
+                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">
+                    User
+                  </th>
+                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">
+                    Type
+                  </th>
+                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">
+                    Amount
+                  </th>
+                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">
+                    Gateway
+                  </th>
+                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">
+                    Status
+                  </th>
+                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">
+                    Reference
+                  </th>
+                  <th className="text-left px-4 py-3 text-[10px] font-mono font-bold uppercase text-neutral-500">
+                    Date
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {transactions.map((tx) => (
-                  <tr key={tx.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                  <tr
+                    key={tx.id}
+                    className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"
+                  >
                     <td className="px-4 py-3">
                       <div>
-                        <div className="text-white font-medium">{tx.user.name || "—"}</div>
-                        <div className="text-neutral-500 text-xs">{tx.user.email}</div>
+                        <div className="text-white font-medium">
+                          {tx.user.name || "—"}
+                        </div>
+                        <div className="text-neutral-500 text-xs">
+                          {tx.user.email}
+                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-3">{getTypeBadge(tx.type)}</td>
@@ -253,7 +352,9 @@ export default function AdminTransactionsPage() {
                         ${tx.amountUSD.toLocaleString()}
                       </div>
                       {tx.amountNGN && tx.amountNGN > 0 && (
-                        <div className="text-neutral-500 text-xs font-mono">₦{tx.amountNGN.toLocaleString()}</div>
+                        <div className="text-neutral-500 text-xs font-mono">
+                          ₦{tx.amountNGN.toLocaleString()}
+                        </div>
                       )}
                     </td>
                     <td className="px-4 py-3">{getGatewayBadge(tx.gateway)}</td>
