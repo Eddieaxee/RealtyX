@@ -49,11 +49,12 @@ export const authConfig = {
         });
 
         if (!user?.password) return null;
-        if (user.status === "SUSPENDED" || user.status === "BANNED") return null;
+        if (user.status === "SUSPENDED" || user.status === "BANNED")
+          return null;
 
         const isValid = await bcrypt.compare(
           credentials.password as string,
-          user.password
+          user.password,
         );
 
         if (!isValid) return null;
@@ -70,11 +71,15 @@ export const authConfig = {
         }
 
         // If 2FA is enabled and OTP token provided, verify it
-        if (user.twoFactorEnabled && credentials.otpToken && user.twoFactorSecret) {
+        if (
+          user.twoFactorEnabled &&
+          credentials.otpToken &&
+          user.twoFactorSecret
+        ) {
           try {
             // Dynamic import with fallback - otplib is optional
-            const otplib = await import("otplib").catch(() => null);
-            if (!otplib) {
+            const otplibModule = await import("otplib").catch(() => null);
+            if (!otplibModule) {
               // If otplib not installed, skip 2FA check (development mode)
               return {
                 id: user.id,
@@ -83,9 +88,15 @@ export const authConfig = {
                 role: user.role,
               };
             }
-            const isValidToken = otplib.authenticator.check(
+            // otplib exports an 'authenticator' named export
+            const { authenticator } = otplibModule as unknown as {
+              authenticator: {
+                check: (token: string, secret: string) => boolean;
+              };
+            };
+            const isValidToken = authenticator.check(
               credentials.otpToken as string,
-              user.twoFactorSecret
+              user.twoFactorSecret,
             );
             if (!isValidToken) return null;
           } catch {
@@ -105,16 +116,27 @@ export const authConfig = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        token.id = user.id;
-        token.role = (user as { role?: string }).role ?? "USER";
-        token.twoFactorRequired = (user as { twoFactorRequired?: boolean }).twoFactorRequired ?? false;
-        token.status = (user as { status?: string }).status ?? "ACTIVE";
+        const authenticatedUser = user as {
+          id: string;
+          role?: string;
+          twoFactorRequired?: boolean;
+          status?: string;
+          kycStatus?: string;
+        };
+
+        token.id = authenticatedUser.id;
+        token.role = authenticatedUser.role ?? "USER";
+        token.twoFactorRequired = authenticatedUser.twoFactorRequired ?? false;
+        token.status = authenticatedUser.status ?? "ACTIVE";
+        token.kycStatus = authenticatedUser.kycStatus ?? "NONE";
       }
       if (trigger === "update" && session) {
-        if (session.name) token.name = session.name;
-        if (session.image) token.image = session.image;
-        if (session.role) token.role = session.role;
-        if (session.twoFactorVerified) {
+        const s = session as Record<string, unknown>;
+        if (typeof s.name === "string") token.name = s.name;
+        if (typeof s.image === "string") token.image = s.image;
+        if (typeof s.role === "string") token.role = s.role;
+        if (typeof s.kycStatus === "string") token.kycStatus = s.kycStatus;
+        if (s.twoFactorVerified === true) {
           token.twoFactorRequired = false;
         }
       }
@@ -123,9 +145,38 @@ export const authConfig = {
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
-        (session.user as { role?: string; twoFactorRequired?: boolean; status?: string }).role = token.role as string;
-        (session.user as { role?: string; twoFactorRequired?: boolean; status?: string }).twoFactorRequired = token.twoFactorRequired;
-        (session.user as { role?: string; twoFactorRequired?: boolean; status?: string }).status = token.status;
+        (
+          session.user as {
+            role?: string;
+            twoFactorRequired?: boolean;
+            status?: string;
+            kycStatus?: string;
+          }
+        ).role = token.role as string;
+        (
+          session.user as {
+            role?: string;
+            twoFactorRequired?: boolean;
+            status?: string;
+            kycStatus?: string;
+          }
+        ).twoFactorRequired = token.twoFactorRequired as boolean;
+        (
+          session.user as {
+            role?: string;
+            twoFactorRequired?: boolean;
+            status?: string;
+            kycStatus?: string;
+          }
+        ).status = token.status as string;
+        (
+          session.user as {
+            role?: string;
+            twoFactorRequired?: boolean;
+            status?: string;
+            kycStatus?: string;
+          }
+        ).kycStatus = token.kycStatus as string;
       }
       return session;
     },
@@ -133,7 +184,8 @@ export const authConfig = {
       const { pathname } = request.nextUrl;
       const isAuthenticated = !!auth;
       const userRole = auth?.user?.role ?? "USER";
-      const userStatus = (auth?.user as { status?: string } | undefined)?.status ?? "ACTIVE";
+      const userStatus =
+        (auth?.user as { status?: string } | undefined)?.status ?? "ACTIVE";
 
       // 1. Public Content Gateways - always accessible
       if (

@@ -85,6 +85,29 @@ export const ourFileRouter = {
         key: file.key,
       };
     }),
+  documentUpload: f({
+    pdf: {
+      maxFileSize: "16MB",
+      maxFileCount: 5,
+      allow: ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"],
+    },
+  })
+    .middleware(async () => {
+      const session = await requireSession();
+      const role = (session.user as { role?: string }).role;
+      if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
+        throw new UploadThingError("Admin only");
+      }
+      return { userId: session.user.id };
+    })
+    .onUploadComplete(async (payload: unknown) => {
+      const { metadata, file } = payload as UploadCompletePayload;
+      return {
+        uploadedBy: metadata.userId,
+        url: file.url,
+        key: file.key,
+      };
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

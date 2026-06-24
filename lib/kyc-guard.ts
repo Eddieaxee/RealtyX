@@ -2,7 +2,7 @@ import { db } from "./db";
 
 /**
  * KYC Guard - Enforces KYC verification before transactions
- * 
+ *
  * Rules:
  * - Users must have APPROVED KYC before investing/buying tokens
  * - Users must have APPROVED KYC before withdrawing funds
@@ -12,47 +12,65 @@ import { db } from "./db";
 
 export type TransactionType = "INVESTMENT" | "WITHDRAWAL" | "SALE" | "PURCHASE";
 
+export type KycStatus =
+  | "NONE"
+  | "PENDING"
+  | "UNDER_REVIEW"
+  | "REJECTED"
+  | "VERIFIED"
+  | "APPROVED";
+
 interface KycGuardResult {
   allowed: boolean;
   reason?: string;
-  kycStatus?: string;
+  kycStatus?: KycStatus;
 }
 
 export async function checkKycForTransaction(
   userId: string,
-  transactionType: TransactionType
+  transactionType: TransactionType,
 ): Promise<KycGuardResult> {
   // Admins can bypass KYC
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { role: true },
+    select: { role: true, kycStatus: true },
   });
 
   if (user?.role === "ADMIN" || user?.role === "SUPER_ADMIN") {
     return { allowed: true };
   }
 
-  // Get user's KYC status
-  const kyc = await db.kyc.findUnique({
+  // Use denormalized kycStatus field on User model for fast check
+  // Use nullish coalescing and then assert to avoid casting undefined directly
+  const kycStatus: KycStatus = (user?.kycStatus ?? "NONE") as KycStatus;
+
+  // Also check the detailed Kyc record for more granular status
+  const kycRecord = await db.kyc.findUnique({
     where: { userId },
     select: { status: true },
   });
 
-  const kycStatus = kyc?.status || "PENDING";
+  const effectiveStatus: KycStatus =
+    kycRecord?.status === "APPROVED" || kycStatus === "VERIFIED"
+      ? "VERIFIED"
+      : (kycRecord?.status as KycStatus) || kycStatus;
 
-  // KYC must be APPROVED for financial transactions
-  if (kycStatus !== "APPROVED") {
+  // KYC must be VERIFIED for financial transactions
+  if (effectiveStatus !== "VERIFIED" && effectiveStatus !== "APPROVED") {
     return {
       allowed: false,
-      kycStatus,
-      reason: getKycErrorMessage(transactionType, kycStatus),
+      kycStatus: effectiveStatus,
+      reason: getKycErrorMessage(transactionType, effectiveStatus),
     };
   }
 
-  return { allowed: true, kycStatus };
+  return { allowed: true, kycStatus: effectiveStatus };
 }
 
-function getKycErrorMessage(transactionType: TransactionType, kycStatus: string): string {
+function getKycErrorMessage(
+  transactionType: TransactionType,
+  kycStatus: string,
+): string {
   const actionMap: Record<TransactionType, string> = {
     INVESTMENT: "invest in properties",
     WITHDRAWAL: "withdraw funds",
@@ -76,7 +94,7 @@ function getKycErrorMessage(transactionType: TransactionType, kycStatus: string)
 
 export async function requireKycForTransaction(
   userId: string,
-  transactionType: TransactionType
+  transactionType: TransactionType,
 ): Promise<void> {
   const result = await checkKycForTransaction(userId, transactionType);
 

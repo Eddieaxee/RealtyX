@@ -2,12 +2,13 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/layout/providers";
-import { CurrencyProvider } from "@/context/currency-context"; // <-- Imported here
+import { CurrencyProvider } from "@/context/currency-context";
 import { Toaster } from "sonner";
 
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { KYCStatusListener } from "@/components/notifications/kyc-listener";
+import { PWARegister } from "@/components/layout/pwa-installer";
 import { auth } from "@/lib/auth";
 
 const inter = Inter({
@@ -111,6 +112,7 @@ export default async function RootLayout({
             {children}
           </CurrencyProvider>
         </Providers>
+        <PWARegister />
         <Analytics />
         <SpeedInsights />
       </body>

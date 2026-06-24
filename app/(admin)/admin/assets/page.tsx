@@ -7,8 +7,9 @@ import styles from "./page.module.css";
 import {
   Building2, Search, Plus, Edit3, Trash2, Image as ImageIcon, DollarSign, MapPin,
   TrendingUp, Layers, Star, FileText, Globe, CheckCircle2, X, ExternalLink,
-  Camera, Save, RefreshCw, ChevronLeft, ChevronRight, Shield,
+  Camera, Save, RefreshCw, Upload, ChevronLeft, ChevronRight, Shield,
 } from "lucide-react";
+import { useUploadThing } from "@/lib/upload";
 
 interface PropertyRecord {
   id: string;
@@ -58,6 +59,34 @@ export default function AdminAssetsPage() {
   const [previewProperty, setPreviewProperty] = useState<PropertyRecord | null>(null);
   const [previewImageIdx, setPreviewImageIdx] = useState(0);
   const [activeTab, setActiveTab] = useState<"all" | "available" | "sold" | "coming_soon">("all");
+  const [docUploading, setDocUploading] = useState(false);
+  const [docUploadError, setDocUploadError] = useState("");
+
+  const { startUpload: startDocUpload } = useUploadThing("documentUpload");
+
+  const handleDocFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setDocUploading(true);
+    setDocUploadError("");
+
+    try {
+      const result = await startDocUpload([file]);
+      if (result && result.length > 0) {
+        const uploadedUrl = result[0].url;
+        const fileName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+        const docLine = `${fileName} - ${uploadedUrl}`;
+        setForm({ ...form, documents: form.documents ? `${form.documents}\n${docLine}` : docLine });
+      }
+    } catch (err) {
+      setDocUploadError("Upload failed. Ensure UPLOADTHING_SECRET is configured.");
+      console.error("Document upload failed:", err);
+    } finally {
+      setDocUploading(false);
+      e.target.value = "";
+    }
+  };
 
   const fetchProperties = async () => {
     try {
@@ -326,8 +355,10 @@ export default function AdminAssetsPage() {
                   {/* Funding bar */}
                   {property.totalTokens > 0 && (
                     <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-                      <div className={styles.fundingBar}
-                        style={{ '--funding-width': `${Math.round(((property.totalTokens - property.availableTokens) / property.totalTokens) * 100)}%` } as React.CSSProperties} />
+                      {(() => {
+                        const percent = Math.round(((property.totalTokens - property.availableTokens) / property.totalTokens) * 100);
+                        return <div className={styles.fundingBar} style={{ width: `${percent}%` }} />;
+                      })()}
                     </div>
                   )}
                   {/* Features preview */}
@@ -769,9 +800,20 @@ export default function AdminAssetsPage() {
                 <h3 className="text-xs font-bold text-white mb-3 flex items-center gap-2">
                   <FileText className="w-3.5 h-3.5 text-[#E2B93B]" /> Documents (one per line)
                 </h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#E2B93B]/10 border border-[#E2B93B]/20 text-[#E2B93B] font-bold text-xs hover:bg-[#E2B93B]/20 transition-all cursor-pointer">
+                    <Upload className="w-3.5 h-3.5" />
+                    {docUploading ? "Uploading..." : "Upload Document File"}
+                    <input type="file" className="hidden" accept=".pdf,.doc,.docx,.txt" onChange={handleDocFileUpload} disabled={docUploading} />
+                  </label>
+                  {docUploadError && <span className="text-[10px] text-red-400">{docUploadError}</span>}
+                </div>
                 <textarea value={form.documents} onChange={(e) => setForm({ ...form, documents: e.target.value })}
                   rows={3} placeholder={`Title Deed - RX-TD-2024-001\nStructural Integrity Report - 2024\nFire Safety Compliance Certificate`}
                   className="w-full px-3 py-2.5 rounded-xl bg-[#090A0C] border border-white/5 text-sm text-white outline-none focus:border-[#E2B93B]/50 font-mono" />
+                <p className="text-[9px] text-neutral-600 mt-1 font-mono">
+                  Uploaded file URLs will appear above. You can also type document names manually.
+                </p>
               </div>
 
               {/* Submit Buttons */}

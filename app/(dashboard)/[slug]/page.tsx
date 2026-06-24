@@ -10,7 +10,9 @@ interface PageProps {
 }
 
 export default function DynamicPublicPages({ params }: PageProps) {
-  const { slug } = use(params);
+  // Handle both Promise<{slug}> and plain {slug} patterns safely across Next.js versions
+  const resolvedParams = params instanceof Promise ? use(params) : params;
+  const { slug } = resolvedParams;
 
   // Normalize path inputs into clean structural headers
   const title = slug.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());

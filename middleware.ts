@@ -5,6 +5,8 @@ import { authConfig } from "./lib/auth.config";
  * Auth.js v5 official middleware pattern.
  * Uses the `authorized` callback from authConfig to handle route protection.
  * Strips unauthorized requests to /admin/* and protected routes.
+ * 
+ * Also enforces KYC verification status for investment/premium routes.
  */
 export default NextAuth(authConfig).auth;
 
@@ -17,7 +19,9 @@ export const config = {
      * - _next/image (image optimization)
      * - favicon.ico (favicon)
      * - public assets
+     * - service worker
+     * - manifest.json
      */
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|assets|public).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|assets|public|sw.js|manifest.json).*)",
   ],
 };

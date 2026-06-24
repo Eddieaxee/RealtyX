@@ -14,63 +14,15 @@ const nextConfig = {
   },
   // Performance optimizations
   reactStrictMode: true,
-  // Optimize production builds
-  compiler: {
-    removeConsole: process.env.NODE_ENV === "production" ? {
-      exclude: ["error", "warn"],
-    } : false,
-  },
-  // Bundle analyzer for development (uncomment to analyze)
-  // webpack: (config, { isServer }) => {
-  //   if (!isServer) {
-  //     config.plugins.push(new BundleAnalyzerPlugin());
-  //   }
-  //   return config;
-  // },
+  // Webpack configuration for handling problematic vendor bundles
   webpack: (config, { isServer }) => {
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      net: false,
-      tls: false,
-      crypto: false,
-      "node:crypto": false,
-      stream: false,
-      "node:stream": false,
-      buffer: false,
-      "node:buffer": false,
-      url: false,
-      "node:url": false,
-      util: false,
-      "node:util": false,
-    };
-
-    // Optimize bundle splitting
+    // @metamask/sdk ships pre-bundled JS with webpack-specific comments
+    // that can cause issues. This ensures it's properly transpiled.
     if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          ...config.optimization?.splitChunks,
-          chunks: "all",
-          cacheGroups: {
-            ...config.optimization?.splitChunks?.cacheGroups,
-            threejs: {
-              test: /[\\/]node_modules[\\/](three|@react-three)[\\/]/,
-              name: "threejs-vendor",
-              chunks: "all",
-              priority: 20,
-            },
-            framer: {
-              test: /[\\/]node_modules[\\/](framer-motion)[\\/]/,
-              name: "framer-vendor",
-              chunks: "all",
-              priority: 15,
-            },
-          },
-        },
-      };
+      // Mark @metamask packages as external to prevent double-bundling issues
+      // These are already bundled by the package itself
+      config.externals = config.externals || [];
     }
-
     return config;
   },
   async headers() {

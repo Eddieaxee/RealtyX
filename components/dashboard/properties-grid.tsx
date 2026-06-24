@@ -3,9 +3,11 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, TrendingUp, ArrowRight, Layers } from "lucide-react";
+import { useState } from "react";
+import { MapPin, TrendingUp, ArrowRight, Layers, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCurrency } from "@/context/currency-context";
+import { SmartPrice } from "@/components/ui/smart-price";
+import { AuthInvestGuard } from "@/components/invest/auth-invest-guard";
 import "./properties-grid.css";
 
 interface PropertyItem {
@@ -13,6 +15,7 @@ interface PropertyItem {
   title: string;
   location: string;
   image: string;
+  images?: string[];
   tokenPrice: number;
   expectedReturn: number;
   rentalYield: number;
@@ -23,8 +26,30 @@ interface PropertyItem {
 export function PropertiesGrid({
   properties: externalProperties,
 }: { properties?: PropertyItem[] } = {}) {
-  const { formatValue } = useCurrency();
   const displayProperties = externalProperties ?? [];
+  const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
+
+  const getPropertyImage = (property: PropertyItem): string => {
+    if (brokenImages.has(property.id)) return "";
+    // Check images array first (from DB JSON field)
+    if (property.images && property.images.length > 0) {
+      const img = property.images[0];
+      if (img && img.trim()) return img.trim();
+    }
+    // Fallback to single image field
+    if (property.image && property.image.trim()) return property.image.trim();
+    // Last resort: check if images is a string (sometimes passed as JSON string)
+    if (typeof property.images === "string") {
+      try {
+        const parsed = JSON.parse(property.images as unknown as string);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]) return parsed[0];
+      } catch {
+        // Not JSON, use as-is
+        if (property.images) return property.images;
+      }
+    }
+    return "";
+  };
 
   function getProgressClass(p: number) {
     const val = Math.max(0, Math.min(100, Math.round(p / 5) * 5));
@@ -43,13 +68,20 @@ export function PropertiesGrid({
         >
           {/* Card Top Banner Area */}
           <div className="relative h-48 w-full overflow-hidden bg-neutral-900">
-            <Image
-              src={property.image}
-              alt={property.title}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-85"
-            />
+            {getPropertyImage(property) ? (
+              <Image
+                src={getPropertyImage(property)}
+                alt={property.title}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-85"
+                onError={() => setBrokenImages(prev => new Set(prev).add(property.id))}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full bg-gradient-to-br from-[#1a1a2e] to-[#16213e]">
+                <ImageIcon className="w-10 h-10 text-neutral-600" />
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#090A0C] via-transparent to-transparent" />
             <div className="absolute top-3 right-3 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400">
               Primary Sale
@@ -121,18 +153,26 @@ export function PropertiesGrid({
                   Unit Cost
                 </div>
                 <div className="text-sm font-bold font-mono text-white">
-                  {formatValue(property.tokenPrice)}
+                  <SmartPrice usdAmount={property.tokenPrice} />
                 </div>
               </div>
-<Link href={`/invest/${property.id}`} className="block">
-                <Button
-                  size="sm"
-                  className="bg-gradient-to-r from-[#E2B93B] to-[#B89221] hover:from-[#B89221] hover:to-[#917116] text-black font-bold text-xs px-4 rounded-xl shadow-lg transition-all duration-200 group/btn"
-                >
-                  Allocate{" "}
-                  <ArrowRight className="ml-1 w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform stroke-[2.5]" />
-                </Button>
-              </Link>
+              <AuthInvestGuard propertyId={property.id}>
+                {({ execute, isAuthenticated }) => (
+                  <Link href={isAuthenticated ? `/invest/${property.id}` : "#"} className="block">
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        execute();
+                      }}
+                      className="bg-gradient-to-r from-[#E2B93B] to-[#B89221] hover:from-[#B89221] hover:to-[#917116] text-black font-bold text-xs px-4 rounded-xl shadow-lg transition-all duration-200 group/btn"
+                    >
+                      Allocate{" "}
+                      <ArrowRight className="ml-1 w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform stroke-[2.5]" />
+                    </Button>
+                  </Link>
+                )}
+              </AuthInvestGuard>
             </div>
           </div>
         </motion.div>

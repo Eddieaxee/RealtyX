@@ -15,6 +15,7 @@ interface CurrencyContextType {
   setCurrency: (c: Currency) => void;
   exchangeRate: ExchangeRate | null;
   formatAmount: (amountUSD: number, amountNGN?: number) => string;
+  formatValue: (amountUSD: number) => string;
   convertAmount: (amountUSD: number) => number;
   loading: boolean;
 }
@@ -24,6 +25,7 @@ const CurrencyContext = createContext<CurrencyContextType>({
   setCurrency: () => {},
   exchangeRate: null,
   formatAmount: () => "",
+  formatValue: () => "",
   convertAmount: () => 0,
   loading: true,
 });
@@ -71,6 +73,11 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     return `$${amountUSD.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
+  // Alias: formatValue is a currency-formatted display alias for formatAmount
+  const formatValue = (amountUSD: number): string => {
+    return formatAmount(amountUSD);
+  };
+
   return (
     <CurrencyContext.Provider
       value={{
@@ -78,6 +85,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         setCurrency,
         exchangeRate,
         formatAmount,
+        formatValue,
         convertAmount,
         loading,
       }}
