@@ -13,7 +13,7 @@ export async function GET() {
         prisma.user.count(),
         prisma.investment.count(),
         prisma.property.count(),
-        prisma.kYCRecord.count({ where: { status: "SUBMITTED" } }),
+        prisma.kyc.count({ where: { status: "SUBMITTED" } }),
       ]);
     return NextResponse.json({
       totalUsers,

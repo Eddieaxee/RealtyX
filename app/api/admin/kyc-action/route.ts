@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   const targetStatus = action === "APPROVE" ? "APPROVED" : "REJECTED";
 
   try {
-    const updated = await prisma.kYCRecord.update({
+    const updated = await prisma.kyc.update({
       where: { id: kycId },
       data: {
         status: targetStatus,
@@ -34,10 +34,12 @@ export async function POST(req: Request) {
       data: {
         userId: session.user.id,
         action: `KYC_${action}`,
-        entity: "KYCRecord",
-        entityId: kycId,
-        oldValue: undefined,
-        newValue: { status: targetStatus },
+        resource: "Kyc",
+        resourceId: kycId,
+        metadata: JSON.stringify({
+          oldValue: { status: "PENDING" },
+          newValue: { status: targetStatus },
+        }),
         ipAddress: null,
         userAgent: null,
       },

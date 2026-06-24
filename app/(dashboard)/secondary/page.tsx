@@ -143,7 +143,7 @@ export default function SecondaryMarketPage() {
               Bid-Ask Spread
             </span>
             <span className="font-bold text-[#E2B93B]">
-              {formatValue(spreadNGN, { digits: 2 })}
+              {formatValue(spreadNGN)}
             </span>
           </div>
         </div>
