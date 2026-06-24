@@ -25,6 +25,12 @@ const nextConfig = {
     }
     return config;
   },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.cache = false; // Disables the buggy disk caching in development mode
+    }
+    return config;
+  },
   async headers() {
     return [
       {
