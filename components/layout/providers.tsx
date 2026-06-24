@@ -44,7 +44,7 @@ export function Providers({
               {mounted ? (
                 children
               ) : (
-                <div style={{ visibility: "hidden" }}>{children}</div>
+                <div className="invisible">{children}</div>
               )}
             </RainbowKitProvider>
           </QueryClientProvider>

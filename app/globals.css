@@ -1,9 +1,9 @@
+/* Leaflet map styles */
+@import "leaflet/dist/leaflet.css";
+
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
-
-/* Leaflet map styles */
-@import "leaflet/dist/leaflet.css";
 
 /* Custom scrollbar for map container */
 .leaflet-container {
@@ -13,7 +13,7 @@
 }
 
 .leaflet-popup-content-wrapper {
-  background: #0D0E12 !important;
+  background: #0d0e12 !important;
   color: white !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   border-radius: 12px !important;
@@ -21,7 +21,7 @@
 }
 
 .leaflet-popup-tip {
-  background: #0D0E12 !important;
+  background: #0d0e12 !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
@@ -195,59 +195,114 @@ body {
 }
 
 /* Progress bar fill classes for properties grid */
-.progress-fill-0 { width: 0%; }
-.progress-fill-5 { width: 5%; }
-.progress-fill-10 { width: 10%; }
-.progress-fill-15 { width: 15%; }
-.progress-fill-20 { width: 20%; }
-.progress-fill-25 { width: 25%; }
-.progress-fill-30 { width: 30%; }
-.progress-fill-35 { width: 35%; }
-.progress-fill-40 { width: 40%; }
-.progress-fill-45 { width: 45%; }
-.progress-fill-50 { width: 50%; }
-.progress-fill-55 { width: 55%; }
-.progress-fill-60 { width: 60%; }
-.progress-fill-65 { width: 65%; }
-.progress-fill-70 { width: 70%; }
-.progress-fill-75 { width: 75%; }
-.progress-fill-80 { width: 80%; }
-.progress-fill-85 { width: 85%; }
-.progress-fill-90 { width: 90%; }
-.progress-fill-95 { width: 95%; }
-.progress-fill-100 { width: 100%; }
+.progress-fill-0 {
+  width: 0%;
+}
+.progress-fill-5 {
+  width: 5%;
+}
+.progress-fill-10 {
+  width: 10%;
+}
+.progress-fill-15 {
+  width: 15%;
+}
+.progress-fill-20 {
+  width: 20%;
+}
+.progress-fill-25 {
+  width: 25%;
+}
+.progress-fill-30 {
+  width: 30%;
+}
+.progress-fill-35 {
+  width: 35%;
+}
+.progress-fill-40 {
+  width: 40%;
+}
+.progress-fill-45 {
+  width: 45%;
+}
+.progress-fill-50 {
+  width: 50%;
+}
+.progress-fill-55 {
+  width: 55%;
+}
+.progress-fill-60 {
+  width: 60%;
+}
+.progress-fill-65 {
+  width: 65%;
+}
+.progress-fill-70 {
+  width: 70%;
+}
+.progress-fill-75 {
+  width: 75%;
+}
+.progress-fill-80 {
+  width: 80%;
+}
+.progress-fill-85 {
+  width: 85%;
+}
+.progress-fill-90 {
+  width: 90%;
+}
+.progress-fill-95 {
+  width: 95%;
+}
+.progress-fill-100 {
+  width: 100%;
+}
 
 /* Line clamp utility */
 .line-clamp-1 {
   display: -webkit-box;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 /* Animation utilities */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes slide-in-from-top-1 {
-  from { transform: translateY(-0.25rem); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(-0.25rem);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 .animate-in {
-  animation: fade-in 0.2s ease-out, slide-in-from-top-1 0.2s ease-out;
+  animation:
+    fade-in 0.2s ease-out,
+    slide-in-from-top-1 0.2s ease-out;
 }
 
 /* ========================================
@@ -256,13 +311,19 @@ body {
 
 /* Smooth float animation for cards and elements */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 /* Gentle pulse glow effect */
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(226, 185, 59, 0.1);
   }
   50% {
@@ -272,15 +333,25 @@ body {
 
 /* Subtle gradient shift for backgrounds */
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Shimmer loading effect */
 @keyframes shimmer-sweep {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* Scale-in entrance animation */
@@ -297,15 +368,25 @@ body {
 
 /* Rotate-subtle for decorative elements */
 @keyframes rotate-subtle {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Border gradient animation */
 @keyframes border-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* ========================================
@@ -359,13 +440,17 @@ body {
   overflow: hidden;
 }
 .btn-glow::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(226, 185, 59, 0.15) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(226, 185, 59, 0.15) 0%,
+    transparent 70%
+  );
   opacity: 0;
   transition: opacity 0.4s ease;
   pointer-events: none;
@@ -376,7 +461,11 @@ body {
 
 /* Smooth text reveal */
 .text-reveal {
-  background: linear-gradient(to right, rgba(226, 185, 59, 1), rgba(243, 201, 74, 1));
+  background: linear-gradient(
+    to right,
+    rgba(226, 185, 59, 1),
+    rgba(243, 201, 74, 1)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -386,7 +475,7 @@ body {
 
 /* Noise texture overlay for premium feel */
 .noise-overlay::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   opacity: 0.015;

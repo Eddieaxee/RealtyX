@@ -1,36 +1,30 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
-  experimental: {
-    serverComponentsExternalPackages: ["@prisma/client", "bcryptjs"],
-  },
+  serverExternalPackages: ["@prisma/client", "hardhat"],
+  turbopack: {},
+
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "cdn.realtyx.io" },
     ],
     formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 60 * 60 * 24, // 24 hours
+    minimumCacheTTL: 60 * 60 * 24,
   },
-  // Performance optimizations
+
   reactStrictMode: true,
-  // Webpack configuration for handling problematic vendor bundles
-  webpack: (config, { isServer }) => {
-    // @metamask/sdk ships pre-bundled JS with webpack-specific comments
-    // that can cause issues. This ensures it's properly transpiled.
+
+  webpack: (config, { isServer, dev }) => {
     if (!isServer) {
-      // Mark @metamask packages as external to prevent double-bundling issues
-      // These are already bundled by the package itself
       config.externals = config.externals || [];
     }
-    return config;
-  },
-  webpack: (config, { dev }) => {
     if (dev) {
-      config.cache = false; // Disables the buggy disk caching in development mode
+      config.cache = false;
     }
     return config;
   },
+
   async headers() {
     return [
       {
@@ -54,26 +48,13 @@ const nextConfig = {
       {
         source: "/(.*)",
         headers: [
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
-            key: "X-XSS-Protection",
-            value: "1; mode=block",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
-          },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-XSS-Protection", value: "1; mode=block" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
         ],
       },
       {
-        // Cache static assets for 1 year
         source: "/favicon.svg",
         headers: [
           {
