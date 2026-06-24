@@ -3,7 +3,9 @@ import { generateReactHelpers } from "@uploadthing/react";
 import type { AnyFileRouter } from "uploadthing/server";
 import type { OurFileRouter } from "@/app/api/uploadthing/core";
 
-type SafeFileRouter = OurFileRouter extends AnyFileRouter ? OurFileRouter : AnyFileRouter;
+type SafeFileRouter = OurFileRouter extends AnyFileRouter
+  ? OurFileRouter
+  : AnyFileRouter;
 
 const utapi = process.env.UPLOADTHING_SECRET ? new UTApi() : null;
 
