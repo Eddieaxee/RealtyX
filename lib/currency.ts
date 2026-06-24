@@ -19,15 +19,14 @@ export async function getUSDToNGNRate(): Promise<number> {
       return 1500;
     }
 
-    const response = await fetch(
+    const data = await (await fetch(
       `https://v6.exchangerate-api.com/v6/${apiKey}/pair/USD/NGN`
-    );
-    const data = await response.json();
+    )).json();
 
     if (data.conversion_rate) {
       cachedRate = data.conversion_rate;
       cacheExpiry = Date.now() + (60 * 60 * 1000); // 1 hour
-      return cachedRate;
+      return cachedRate as number;
     }
 
     return 1500; // Fallback
@@ -46,7 +45,10 @@ export async function convertNGNToUSD(ngn: number): Promise<number> {
   return Math.round((ngn / rate) * 100) / 100;
 }
 
-export function formatCurrency(amount: number, currency: "USD" | "NGN"): string {
+export function formatCurrency(
+  amount: number,
+  currency: "USD" | "NGN",
+): string {
   if (currency === "NGN") {
     return `₦${amount.toLocaleString("en-NG")}`;
   }

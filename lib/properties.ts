@@ -73,6 +73,13 @@ function mapDBProperty(dbProp: {
   const features = typeof dbProp.features === 'string' ? JSON.parse(dbProp.features || '[]') : (dbProp.features || []);
   const documents = typeof dbProp.documents === 'string' ? JSON.parse(dbProp.documents || '[]') : (dbProp.documents || []);
 
+  const tokenPriceUSD = dbProp.tokenPriceUSD || 0;
+  const priceUSD = dbProp.priceUSD || 0;
+  const priceNGN = dbProp.priceNGN || 0;
+  const tokenPriceNGN = dbProp.tokenPriceNGN || 0;
+  const totalTokens = dbProp.totalTokens || 100;
+  const availableTokens = dbProp.availableTokens || 0;
+
   return {
     id: dbProp.id,
     slug: dbProp.slug,
@@ -89,13 +96,13 @@ function mapDBProperty(dbProp: {
     lng: dbProp.lng || 3.3792,
     image: images[0] || '',
     images,
-    tokenPriceNGN: dbProp.tokenPriceNGN || dbProp.tokenPriceUSD * 1500 || 0,
-    totalValueNGN: dbProp.priceNGN || dbProp.priceUSD * 1500 || 0,
+    tokenPriceNGN: tokenPriceNGN || (tokenPriceUSD * 1500) || 0,
+    totalValueNGN: priceNGN || (priceUSD * 1500) || 0,
     expectedReturn: dbProp.expectedReturn || 12,
     rentalYield: dbProp.rentalYield || 8,
-    availableTokens: dbProp.availableTokens || 0,
-    totalTokens: dbProp.totalTokens || 100,
-    funded: dbProp.totalTokens ? ((dbProp.totalTokens - dbProp.availableTokens) / dbProp.totalTokens) * 100 : 0,
+    availableTokens,
+    totalTokens,
+    funded: totalTokens ? ((totalTokens - availableTokens) / totalTokens) * 100 : 0,
     completionPercentage: dbProp.completionPercentage || 100,
     features,
     documents,
@@ -107,9 +114,9 @@ function mapDBProperty(dbProp: {
     },
     type: dbProp.type || 'RESIDENTIAL',
     status: dbProp.status || 'AVAILABLE',
-    priceUSD: dbProp.priceUSD || 0,
-    priceNGN: dbProp.priceNGN || 0,
-    tokenPriceUSD: dbProp.tokenPriceUSD || 0,
+    priceUSD,
+    priceNGN,
+    tokenPriceUSD,
     developmentStatus: dbProp.developmentStatus || 'COMPLETED',
     country: dbProp.country || 'Nigeria',
   };
@@ -117,31 +124,34 @@ function mapDBProperty(dbProp: {
 
 let cachedProperties: Property[] | null = null;
 let cacheTimestamp = 0;
-const CACHE_DURATION = 60000; // 1 minute
 
 export async function getAllProperties(): Promise<Property[]> {
-  if (cachedProperties && Date.now() - cacheTimestamp < CACHE_DURATION) {
+  const now = Date.now();
+  if (cachedProperties && now - cacheTimestamp < 60000) {
     return cachedProperties;
   }
 
   try {
-    const res = await fetch(process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/api/admin/properties` : '/api/admin/properties', {
+    const res = await fetch('/api/admin/properties', {
       cache: 'no-store',
+      headers: {
+        'Cookie': (typeof document !== 'undefined' ? document.cookie : '') || '',
+      },
     });
     const data = await res.json();
-    if (data.success) {
+    if (data.success && data.properties) {
       cachedProperties = data.properties.map(mapDBProperty);
-      cacheTimestamp = Date.now();
+      cacheTimestamp = now;
       return cachedProperties!;
     }
   } catch {
-    // Fallback: try without admin auth (public properties endpoint)
+    // Fallback: try public endpoint
     try {
       const res = await fetch('/api/properties', { cache: 'no-store' });
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.properties) {
         cachedProperties = data.properties.map(mapDBProperty);
-        cacheTimestamp = Date.now();
+        cacheTimestamp = now;
         return cachedProperties!;
       }
     } catch {

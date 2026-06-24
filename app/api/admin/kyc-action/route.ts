@@ -54,7 +54,6 @@ export async function POST(req: Request) {
           targetStatus === "APPROVED"
             ? "Your identity verification has been approved. You can now continue investing."
             : "Your KYC submission has been rejected. Please review your documents and try again.",
-        metadata: { status: targetStatus },
       },
     });
 

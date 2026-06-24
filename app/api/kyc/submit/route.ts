@@ -31,7 +31,7 @@ export async function POST(req: Request) {
   } = await req.json();
 
   try {
-    const record = await prisma.kYCRecord.upsert({
+    const record = await prisma.kyc.upsert({
       where: { userId: session.user.id },
       update: {
         status: "SUBMITTED",
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
         idNumber: idNumber ?? null,
         ninNumber: ninNumber ?? null,
         idDocumentUrl: idDocumentUrl ?? null,
-        proofOfAddressUrl: proofOfAddressUrl ?? null,
+        proofOfAddress: proofOfAddressUrl ?? null,
         selfieUrl: selfieUrl ?? null,
         address: address ?? null,
         city: city ?? null,
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
         phoneNumber: phoneNumber ?? null,
         riskLevel: riskLevel ?? "LOW",
         investorCategory: investorCategory ?? "RETAIL",
-        investmentGoals: Array.isArray(investmentGoals) ? investmentGoals : [],
+        investmentGoals: Array.isArray(investmentGoals) ? JSON.stringify(investmentGoals) : null,
         submittedAt: new Date(),
       },
       create: {
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
         idNumber: idNumber ?? null,
         ninNumber: ninNumber ?? null,
         idDocumentUrl: idDocumentUrl ?? null,
-        proofOfAddressUrl: proofOfAddressUrl ?? null,
+        proofOfAddress: proofOfAddressUrl ?? null,
         selfieUrl: selfieUrl ?? null,
         address: address ?? null,
         city: city ?? null,
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
         phoneNumber: phoneNumber ?? null,
         riskLevel: riskLevel ?? "LOW",
         investorCategory: investorCategory ?? "RETAIL",
-        investmentGoals: Array.isArray(investmentGoals) ? investmentGoals : [],
+        investmentGoals: Array.isArray(investmentGoals) ? JSON.stringify(investmentGoals) : null,
         submittedAt: new Date(),
       },
     });

@@ -42,10 +42,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        token.id = user.id;
+        token.id = user.id ?? "";
         token.role = (user as { role?: string }).role ?? "USER";
         token.twoFactorRequired = (user as { twoFactorRequired?: boolean }).twoFactorRequired ?? false;
-        token.twoFactorVerified = false;
+        token.twoFactorVerified = false as boolean | undefined;
       }
       if (trigger === "update" && session) {
         token.name = session.name;
@@ -72,9 +72,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
-      (session.user as { twoFactorRequired?: boolean; twoFactorVerified?: boolean; status?: string }).twoFactorRequired = token.twoFactorRequired;
-      (session.user as { twoFactorRequired?: boolean; twoFactorVerified?: boolean; status?: string }).twoFactorVerified = token.twoFactorVerified;
-      (session.user as { twoFactorRequired?: boolean; twoFactorVerified?: boolean; status?: string }).status = token.status;
+        (session.user as { twoFactorRequired?: boolean; twoFactorVerified?: boolean; status?: string }).twoFactorRequired = token.twoFactorRequired;
+        (session.user as { twoFactorRequired?: boolean; twoFactorVerified?: boolean; status?: string }).twoFactorVerified = token.twoFactorVerified as boolean | undefined;
+        (session.user as { twoFactorRequired?: boolean; twoFactorVerified?: boolean; status?: string }).status = token.status;
       }
       return session;
     },
@@ -99,13 +99,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
     },
     async signOut(message) {
-      if (message.session?.userId) {
+      if ((message as { session?: { userId?: string } }).session?.userId) {
         await db.auditLog.create({
           data: {
-            userId: message.session.userId,
+            userId: (message as { session: { userId: string } }).session.userId,
             action: "LOGOUT",
             resource: "User",
-            resourceId: message.session.userId,
+            resourceId: (message as { session: { userId: string } }).session.userId,
           },
         }).catch(() => {});
       }

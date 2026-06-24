@@ -11,11 +11,11 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const kycRecords = await prisma.kYCRecord.findMany({
+  const kycRecords = await prisma.kyc.findMany({
     where: {
       OR: [{ status: "SUBMITTED" }, { status: "UNDER_REVIEW" }],
     },
-    orderBy: { submittedAt: "desc" },
+    orderBy: { createdAt: "desc" },
     include: {
       user: { select: { id: true, name: true, email: true } },
     },

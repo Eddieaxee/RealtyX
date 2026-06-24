@@ -28,19 +28,28 @@ export async function POST(req: Request) {
     }
 
     // Link wallet to user or create nonce for auth
-    const wallet = await prisma.wallet.upsert({
-      where: { address: address.toLowerCase() },
-      update: { isVerified: true, verifiedAt: new Date() },
-      create: {
-        address: address.toLowerCase(),
-        chainId: 1,
-        chain: "ethereum",
-        type: "EOA",
-        isVerified: true,
-        verifiedAt: new Date(),
-        userId: "", // Will be linked after auth
-      },
+    const normalizedAddress = address.toLowerCase();
+    let wallet = await prisma.wallet.findFirst({
+      where: { address: normalizedAddress },
     });
+
+    if (wallet) {
+      wallet = await prisma.wallet.update({
+        where: { id: wallet.id },
+        data: { isVerified: true, verifiedAt: new Date() },
+      });
+    } else {
+      wallet = await prisma.wallet.create({
+        data: {
+          userId: "",
+          address: normalizedAddress,
+          chainId: 1,
+          chain: "ethereum",
+          type: "EOA",
+          verifiedAt: new Date(),
+        },
+      });
+    }
 
     return NextResponse.json({ success: true, wallet });
   } catch {

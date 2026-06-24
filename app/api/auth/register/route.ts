@@ -71,6 +71,7 @@ export async function POST(req: Request) {
     });
 
     // Send welcome email (non-blocking)
+    // Send welcome email (non-blocking). Do not include userId in payload to match EmailPayload type.
     sendEmail({
       to: email,
       subject: "Welcome to RealtyX",
@@ -78,7 +79,6 @@ export async function POST(req: Request) {
       data: {
         userName: name || email.split("@")[0],
       },
-      userId: user.id,
     }).catch(() => {});
 
     return NextResponse.json({

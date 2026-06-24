@@ -133,18 +133,27 @@ model UserSettings {
 model Kyc {
   id             String    @id @default(cuid())
   userId         String    @unique @map("user_id")
-  status         String    @default("PENDING") // PENDING | UNDER_REVIEW | APPROVED | REJECTED
+  status         String    @default("PENDING") // PENDING | SUBMITTED | UNDER_REVIEW | APPROVED | REJECTED
   firstName      String?   @map("first_name")
   lastName       String?   @map("last_name")
   dateOfBirth    DateTime? @map("date_of_birth")
+  nationality    String?
   phoneNumber    String?   @map("phone_number")
   address        String?
+  city           String?
+  state          String?
   country        String?
-  idType         String?   @map("id_type") // PASSPORT | DRIVERS_LICENSE | NATIONAL_ID
+  postalCode     String?   @map("postal_code")
+  idType         String?   @map("id_type") // PASSPORT | DRIVERS_LICENSE | NATIONAL_ID | BVN | NIN
   idNumber       String?   @map("id_number")
+  ninNumber      String?   @map("nin_number")
   idDocumentUrl  String?   @map("id_document_url")
   selfieUrl      String?   @map("selfie_url")
   proofOfAddress String?   @map("proof_of_address")
+  riskLevel      String?   @default("LOW") @map("risk_level") // LOW | MEDIUM | HIGH
+  investorCategory String? @default("RETAIL") @map("investor_category") // RETAIL | ACCREDITED | INSTITUTIONAL
+  investmentGoals String? @map("investment_goals") // JSON array
+  submittedAt    DateTime? @map("submitted_at")
   notes          String?   // Admin rejection/approval notes
   reviewedBy     String?   @map("reviewed_by")
   reviewedAt     DateTime? @map("reviewed_at")
@@ -175,12 +184,18 @@ model ComplianceCheck {
 model Wallet {
   id            String  @id @default(cuid())
   userId        String  @unique @map("user_id")
+  address       String? @unique // Blockchain wallet address
+  chainId       Int?     @map("chain_id")
+  chain         String?  @default("ethereum")
+  type          String?  @default("EOA")
+  isVerified    Boolean  @default(false) @map("is_verified")
+  verifiedAt    DateTime? @map("verified_at")
   balanceUSD    Float   @default(0) @map("balance_usd")
   balanceNGN    Float   @default(0) @map("balance_ngn")
   totalInvested Float   @default(0) @map("total_invested")
   totalReturns  Float   @default(0) @map("total_returns")
   totalWithdrawn Float  @default(0) @map("total_withdrawn")
-  walletAddress String? @map("wallet_address") // Blockchain wallet address
+  walletAddress String? @map("wallet_address") // Legacy field
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -256,8 +271,11 @@ model Property {
   investments          Investment[]
   propertyDocuments    PropertyDocument[]
   distributions        Distribution[]
+  payouts              Payout[]
   assetHoldings        AssetHolding[]
   marketOrders         MarketOrder[]
+  maintenanceRequests  MaintenanceRequest[]
+  propertyTenants      PropertyTenant[]
 
   @@map("properties")
 }
@@ -303,17 +321,24 @@ model Investment {
 }
 
 model Distribution {
-  id          String   @id @default(cuid())
-  propertyId  String   @map("property_id")
-  type        String   // DIVIDEND | RENTAL_YIELD | CAPITAL_GAIN
-  totalAmount Float    @map("total_amount")
-  perToken    Float    @map("per_token")
-  currency    String   @default("USD")
+  id          String    @id @default(cuid())
+  propertyId  String    @map("property_id")
+  payoutId    String?   @map("payout_id")
+  payout      Payout?   @relation(fields: [payoutId], references: [id])
+  userId      String    @map("user_id")
+  type        String    // DIVIDEND | RENTAL_YIELD | CAPITAL_GAIN
+  totalAmount Float     @map("total_amount")
+  perToken    Float     @map("per_token")
+  amountUSD   Float?    @map("amount_usd")
+  amountNGN   Float?    @map("amount_ngn")
+  currency    String    @default("USD")
+  tokens      Int
   snapshotDate DateTime? @map("snapshot_date")
-  paidAt      DateTime? @map("paid_at")
-  status      String   @default("PENDING") // PENDING | PAID | CANCELLED
-  createdAt   DateTime @default(now()) @map("created_at")
-  property    Property @relation(fields: [propertyId], references: [id])
+  distributedAt DateTime? @map("distributed_at")
+  paidAt      DateTime?  @map("paid_at")
+  status      String    @default("PENDING") // PENDING | PAID | CANCELLED | DISTRIBUTED
+  createdAt   DateTime  @default(now()) @map("created_at")
+  property    Property  @relation(fields: [propertyId], references: [id])
 
   @@map("distributions")
 }
@@ -413,4 +438,54 @@ model PlatformConfig {
   value String
 
   @@map("platform_config")
+}
+
+model Payout {
+  id            String    @id @default(cuid())
+  propertyId    String    @map("property_id")
+  type          String    // RENTAL | DIVIDEND | CAPITAL_GAIN
+  amountUSD     Float     @map("amount_usd")
+  amountNGN     Float     @map("amount_ngn")
+  periodStart   DateTime? @map("period_start")
+  periodEnd     DateTime? @map("period_end")
+  status        String    @default("PENDING") // PENDING | DISTRIBUTED | CANCELLED
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  property      Property  @relation(fields: [propertyId], references: [id])
+  distributions Distribution[]
+
+  @@map("payouts")
+}
+
+model MaintenanceRequest {
+  id            String    @id @default(cuid())
+  propertyId    String    @map("property_id")
+  property      Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  userId        String    @map("user_id")
+  title         String
+  description   String?
+  priority      String    @default("MEDIUM") // LOW | MEDIUM | HIGH | URGENT
+  status        String    @default("REPORTED") // REPORTED | SCHEDULED | IN_PROGRESS | RESOLVED | CANCELLED
+  scheduledDate DateTime? @map("scheduled_date")
+  estimatedCost Float?    @map("estimated_cost")
+  resolvedAt    DateTime? @map("resolved_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("maintenance_requests")
+}
+
+model PropertyTenant {
+  id              String    @id @default(cuid())
+  propertyId      String    @map("property_id")
+  property        Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tenantName      String    @map("tenant_name")
+  leaseStart      DateTime  @map("lease_start")
+  leaseEnd        DateTime  @map("lease_end")
+  rentAmountNGN   Float     @map("rent_amount_ngn")
+  occupancyStatus String    @default("ACTIVE") @map("occupancy_status") // ACTIVE | VACANT | NOTICE_PERIOD
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@map("property_tenants")
 }

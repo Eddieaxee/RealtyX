@@ -19,10 +19,10 @@ export async function GET(req: Request) {
       const properties = await prisma.property.findMany({
         where: {
           OR: [
-            { title: { contains: query, mode: "insensitive" } },
-            { description: { contains: query, mode: "insensitive" } },
-            { city: { contains: query, mode: "insensitive" } },
-            { country: { contains: query, mode: "insensitive" } },
+            { title: { contains: query } },
+            { description: { contains: query } },
+            { city: { contains: query } },
+            { country: { contains: query } },
           ],
           status: "ACTIVE",
         },

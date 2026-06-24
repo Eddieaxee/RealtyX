@@ -82,7 +82,7 @@ export function DepositWithdraw() {
   const [amount, setAmount] = useState<string>("");
   const [step, setStep] = useState<"SELECT" | "CONFIRM" | "PROCESSING" | "SUCCESS">("SELECT");
   const [txRef, setTxRef] = useState("");
-  const { formatValue, convertValue } = useCurrency();
+  const { formatValue } = useCurrency();
 
   const methods = mode === "DEPOSIT" ? depositMethods : withdrawMethods;
   const selected = methods.find((m) => m.id === selectedMethod);
@@ -93,12 +93,12 @@ export function DepositWithdraw() {
       // For deposit, show equivalent in selected currency
       if (selectedMethod === "crypto") {
         // ETH deposited → show USD equivalent
-        return formatValue(num, { noSymbol: false });
+        return formatValue(num);
       } else if (selectedMethod === "bank") {
         // NGN deposited → show USD equivalent
-        return formatValue(num / 1520, { noSymbol: false });
+        return formatValue(num / 1520);
       }
-      return formatValue(num, { noSymbol: false });
+      return formatValue(num);
     } else {
       // For withdrawal, show what they'll receive
       if (selectedMethod === "crypto") {
@@ -106,11 +106,11 @@ export function DepositWithdraw() {
         return `~${(num / 3500).toFixed(6)} ETH`;
       } else if (selectedMethod === "ngn_bank") {
         // Withdraw as NGN
-        return `₦${convertValue(num).toLocaleString("en-NG")}`;
+        return `₦${num.toLocaleString("en-NG")}`;
       }
-      return formatValue(num, { noSymbol: false });
+      return formatValue(num);
     }
-  }, [amount, mode, selectedMethod, formatValue, convertValue]);
+  }, [amount, mode, selectedMethod, formatValue]);
 
   const handleSubmit = () => {
     if (!amount || parseFloat(amount) <= 0) return;
@@ -149,7 +149,7 @@ export function DepositWithdraw() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="rounded-2xl border border-white/5 bg-[#0D0E12]/80 backdrop-blur-md p-6 shadow-xl"
+      className="rounded-2xl border border-white/5 bg-[#0D0E12]/80 backdrop:blur-md p-6 shadow-xl"
     >
       {/* Mode Toggle */}
       <div className="flex gap-1 p-1 rounded-xl bg-[#090A0C] border border-white/5 mb-5">

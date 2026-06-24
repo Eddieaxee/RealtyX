@@ -30,16 +30,34 @@ export async function GET() {
 
     // Calculate summary stats
     const totalDistributed = payouts
-      .filter((p) => p.status === "DISTRIBUTED")
-      .reduce((sum, p) => sum + Number(p.amountNGN), 0);
+      .filter(
+        (p: { status: string; amountNGN: number | null }) =>
+          p.status === "DISTRIBUTED",
+      )
+      .reduce(
+        (sum: number, p: { amountNGN: number | null }) =>
+          sum + Number(p.amountNGN || 0),
+        0,
+      );
 
     const pendingAmount = payouts
-      .filter((p) => p.status === "PENDING")
-      .reduce((sum, p) => sum + Number(p.amountNGN), 0);
+      .filter(
+        (p: { status: string; amountNGN: number | null }) =>
+          p.status === "PENDING",
+      )
+      .reduce(
+        (sum: number, p: { amountNGN: number | null }) =>
+          sum + Number(p.amountNGN || 0),
+        0,
+      );
 
     const totalUserReceived = userDistributions
-      .filter((d) => d.distributedAt)
-      .reduce((sum, d) => sum + Number(d.amountNGN), 0);
+      .filter((d: { distributedAt: Date | null }) => d.distributedAt)
+      .reduce(
+        (sum: number, d: { amountNGN: number | null }) =>
+          sum + Number(d.amountNGN || 0),
+        0,
+      );
 
     return NextResponse.json({
       payouts,
@@ -76,8 +94,8 @@ export async function POST(req: Request) {
         amountUSD,
         amountNGN,
         type: type || "RENTAL",
-        periodStart: new Date(periodStart),
-        periodEnd: new Date(periodEnd),
+        periodStart: periodStart ? new Date(periodStart) : null,
+        periodEnd: periodEnd ? new Date(periodEnd) : null,
         status: "PENDING",
       },
       include: { property: true },
@@ -88,17 +106,25 @@ export async function POST(req: Request) {
       where: { propertyId, status: "CONFIRMED" },
     });
 
-    const totalTokens = investments.reduce((sum, inv) => sum + inv.tokens, 0);
+    const totalTokens = investments.reduce(
+      (sum: number, inv: { tokens: number }) => sum + inv.tokens,
+      0,
+    );
 
     for (const investment of investments) {
       const shareRatio = investment.tokens / totalTokens;
       await prisma.distribution.create({
         data: {
           payoutId: payout.id,
+          propertyId,
           userId: investment.userId,
           amountUSD: Number(amountUSD) * shareRatio,
           amountNGN: Number(amountNGN) * shareRatio,
           tokens: investment.tokens,
+          type: "DIVIDEND",
+          totalAmount: Number(amountUSD) * shareRatio,
+          perToken: Number(amountUSD) / totalTokens,
+          status: "PENDING",
         },
       });
     }

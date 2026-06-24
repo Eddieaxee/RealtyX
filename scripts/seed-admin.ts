@@ -4,7 +4,7 @@ import Database from "better-sqlite3";
 import bcrypt from "bcryptjs";
 
 async function main() {
-  const sqlite = new Database("prisma/dev.db");
+  const sqlite = new (Database as unknown as { new (path: string): unknown })("prisma/dev.db");
   const adapter = new PrismaBetterSqlite3(sqlite);
   const prisma = new PrismaClient({ adapter });
 

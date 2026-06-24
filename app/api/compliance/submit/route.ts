@@ -16,14 +16,14 @@ export async function POST(request: Request) {
     const statusUpdate =
       bvn && bvn.startsWith("222") ? "REJECTED" : "UNDER_REVIEW";
 
-    const complianceProfile = await prisma.kYCRecord.upsert({
+    const complianceProfile = await prisma.kyc.upsert({
       where: { userId },
       update: {
         idType: idType || (bvn ? "BVN" : "NIN"),
         idNumber: bvn || nin,
         ninNumber: nin || null,
         idDocumentUrl: idDocumentUrl || null,
-        proofOfAddressUrl: proofOfAddressUrl || null,
+        proofOfAddress: proofOfAddressUrl || null,
         status: statusUpdate,
         submittedAt: new Date(),
       },
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
         idNumber: bvn || nin,
         ninNumber: nin || null,
         idDocumentUrl: idDocumentUrl || null,
-        proofOfAddressUrl: proofOfAddressUrl || null,
+        proofOfAddress: proofOfAddressUrl || null,
         status: statusUpdate,
         submittedAt: new Date(),
       },

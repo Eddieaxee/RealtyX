@@ -38,7 +38,7 @@ export async function GET(req: Request) {
         where: { userId: transaction.userId },
         data: {
           balanceUSD: { increment: amountUSD },
-          balanceNGN: { increment: amountNGN },
+          ...(amountNGN !== null && { balanceNGN: { increment: amountNGN } }),
         },
       });
 
@@ -53,7 +53,6 @@ export async function GET(req: Request) {
             amount: amountUSD > 0 ? `$${amountUSD}` : `₦${amountNGN}`,
             status: "Completed",
           },
-          userId: transaction.userId,
         }).catch(() => {});
       }
 

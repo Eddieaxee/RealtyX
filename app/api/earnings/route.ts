@@ -30,20 +30,20 @@ export async function GET() {
 
     // Calculate earnings summary
     const totalEarnedUSD = distributions
-      .filter((d) => d.distributedAt)
-      .reduce((sum, d) => sum + Number(d.amountUSD), 0);
+      .filter((d: { distributedAt: Date | null }) => d.distributedAt)
+      .reduce((sum: number, d: { amountUSD: number | null }) => sum + Number(d.amountUSD || 0), 0);
 
     const totalEarnedNGN = distributions
-      .filter((d) => d.distributedAt)
-      .reduce((sum, d) => sum + Number(d.amountNGN), 0);
+      .filter((d: { distributedAt: Date | null }) => d.distributedAt)
+      .reduce((sum: number, d: { amountNGN: number | null }) => sum + Number(d.amountNGN || 0), 0);
 
     const pendingEarningsUSD = distributions
-      .filter((d) => !d.distributedAt)
-      .reduce((sum, d) => sum + Number(d.amountUSD), 0);
+      .filter((d: { distributedAt: Date | null }) => !d.distributedAt)
+      .reduce((sum: number, d: { amountUSD: number | null }) => sum + Number(d.amountUSD || 0), 0);
 
     const pendingEarningsNGN = distributions
-      .filter((d) => !d.distributedAt)
-      .reduce((sum, d) => sum + Number(d.amountNGN), 0);
+      .filter((d: { distributedAt: Date | null }) => !d.distributedAt)
+      .reduce((sum: number, d: { amountNGN: number | null }) => sum + Number(d.amountNGN || 0), 0);
 
     // Monthly earnings breakdown
     const monthlyEarnings: Record<string, { usd: number; ngn: number }> = {};
@@ -54,8 +54,8 @@ export async function GET() {
         if (!monthlyEarnings[month]) {
           monthlyEarnings[month] = { usd: 0, ngn: 0 };
         }
-        monthlyEarnings[month].usd += Number(d.amountUSD);
-        monthlyEarnings[month].ngn += Number(d.amountNGN);
+        monthlyEarnings[month].usd += Number(d.amountUSD || 0);
+        monthlyEarnings[month].ngn += Number(d.amountNGN || 0);
       });
 
     // Earnings by property
@@ -85,10 +85,10 @@ export async function GET() {
       );
       if (matchingInv && earningsByProperty[matchingInv.propertyId]) {
         earningsByProperty[matchingInv.propertyId].usd += Number(
-          dist.amountUSD,
+          dist.amountUSD || 0,
         );
         earningsByProperty[matchingInv.propertyId].ngn += Number(
-          dist.amountNGN,
+          dist.amountNGN || 0,
         );
       }
     }

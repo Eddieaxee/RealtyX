@@ -25,11 +25,11 @@ export async function GET(req: Request) {
     // Calculate occupancy stats
     const totalTenants = tenants.length;
     const activeTenants = tenants.filter(
-      (t) => t.occupancyStatus === "ACTIVE",
+      (t: { occupancyStatus: string }) => t.occupancyStatus === "ACTIVE",
     ).length;
     const totalRentNGN = tenants
-      .filter((t) => t.occupancyStatus === "ACTIVE")
-      .reduce((sum, t) => sum + Number(t.rentAmountNGN), 0);
+      .filter((t: { occupancyStatus: string }) => t.occupancyStatus === "ACTIVE")
+      .reduce((sum: number, t: { rentAmountNGN: number }) => sum + Number(t.rentAmountNGN), 0);
 
     return NextResponse.json({
       tenants,

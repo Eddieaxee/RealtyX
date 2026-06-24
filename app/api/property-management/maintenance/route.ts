@@ -20,7 +20,6 @@ export async function GET(req: Request) {
       where,
       include: {
         property: true,
-        user: { select: { id: true, name: true, email: true } },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -28,17 +27,17 @@ export async function GET(req: Request) {
     // Calculate maintenance stats
     const totalRequests = requests.length;
     const openRequests = requests.filter(
-      (r) =>
+      (r: { status: string }) =>
         r.status === "REPORTED" ||
         r.status === "SCHEDULED" ||
         r.status === "IN_PROGRESS",
     ).length;
     const resolvedRequests = requests.filter(
-      (r) => r.status === "RESOLVED",
+      (r: { status: string }) => r.status === "RESOLVED",
     ).length;
     const totalEstimatedCost = requests
-      .filter((r) => r.estimatedCost)
-      .reduce((sum, r) => sum + Number(r.estimatedCost), 0);
+      .filter((r: { estimatedCost: number | null }) => r.estimatedCost)
+      .reduce((sum: number, r: { estimatedCost: number | null }) => sum + Number(r.estimatedCost), 0);
 
     return NextResponse.json({
       requests,

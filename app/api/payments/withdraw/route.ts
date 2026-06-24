@@ -28,7 +28,7 @@ export async function GET() {
     }
 
     const methods = getAvailablePaymentMethods().filter(
-      (m) => m.id === "paystack" || m.id === "opay" || m.id === "spendex"
+      (m) => m.id === "paystack" || m.id === "opay" || m.id === "spendex",
     );
 
     return NextResponse.json({
@@ -44,7 +44,7 @@ export async function GET() {
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch withdrawal info" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -60,12 +60,13 @@ export async function POST(req: Request) {
     await requireKycForTransaction(session.user.id, "WITHDRAWAL");
 
     const body = await req.json();
-    const { method, amount, currency, bankAccount, accountName, bankCode } = body;
+    const { method, amount, currency, bankAccount, accountName, bankCode } =
+      body;
 
     if (!method || !amount || amount <= 0) {
       return NextResponse.json(
         { error: "Invalid withdrawal method or amount" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -75,21 +76,17 @@ export async function POST(req: Request) {
     });
 
     if (!wallet) {
-      return NextResponse.json(
-        { error: "Wallet not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Wallet not found" }, { status: 404 });
     }
 
     // Check sufficient balance
-    const amountInUSD = currency === "NGN" 
-      ? await convertNGNToUSD(amount) 
-      : amount;
+    const amountInUSD =
+      currency === "NGN" ? await convertNGNToUSD(amount) : amount;
 
     if (wallet.balanceUSD < amountInUSD) {
       return NextResponse.json(
         { error: "Insufficient balance", code: "INSUFFICIENT_BALANCE" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -99,12 +96,12 @@ export async function POST(req: Request) {
 
     if (!methodInfo) {
       return NextResponse.json(
-        { 
+        {
           error: `${method.toUpperCase()} is not configured yet. Please contact support or try another method.`,
           code: "METHOD_UNAVAILABLE",
-          availableMethods: availableMethods.map(m => m.id),
+          availableMethods: availableMethods.map((m) => m.id),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -119,7 +116,7 @@ export async function POST(req: Request) {
         if (!bankCode || !bankAccount) {
           return NextResponse.json(
             { error: "Bank code and account number required for Paystack" },
-            { status: 400 }
+            { status: 400 },
           );
         }
         result = await processPaystackWithdrawal({
@@ -136,21 +133,23 @@ export async function POST(req: Request) {
         // OPay withdrawal - would need OPay API integration
         // For now, return not implemented
         return NextResponse.json(
-          { 
-            error: "OPay withdrawals are being integrated. Please use Paystack for now.",
+          {
+            error:
+              "OPay withdrawals are being integrated. Please use Paystack for now.",
             code: "METHOD_COMING_SOON",
           },
-          { status: 400 }
+          { status: 400 },
         );
 
       case "spendex":
         // SpendEx withdrawal - would need SpendEx API integration
         return NextResponse.json(
-          { 
-            error: "SpendEx withdrawals are being integrated. Please use Paystack for now.",
+          {
+            error:
+              "SpendEx withdrawals are being integrated. Please use Paystack for now.",
             code: "METHOD_COMING_SOON",
           },
-          { status: 400 }
+          { status: 400 },
         );
 
       case "crypto":
@@ -158,7 +157,7 @@ export async function POST(req: Request) {
         if (!bankAccount) {
           return NextResponse.json(
             { error: "Wallet address required for crypto withdrawal" },
-            { status: 400 }
+            { status: 400 },
           );
         }
         // In production, this would initiate a blockchain transaction
@@ -175,19 +174,20 @@ export async function POST(req: Request) {
       default:
         return NextResponse.json(
           { error: "Unsupported withdrawal method" },
-          { status: 400 }
+          { status: 400 },
         );
     }
 
     if (!result.success) {
       return NextResponse.json(
         { error: result.message || "Withdrawal failed" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Deduct from wallet (in USD)
-    const ngnAmount = currency === "NGN" ? amount : await convertUSDToNGN(amount);
+    const ngnAmount =
+      currency === "NGN" ? amount : await convertUSDToNGN(amount);
     const usdAmount = amountInUSD;
 
     await db.wallet.update({
@@ -200,6 +200,17 @@ export async function POST(req: Request) {
     });
 
     // Create withdrawal transaction
+    const metadata: Record<string, unknown> = {
+      bankAccount,
+      accountName,
+      bankCode,
+    };
+    const withdrawalDetails = (result as { details?: Record<string, unknown> })
+      .details;
+    if (withdrawalDetails) {
+      metadata.details = withdrawalDetails;
+    }
+
     await db.transaction.create({
       data: {
         userId: session.user.id,
@@ -210,24 +221,21 @@ export async function POST(req: Request) {
         paymentMethod: method.toUpperCase(),
         txReference: reference,
         providerRef: result.transferId,
-        metadata: JSON.stringify({
-          bankAccount,
-          accountName,
-          bankCode,
-          details: result.details,
-        }),
+        metadata: JSON.stringify(metadata),
       },
     });
 
     // Log audit
-    await db.auditLog.create({
-      data: {
-        userId: session.user.id,
-        action: "WITHDRAWAL",
-        resource: "Transaction",
-        metadata: JSON.stringify({ amount: usdAmount, currency, method }),
-      },
-    }).catch(() => {});
+    await db.auditLog
+      .create({
+        data: {
+          userId: session.user.id,
+          action: "WITHDRAWAL",
+          resource: "Transaction",
+          metadata: JSON.stringify({ amount: usdAmount, currency, method }),
+        },
+      })
+      .catch(() => {});
 
     return NextResponse.json({
       success: true,
@@ -246,12 +254,12 @@ export async function POST(req: Request) {
     if (error instanceof Error) {
       return NextResponse.json(
         { error: error.message, code: "KYC_REQUIRED" },
-        { status: 403 }
+        { status: 403 },
       );
     }
     return NextResponse.json(
       { error: "Failed to process withdrawal" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

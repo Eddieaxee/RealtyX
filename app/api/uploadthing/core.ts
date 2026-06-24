@@ -33,8 +33,8 @@ export const ourFileRouter = {
       const session = await requireSession();
       return { userId: session.user.id };
     })
-    .onUploadComplete(async (payload: unknown) => {
-      const { metadata, file } = payload as UploadCompletePayload;
+    .onUploadComplete(async (payload: UploadCompletePayload) => {
+      const { metadata, file } = payload;
       return {
         uploadedBy: metadata.userId,
         url: file.url,
@@ -57,8 +57,8 @@ export const ourFileRouter = {
       }
       return { userId: session.user.id };
     })
-    .onUploadComplete(async (payload: unknown) => {
-      const { metadata, file } = payload as UploadCompletePayload;
+    .onUploadComplete(async (payload: UploadCompletePayload) => {
+      const { metadata, file } = payload;
       return {
         uploadedBy: metadata.userId,
         url: file.url,
@@ -77,8 +77,8 @@ export const ourFileRouter = {
       const session = await requireSession();
       return { userId: session.user.id };
     })
-    .onUploadComplete(async (payload: unknown) => {
-      const { metadata, file } = payload as UploadCompletePayload;
+    .onUploadComplete(async (payload: UploadCompletePayload) => {
+      const { metadata, file } = payload;
       return {
         uploadedBy: metadata.userId,
         url: file.url,
@@ -100,8 +100,8 @@ export const ourFileRouter = {
       }
       return { userId: session.user.id };
     })
-    .onUploadComplete(async (payload: unknown) => {
-      const { metadata, file } = payload as UploadCompletePayload;
+    .onUploadComplete(async (payload: UploadCompletePayload) => {
+      const { metadata, file } = payload;
       return {
         uploadedBy: metadata.userId,
         url: file.url,
