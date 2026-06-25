@@ -1,6 +1,7 @@
 # RealtyX Structural Upgrade - Complete Implementation Summary
 
 ## Overview
+
 This document summarizes the massive structural upgrade performed on the RealtyX fractional real estate platform. All changes were implemented additively, preserving existing UI/UX while adding critical security, financial, and Web3 infrastructure.
 
 ---
@@ -8,14 +9,17 @@ This document summarizes the massive structural upgrade performed on the RealtyX
 ## 1. DATABASE SCHEMA UPGRADES ✅
 
 ### New Models Added
+
 - **AssetHolding**: Tracks user token balances per property (`userId`, `propertyId`, `tokenBalance`)
 - **MarketOrder**: P2P secondary market listings (`sellerId`, `propertyId`, `tokenCount`, `pricePerTokenUSD`, `status`)
 
 ### Enhanced Models
+
 - **User**: Added `kycStatus` (NONE|PENDING|VERIFIED|REJECTED) and `walletAddress` fields
 - **Transaction**: Added `amountLocal`, `currency` (USD|NGN|USDC|USDT|BTC|ETH), `gateway` (SPENDEX|PAYSTACK|OPAY|WEB3|PAYPAL)
 
 ### Migration
+
 - Prisma schema updated and pushed to SQLite database
 - All existing data preserved
 
@@ -24,18 +28,21 @@ This document summarizes the massive structural upgrade performed on the RealtyX
 ## 2. AUTHENTICATION & KYC SECURITY GATES ✅
 
 ### Client-Side Guards
+
 - **`components/invest/auth-invest-guard.tsx`**: Strict auth interceptor for investment actions
   - Redirects unauthenticated users to `/auth/signup?redirect=/properties/[propertyId]`
   - After login, bounces back to complete transaction
   - Used in `PropertiesGrid` component
 
 ### Server-Side KYC Enforcement
+
 - **`lib/kyc-guard.ts`**: Enhanced to use denormalized `kycStatus` field
   - Checks both `User.kycStatus` and `Kyc` record
   - Supports VERIFIED/APPROVED equivalence
   - Admins bypass KYC requirements
 
 ### Middleware Updates
+
 - **`middleware.ts`**: Updated matcher to allow service worker and manifest
 - **`lib/auth.config.ts`**: KYC status now flows through JWT/session
 - **`types/next-auth.d.ts`**: Type definitions for KYC status in session
@@ -45,6 +52,7 @@ This document summarizes the massive structural upgrade performed on the RealtyX
 ## 3. LANDING PAGE IMAGE BUG FIX ✅
 
 ### Fixed Components
+
 - **`components/dashboard/properties-grid.tsx`**: Enhanced `getPropertyImage()` function
   - Handles `images` array from DB JSON field
   - Handles single `image` string fallback
@@ -52,6 +60,7 @@ This document summarizes the massive structural upgrade performed on the RealtyX
   - Proper trim and validation
 
 ### Result
+
 - Property grid cards now correctly display database images
 - Fallback to placeholder only when truly no image exists
 
@@ -60,6 +69,7 @@ This document summarizes the massive structural upgrade performed on the RealtyX
 ## 4. PWA "LAUNCH APP" DEPLOYMENT ✅
 
 ### Files Created
+
 - **`public/sw.js`**: Service worker with:
   - Offline asset caching (cache-first for static, network-first for API)
   - Cache versioning and cleanup
@@ -77,6 +87,7 @@ This document summarizes the massive structural upgrade performed on the RealtyX
   - `PWARegister` component for service worker registration
 
 ### Integration
+
 - **`app/layout.tsx`**: `<PWARegister />` added to root layout
 - "Launch App" button ready for navbar integration
 
@@ -85,12 +96,14 @@ This document summarizes the massive structural upgrade performed on the RealtyX
 ## 5. GLOBAL USD-BASE STATE & CURRENCY CONVERTER ✅
 
 ### Enhanced Currency Context
+
 - **`context/currency-context.tsx`**: Already existed, now fully functional
   - Fetches live exchange rates from existing provider
   - Refreshes every 30 minutes
   - Provides `convertAmount()`, `formatAmount()`, `formatValue()`
 
 ### SmartPrice Component
+
 - **`components/ui/smart-price.tsx`**: Universal price display component
   - `<SmartPrice usdAmount={number} />`: Auto-converts USD→NGN based on global state
   - `<SmartPriceNGN ngnAmount={number} />`: Forces NGN display
@@ -98,6 +111,7 @@ This document summarizes the massive structural upgrade performed on the RealtyX
   - Instant global recalculation on currency toggle
 
 ### Integration
+
 - **`components/dashboard/properties-grid.tsx`**: All prices now use `<SmartPrice />`
 - Ready for navbar currency selector integration
 
@@ -106,9 +120,11 @@ This document summarizes the massive structural upgrade performed on the RealtyX
 ## 6. FINANCIAL TRANSACTION LEDGER & WEBHOOKS ✅
 
 ### Database
+
 - **Transaction model**: Full tracking with `gateway`, `currency`, `amountLocal`, `status`
 
 ### Webhook Routes Created
+
 1. **`app/api/webhooks/paystack/route.ts`**:
    - HMAC-SHA512 signature verification
    - Handles `charge.success` events
@@ -127,7 +143,9 @@ This document summarizes the massive structural upgrade performed on the RealtyX
    - Wallet crediting and direct checkout
 
 ### Direct Checkout Pipeline
+
 When a user buys tokens via Paystack/OPay/Spendex:
+
 1. Webhook receives `charge.success`
 2. Creates transaction record (SUCCESS)
 3. Credits user wallet
@@ -142,10 +160,12 @@ When a user buys tokens via Paystack/OPay/Spendex:
 ## 7. P2P SECONDARY MARKET ENGINE ✅
 
 ### Database Models
+
 - **AssetHolding**: Tracks user token balances per property
 - **MarketOrder**: Open sell listings with price per token
 
 ### API Routes
+
 1. **`app/api/market/orders/route.ts`**:
    - GET: List open orders (public)
    - POST: Create sell order (KYC verified, balance check)
@@ -165,6 +185,7 @@ When a user buys tokens via Paystack/OPay/Spendex:
      - Audit log entry
 
 ### Platform Fee
+
 - 1.5% fee on all P2P trades
 - Automatically deducted and recorded
 
@@ -173,6 +194,7 @@ When a user buys tokens via Paystack/OPay/Spendex:
 ## 8. ADMIN DASHBOARD INFRASTRUCTURE ✅
 
 ### KYC Management Center
+
 - **`app/(admin)/admin/kyc/page.tsx`**:
   - Lists all KYC submissions with search/filter
   - Status badges (Pending/Approved/Rejected)
@@ -181,6 +203,7 @@ When a user buys tokens via Paystack/OPay/Spendex:
   - Triggers on-chain KYC update via blockchain utility
 
 ### Transaction Ledger
+
 - **`app/api/admin/transactions/route.ts`**:
   - Full transaction history with pagination
   - Filter by type, status, gateway, user
@@ -193,12 +216,14 @@ When a user buys tokens via Paystack/OPay/Spendex:
   - Pagination support
 
 ### Asset Token Sourcing
+
 - **`app/(admin)/admin/assets/page.tsx`**: Already existed, fully functional
   - Property CRUD operations
   - Image gallery, features, documents
   - Financial details (price, tokens, returns)
 
 ### Admin Layout
+
 - **`app/(admin)/admin/layout.tsx`**:
   - Collapsible sidebar navigation
   - Dashboard, Assets, KYC, Transactions, Settings
@@ -210,10 +235,12 @@ When a user buys tokens via Paystack/OPay/Spendex:
 ## 9. SMART CONTRACTS (ERC-1155) ✅
 
 ### Contract: `contracts/RealtyXAssetManager.sol`
+
 - **Standard**: ERC-1155 Multi-Token (OpenZeppelin)
 - **Inherits**: ERC1155, Ownable, ERC1155Supply, ReentrancyGuard
 
 ### Key Features
+
 1. **KYC Whitelist**:
    - `mapping(address => bool) public isKYCVerified`
    - `setKYCStatus(address, bool)` - admin only
@@ -235,6 +262,7 @@ When a user buys tokens via Paystack/OPay/Spendex:
    - `setTreasuryWallet()`, `setPlatformFee()` - admin only
 
 ### Blockchain Interaction Utility
+
 - **`lib/blockchain/contract-interactions.ts`**:
   - `setKYCStatusOnChain()`: Called when admin approves KYC
   - `mintPropertyFractionsOnChain()`: Called when property listed
@@ -247,7 +275,9 @@ When a user buys tokens via Paystack/OPay/Spendex:
 ## 10. ENVIRONMENT CONFIGURATION ✅
 
 ### Updated `.env.example`
+
 Comprehensive environment variables for:
+
 - NextAuth.js v5 (JWT strategy)
 - OAuth providers (Google, Microsoft, Apple)
 - Payment gateways (Paystack, OPay, Spendex, PayPal)
@@ -264,6 +294,7 @@ Comprehensive environment variables for:
 ## 11. TYPE SAFETY & TYPE DEFINITIONS ✅
 
 ### Updated Types
+
 - **`types/next-auth.d.ts`**: Extended NextAuth types with KYC status
 - **`lib/auth.config.ts`**: Type-safe JWT/session callbacks
 - All new API routes fully typed
@@ -273,6 +304,7 @@ Comprehensive environment variables for:
 ## 12. CRITICAL SECURITY IMPROVEMENTS ✅
 
 ### Implemented
+
 1. **Auth Guard**: Unauthenticated users cannot access investment flows
 2. **KYC Gate**: Server-side enforcement on all financial transactions
 3. **Webhook Signatures**: HMAC verification for all payment webhooks
@@ -285,6 +317,7 @@ Comprehensive environment variables for:
 ## FILES CREATED/MODIFIED SUMMARY
 
 ### New Files (18)
+
 1. `prisma/schema.prisma` - Updated schema
 2. `components/invest/auth-invest-guard.tsx`
 3. `components/ui/smart-price.tsx`
@@ -309,6 +342,7 @@ Comprehensive environment variables for:
 22. `UPGRADE_SUMMARY.md`
 
 ### Modified Files (6)
+
 1. `components/dashboard/properties-grid.tsx` - Image fix + SmartPrice + Auth guard
 2. `lib/kyc-guard.ts` - Enhanced KYC checking
 3. `lib/auth.config.ts` - KYC status in session
@@ -321,10 +355,11 @@ Comprehensive environment variables for:
 ## DEPLOYMENT CHECKLIST
 
 ### Before Production
+
 - [ ] Set all environment variables in `.env`
 - [ ] Configure Paystack, OPay, Spendex API keys
 - [ ] Deploy smart contract to Base/Polygon mainnet
-- [ ] Update `NEXT_PUBLIC_CONTRACT_ADDRESS` in `.env`
+- [ ] Update `NEXT_PUBLIC_REALTYX_PLATFORM_ADDRESS` in `.env`
 - [ ] Configure admin wallet private key for on-chain operations
 - [ ] Set up webhook URLs in payment gateway dashboards
 - [ ] Configure email service (Resend/SendGrid)
@@ -353,18 +388,21 @@ Comprehensive environment variables for:
 ## ARCHITECTURE HIGHLIGHTS
 
 ### Security-First Design
+
 - Every investment action requires authentication
 - KYC verification enforced at multiple layers (client, server, smart contract)
 - Webhook signatures prevent spoofing
 - Atomic database transactions prevent race conditions
 
 ### Additive Implementation
+
 - No existing UI/UX destroyed
 - All new features built on top of existing code
 - Backward compatible with existing data
 - Non-breaking middleware layers
 
 ### Production-Ready
+
 - Environment variable placeholders for all secrets
 - Comprehensive error handling
 - Audit logging for compliance

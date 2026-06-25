@@ -1,19 +1,29 @@
-/** @type {import('next').NextConfig} */
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Recreate __dirname cleanly for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
-
-  // 1. Correct location for production dependencies
   serverExternalPackages: ["@prisma/client", "hardhat"],
 
-  // 2. Clear out the Turbopack / Webpack fallback mismatch
-  turbopack: {},
+  // Force consistent React/Lit/three.js instances for all web3 + 3D packages
+  transpilePackages: [
+    "@react-three/fiber",
+    "@react-three/drei",
+    "three",
+    "@reown/appkit",
+    "@rainbow-me/rainbowkit",
+    "@walletconnect/web3wallet",
+    "@web3modal/ui",
+    "@web3modal/core",
+    "@lit/reactive-element",
+    "lit",
+  ],
+
+  reactStrictMode: true,
 
   images: {
     remotePatterns: [
@@ -21,30 +31,48 @@ const nextConfig = {
       { protocol: "https", hostname: "cdn.realtyx.io" },
     ],
     formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 60 * 60 * 24, // 24 hours
+    minimumCacheTTL: 60 * 60 * 24,
   },
 
-  reactStrictMode: true,
-
-  // 3. Centralized Webpack pipeline configuration
+  /**
+   * Centralized Webpack configuration with context-aware React aliasing.
+   *
+   * RATIONALE:
+   * - On the client bundle, we alias react / react-dom to a SINGLE canonical copy
+   *   to prevent ReactCurrentOwner duplication and "cache is not a function" crashes
+   *   from heavy client-side packages (reown/appkit, @react-three/fiber, wagmi).
+   * - On the server bundle, we DO NOT alias React. This lets Next.js 16 RSC resolve
+   *   its internal _react.cache functions without interference from the client copy.
+   * - Polyfills for buffer/crypto/stream/process are only injected client-side
+   *   (needed by viem, ethers, wagmi in the browser).
+   */
   webpack: (config, { isServer, dev }) => {
-    // Force all 3D/Web3 libraries to use a single shared copy of React
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      react: path.resolve(__dirname, "node_modules/react"),
-      "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
-    };
-
-    // Prevent Webpack from breaking on MetaMask's uninstalled mobile code pathways
     if (!isServer) {
-      config.externals = config.externals || [];
-      config.externals.push({
-        "@react-native-async-storage/async-storage":
-          "commonjs @react-native-async-storage/async-storage",
-      });
+      // Force single React/three.js instances ONLY on the CLIENT bundle
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        react: path.resolve(__dirname, "node_modules/react"),
+        "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
+        three: path.resolve(__dirname, "node_modules/three"),
+      };
+
+      // Polyfill node modules for wagmi/viem/ethers browser usage
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        buffer: path.resolve(__dirname, "node_modules/buffer"),
+        crypto: path.resolve(__dirname, "node_modules/crypto-browserify"),
+        stream: path.resolve(__dirname, "node_modules/stream-browserify"),
+        process: path.resolve(__dirname, "node_modules/process"),
+      };
+
+      // Replace Metamask's @react-native-async-storage with a mock for the browser
+      config.resolve.alias["@react-native-async-storage/async-storage"] =
+        path.resolve(
+          __dirname,
+          "stubs/@react-native-async-storage/async-storage.js",
+        );
     }
 
-    // Disable disk caching to prevent stale binary mismatches during dev mode
     if (dev) {
       config.cache = false;
     }
@@ -69,24 +97,6 @@ const nextConfig = {
           {
             key: "Access-Control-Allow-Headers",
             value: "Content-Type, Authorization",
-          },
-        ],
-      },
-      {
-        source: "/(.*)",
-        headers: [
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "X-XSS-Protection", value: "1; mode=block" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-        ],
-      },
-      {
-        source: "/favicon.svg",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
           },
         ],
       },

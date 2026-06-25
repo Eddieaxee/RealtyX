@@ -111,7 +111,7 @@ export const REALTYX_ASSET_MANAGER_ABI = [
 export function getContractConfig() {
   return {
     contractAddress: (process.env.NEXT_PUBLIC_REALTYX_PLATFORM_ADDRESS ||
-      process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
+      process.env.NEXT_PUBLIC_REALTYX_PLATFORM_ADDRESS ||
       "0x0000000000000000000000000000000000000000") as `0x${string}`,
     adminPrivateKey: process.env.ADMIN_WALLET_PRIVATE_KEY || "",
     adminAddress: (process.env.ADMIN_WALLET_ADDRESS ||
