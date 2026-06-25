@@ -1,7 +1,18 @@
 /** @type {import('next').NextConfig} */
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Recreate __dirname cleanly for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const nextConfig = {
   output: "standalone",
+
+  // 1. Correct location for production dependencies
   serverExternalPackages: ["@prisma/client", "hardhat"],
+
+  // 2. Clear out the Turbopack / Webpack fallback mismatch
   turbopack: {},
 
   images: {
@@ -10,18 +21,34 @@ const nextConfig = {
       { protocol: "https", hostname: "cdn.realtyx.io" },
     ],
     formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 60 * 60 * 24,
+    minimumCacheTTL: 60 * 60 * 24, // 24 hours
   },
 
   reactStrictMode: true,
 
+  // 3. Centralized Webpack pipeline configuration
   webpack: (config, { isServer, dev }) => {
+    // Force all 3D/Web3 libraries to use a single shared copy of React
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      react: path.resolve(__dirname, "node_modules/react"),
+      "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
+    };
+
+    // Prevent Webpack from breaking on MetaMask's uninstalled mobile code pathways
     if (!isServer) {
       config.externals = config.externals || [];
+      config.externals.push({
+        "@react-native-async-storage/async-storage":
+          "commonjs @react-native-async-storage/async-storage",
+      });
     }
+
+    // Disable disk caching to prevent stale binary mismatches during dev mode
     if (dev) {
       config.cache = false;
     }
+
     return config;
   },
 
@@ -67,4 +94,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
