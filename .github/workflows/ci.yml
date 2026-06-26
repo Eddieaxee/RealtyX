@@ -18,7 +18,10 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
       - run: npm run lint || true
-      - run: npm run build
+      - name: Build Project
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: npm run build
 
   deploy:
     runs-on: ubuntu-latest
@@ -32,7 +35,10 @@ jobs:
           cache: "npm"
       - run: npm ci
       - run: npx prisma generate
-      - run: npm run build
+      - name: Build for Production
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: npm run build
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
         with:
