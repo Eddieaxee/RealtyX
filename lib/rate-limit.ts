@@ -4,7 +4,7 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT = 100;
 const WINDOW_MS = 60 * 1000;
 export function rateLimit(request: NextRequest) {
-  const ip = request.ip ?? "anonymous";
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? request.headers.get("x-real-ip") ?? "anonymous";
   const now = Date.now();
   const record = rateLimitMap.get(ip);
   if (!record || now > record.resetTime) {

@@ -4,8 +4,9 @@ import { prisma } from "@/lib/db";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await context.params;
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -13,7 +14,7 @@ export async function GET(
 
   try {
     const maintenance = await prisma.maintenanceRequest.findMany({
-      where: { propertyId: params.id },
+      where: { propertyId: id },
       orderBy: { createdAt: "desc" },
     });
 
@@ -28,8 +29,9 @@ export async function GET(
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await context.params;
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -40,7 +42,7 @@ export async function POST(
 
     const created = await prisma.maintenanceRequest.create({
       data: {
-        propertyId: params.id,
+        propertyId: id,
         userId: session.user.id,
         title: body.title,
         description: body.description,

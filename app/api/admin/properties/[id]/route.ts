@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> },
+) {
+  const { id } = await context.params;
   const session = await auth();
   if (!session?.user || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -31,7 +35,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
   try {
     const property = await prisma.property.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
     });
     return NextResponse.json({ success: true, property });
@@ -40,14 +44,18 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: Request,
+  context: { params: Promise<{ id: string }> },
+) {
+  const { id } = await context.params;
   const session = await auth();
   if (!session?.user || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    await prisma.property.delete({ where: { id: params.id } });
+    await prisma.property.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Property not found" }, { status: 404 });
