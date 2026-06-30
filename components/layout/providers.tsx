@@ -9,6 +9,16 @@ import { config } from "@/lib/blockchain/config";
 import { ThemeProvider } from "next-themes";
 import "@rainbow-me/rainbowkit/styles.css";
 
+// Fallback check to alert you in the browser console if you forgot to add the key to your .env file
+if (
+  typeof window !== "undefined" &&
+  !process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
+) {
+  console.warn(
+    "Warning: NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is missing from your environment variables.",
+  );
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -41,11 +51,7 @@ export function Providers({
               modalSize="compact"
               showRecentTransactions={true}
             >
-              {mounted ? (
-                children
-              ) : (
-                <div className="invisible">{children}</div>
-              )}
+              {mounted ? children : <div className="invisible">{children}</div>}
             </RainbowKitProvider>
           </QueryClientProvider>
         </WagmiProvider>
