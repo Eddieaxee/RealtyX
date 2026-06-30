@@ -4,7 +4,9 @@ import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { mainnet, sepolia, polygon, arbitrum, base } from "wagmi/chains";
 import { http, createStorage, cookieStorage } from "wagmi";
 
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "";
+const projectId =
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ||
+  "11111111111111111111111111111111";
 
 // Public RPC endpoints for reliable transport fallbacks
 const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
