@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: "22"
           cache: "npm"
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
       - run: npx prisma generate
       - run: npm run lint || true
       - name: Build Project
@@ -34,11 +34,12 @@ jobs:
         with:
           node-version: "22"
           cache: "npm"
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
       - run: npx prisma generate
       - name: Build for Production
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID }}
         run: npm run build
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
