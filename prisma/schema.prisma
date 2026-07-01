@@ -4,9 +4,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
-
 // ============================================================
 // AUTH & ACCOUNT MODELS (NextAuth.js v5 compatible)
 // ============================================================
