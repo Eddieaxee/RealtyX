@@ -19,8 +19,7 @@
         "name": "next"
       }
     ],
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
+    // Clean, direct path mapping relative to root without baseUrl
     "paths": {
       "@/*": ["./*"]
     }
