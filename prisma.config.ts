@@ -1,10 +1,10 @@
 import "dotenv/config";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
 export default defineConfig({
   schema: "./prisma/schema.prisma",
   datasource: {
-    // This is where Prisma 7 reads your database URL for migrations and CLI tasks
-    url: env("DATABASE_URL"),
+    // ✓ Use process.env directly so it doesn't throw a fatal crash if missing during builds
+    url: process.env.DATABASE_URL || "postgres://placeholder_for_build_steps",
   },
 });
