@@ -80,11 +80,28 @@ const nextConfig = {
     return config;
   },
 
-  // Turbopack intentionally disabled: the custom webpack config below handles
-  // React aliasing, polyfills, and browser shims that Turbopack cannot emulate.
-  // Enabling Turbopack on Vercel would break React singleton resolution and
-  // cause "Cannot read properties of undefined (reading 'ReactCurrentBatchConfig')".
-  // turbopack: {},
+  /**
+   * Turbopack configuration for Next.js 16 (default bundler on Vercel).
+   *
+   * RATIONALE:
+   * - Next.js 16 uses Turbopack by default on Vercel. The webpack config below
+   *   is still kept for local `--webpack` usage, but Turbopack needs its own
+   *   React aliasing to prevent duplicate React instances.
+   * - Without these aliases, packages like @react-three/fiber, rainbowkit, and
+   *   wagmi resolve to different React copies, causing:
+   *   "Cannot read properties of undefined (reading 'ReactCurrentBatchConfig')"
+   * - Uses relative paths (not path.resolve) because Turbopack on Windows does
+   *   not support absolute paths with drive letters (e.g. C:\...).
+   */
+  turbopack: {
+    resolveAlias: {
+      react: "./node_modules/react",
+      "react-dom": "./node_modules/react-dom",
+      three: "./node_modules/three",
+      "@react-native-async-storage/async-storage":
+        "./stubs/@react-native-async-storage/async-storage.js",
+    },
+  },
 
   async headers() {
     return [
