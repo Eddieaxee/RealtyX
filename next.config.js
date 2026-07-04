@@ -80,7 +80,11 @@ const nextConfig = {
     return config;
   },
 
-  turbopack: {},
+  // Turbopack intentionally disabled: the custom webpack config below handles
+  // React aliasing, polyfills, and browser shims that Turbopack cannot emulate.
+  // Enabling Turbopack on Vercel would break React singleton resolution and
+  // cause "Cannot read properties of undefined (reading 'ReactCurrentBatchConfig')".
+  // turbopack: {},
 
   async headers() {
     return [
