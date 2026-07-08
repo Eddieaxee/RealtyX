@@ -1,23 +1,6 @@
+import { jwtVerify } from "jose";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-
-type JwtVerifyFn = (
-  token: string,
-  secret: Uint8Array,
-) => Promise<{ payload: unknown }>;
-
-let jwtVerify: JwtVerifyFn | null = null;
-
-async function getJwtVerify(): Promise<JwtVerifyFn> {
-  if (jwtVerify) return jwtVerify;
-  const mod = await import("jose");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  jwtVerify = (mod.jwtVerify as JwtVerifyFn) ?? null;
-  if (!jwtVerify) {
-    throw new Error("jose.jwtVerify is not available");
-  }
-  return jwtVerify;
-}
 
 /**
  * Edge middleware for RealtyX.
@@ -64,9 +47,8 @@ const verifyToken = async (
   if (!secret) return null;
 
   try {
-    const verify = await getJwtVerify();
-    const { payload } = await verify(token, secret);
-    return payload as unknown as JwtPayload;
+    const { payload } = await jwtVerify(token, secret);
+    return payload as JwtPayload;
   } catch {
     return null;
   }

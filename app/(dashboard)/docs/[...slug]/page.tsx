@@ -1,16 +1,15 @@
-"use client";
-
-import { use } from "react";
+// Server component: await params instead of using client-only hooks
 import Link from "next/link";
 import { BookOpen, ChevronRight, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DocsProps {
-  params: Promise<{ slug: string[] }>;
+  params: Promise<{ slug: string[] }> | { slug: string[] };
 }
 
-export default function TechnicalDocsDynamicRoute({ params }: DocsProps) {
-  const { slug } = use(params);
+export default async function TechnicalDocsDynamicRoute({ params }: DocsProps) {
+  const resolved = params instanceof Promise ? await params : params;
+  const { slug } = resolved as { slug: string[] };
   const coreNode = slug[0] || "documentation";
 
   // Compute navigation metrics based on dynamic url params array

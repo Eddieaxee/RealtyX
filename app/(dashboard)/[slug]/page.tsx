@@ -1,18 +1,16 @@
-"use client";
-
-import { use } from "react";
+// Server component: await params instead of using client-only hooks
 import Link from "next/link";
 import { ShieldCheck, ArrowLeft, FileText, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string }> | { slug: string };
 }
 
-export default function DynamicPublicPages({ params }: PageProps) {
+export default async function DynamicPublicPages({ params }: PageProps) {
   // Handle both Promise<{slug}> and plain {slug} patterns safely across Next.js versions
-  const resolvedParams = params instanceof Promise ? use(params) : params;
-  const { slug } = resolvedParams;
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const { slug } = resolvedParams as { slug: string };
 
   // Normalize path inputs into clean structural headers
   const title = slug.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -111,7 +109,7 @@ export default function DynamicPublicPages({ params }: PageProps) {
               <ArrowLeft className="mr-1.5 w-3.5 h-3.5" /> Back to Home
             </Button>
           </Link>
-<Link href="/portal" passHref legacyBehavior>
+          <Link href="/portal" passHref legacyBehavior>
             <Button
               size="sm"
               className="bg-[#E2B93B] text-black hover:bg-[#B89221] font-mono font-bold text-xs rounded-xl h-9"
