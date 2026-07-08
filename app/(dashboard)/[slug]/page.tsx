@@ -4,13 +4,11 @@ import { ShieldCheck, ArrowLeft, FileText, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface PageProps {
-  params: Promise<{ slug: string }> | { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default async function DynamicPublicPages({ params }: PageProps) {
-  // Handle both Promise<{slug}> and plain {slug} patterns safely across Next.js versions
-  const resolvedParams = params instanceof Promise ? await params : params;
-  const { slug } = resolvedParams as { slug: string };
+  const { slug } = await params;
 
   // Normalize path inputs into clean structural headers
   const title = slug.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase());

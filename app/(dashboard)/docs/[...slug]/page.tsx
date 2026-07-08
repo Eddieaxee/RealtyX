@@ -4,12 +4,11 @@ import { BookOpen, ChevronRight, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DocsProps {
-  params: Promise<{ slug: string[] }> | { slug: string[] };
+  params: Promise<{ slug: string[] }>;
 }
 
 export default async function TechnicalDocsDynamicRoute({ params }: DocsProps) {
-  const resolved = params instanceof Promise ? await params : params;
-  const { slug } = resolved as { slug: string[] };
+  const { slug } = await params;
   const coreNode = slug[0] || "documentation";
 
   // Compute navigation metrics based on dynamic url params array
